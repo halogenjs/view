@@ -1,12 +1,13 @@
 
 describe("suite", function(){
 
-	it("is ready to go for tests", function(){
+	it("Environment", function(){
 
-		should.exist(describe);
-		should.exist(it);
-		should.exist(should);
-		should.exist(expect);
+		should.exist($);
+		should.exist(useFixture);
+		should.exist(fixtures);
+		should.exist(Model);
+		should.exist(require('hyperbone-form'))
 
 	})
 

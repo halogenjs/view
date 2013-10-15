@@ -1,7 +1,7 @@
 {
-  "name": "component-skeleton",
-  "repo": "charlottegore/component-skeleton",
-  "description": "Replace this with the description of the module",
+  "name": "hyperbone-form",
+  "repo": "green-mesa/hyperbone-form",
+  "description": "Generates two way bound HTML forms from Hyperbone model controls",
   "version": "0.0.1",
   "keywords": [],
   "dependencies": {},
