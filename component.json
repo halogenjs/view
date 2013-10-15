@@ -4,7 +4,11 @@
   "description": "Generates two way bound HTML forms from Hyperbone model controls",
   "version": "0.0.1",
   "keywords": [],
-  "dependencies": {},
+  "dependencies": {
+    "green-mesa/backbone-events" : "1.0.0",
+    "components/underscore" : "1.4.4",
+    "component/dom" : "0.9.0"
+  },
   "development": {},
   "license": "MIT",
   "scripts": [
