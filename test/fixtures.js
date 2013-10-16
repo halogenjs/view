@@ -27,46 +27,65 @@ var fixtures = {
 									name : "text-input",
 									value : "I am some text",
 									required : "required",
-									placeholder : ""
+									placeholder : "Some default helptext"
 								}
 							},
 							{
-								input : {
-									type : "checkbox",
-									checked : "checked",
-									name : "checkbox-input",
-									value : "checked-1"
+								label : {
+									input : {
+										type : "checkbox",
+										name : "checkbox-input",
+										value : "checked-1"
+									},
+									text : "Checkbox 1",
 								}
 							},
 							{
-								input : {
-									type : "checkbox",
-									name : "checkbox-input",
-									value : "checked-2"
+
+								label : {
+									input : {
+										type : "checkbox",
+										name : "checkbox-input",
+										value : "checked-2"
+									},
+									text : "Checkbox 2",
 								}
 							},
 							{
-								input : {
-									type : "checkbox",
-									name : "checkbox-input",
-									value : "checked-3"
+
+								label : {
+									input : {
+										type : "checkbox",
+										name : "checkbox-input",
+										value : "checked-3"
+									},
+									text : "Checkbox 3",
 								}
 							},
 							{
-								input : {
-									type : "radio",
-									name : "radio-input",
-									value : "radio-1",
-									checked : "checked"
+								label : {
+									input : {
+										type : "radio",
+										name : "radio-input",
+										value : "radio-1",
+										checked : "checked"
+									},
+									text : "Radio 1"
 								}
+
 							},
 							{
-								input : {
-									type : "radio",
-									name : "radio-input",
-									value : "radio-2"
+								label : {
+									input : {
+										type : "radio",
+										name : "radio-input",
+										value : "radio-1",
+										checked : "checked"
+									},
+									text : "Radio 2"
 								}
-							}
+
+							},
 						]
 					},
 					{
@@ -85,6 +104,7 @@ var fixtures = {
 							},
 							{
 								textarea : {
+									id : "textarea-input-1",
 									name : "textarea-input-1",
 									text : "a lot of text goes here"
 								},
@@ -97,6 +117,7 @@ var fixtures = {
 							},
 							{
 								textarea : {
+									id : "textarea-input-2",
 									name : "textarea-input-2",
 									innerText : "a lot of text goes here"
 								},
@@ -104,13 +125,14 @@ var fixtures = {
 							{
 								label : {
 									"for" : "textarea-input-3",
-									value : "Text input"
+									innerText : "Text input"
 								},
 							},
 							{
 								textarea : {
+									id : "textarea-input-3",
 									name : "textarea-input-3",
-									value : "a lot of text goes here"
+									innerText: "a lot of text goes here"
 								}
 							}
 						]
@@ -239,16 +261,34 @@ var fixtures = {
 						]
 					},
 					{
-						keygen : {
-							name : "keygen-test"
-						}
+						fieldset : [
+							{
+								legend : {
+									text : "Keygen"
+								}
+							},
+							{
+								keygen : {
+									name : "keygen-test"
+								}
+							}
+						]
 					},
 					{
-						output : {
-							name : "output-test",
-							"for" : "keygen-test"
-						}
-					}
+						fieldset : [
+							{
+								legend : {
+									text : "Output"
+								}
+							},
+							{
+								output : {
+									name : "output-test",
+									value : "Hello"
+								}
+							}
+						]
+					},
 				]
 			}
 		}
