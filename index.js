@@ -91,7 +91,18 @@ HyperboneForm.prototype = {
 
     }
 
-    return this;
+    var results = []
+    _.each(this.refs, function(refs){
+
+      _.each(refs.models, function(ref){
+
+        results.push(ref);
+
+      });
+
+    }, this);
+
+    return results;
   },
 
   partials : function( name ){
@@ -110,10 +121,36 @@ HyperboneForm.prototype = {
 
     }
 
-    return this;
+    var results = [];
+
+    _.each(this.refs, function(refs){
+
+      results.push(refs.partials);
+
+    
+    }, this);
+
+    return results;
 
   }
 
 };
 
 module.exports.HyperboneForm = HyperboneForm;
+
+/*
+
+bootstrap 2 projection stuff:
+
+var _ = require('underscore'); _.each(control.partials(), function(partial){
+   var controlGroup = dom('<div></div>').addClass('control-group');
+   var label = dom('<label></label>').text( partial.attr('name') ).addClass('control-label');
+   label.appendTo( controlGroup );
+   var div = dom('<div></div>').addClass('controls');
+
+   controlGroup.insertAfter(partial);
+   div.appendTo(controlGroup);
+   partial.appendTo(div);
+})
+
+*/

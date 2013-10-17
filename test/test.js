@@ -248,21 +248,24 @@ describe("suite", function(){
 
 	});
 
-	describe("AUtpmatically generating initial HTML tranformation when passed a control", function(){
+	describe("Using controls", function(){
 
 		var HyperboneForm = require('hyperbone-form').HyperboneForm;
 
-		it("accepts a control as a parameter",function(){
+		it("accepts a control as a constructor parameter and automatically generates initial HTML",function(){
 
 			var m = new Model( useFixture('/everything'))
 
 			var control = new HyperboneForm( m.control("controls:test") );
 
+			control.partials();
+
 			expect( control.control ).to.equal( m.control("controls:test") );
 			expect( control.html.els[0].outerHTML ).to.equal('<form action="/tasklist/create" method="POST" encoding="application/x-www-form-urlencoded"><fieldset><legend>Inputs (inc. checkbox)</legend><input type="text" name="text-input" value="I am some text" required="required" placeholder="Some default helptext"><input type="checkbox" name="checkbox-input" value="checked-1"><input type="checkbox" name="checkbox-input" value="checked-2"><input type="checkbox" name="checkbox-input" value="checked-3"><input type="radio" name="radio-input" value="radio-1" checked="checked"><input type="radio" name="radio-input" value="radio-1" checked="checked"></fieldset><fieldset><legend>Text area and labels</legend><textarea id="textarea-input-1" name="textarea-input-1">a lot of text goes here</textarea><textarea id="textarea-input-2" name="textarea-input-2">a lot of text goes here</textarea><textarea id="textarea-input-3" name="textarea-input-3">a lot of text goes here</textarea></fieldset><select name="select-input" value="1"><optgroup label="Options group 1"><option value="1">option 1</option><option value="2">option 2</option></optgroup><option value="3">option 3</option><option value="4">option 4</option></select><select name="select-multiple-input" multiple="multiple"><optgroup label="Options group 1"><option value="1">option 1</option><option value="2" selected="selected">option 2</option></optgroup><option value="3">option 3</option><option value="4">option 4</option></select><button name="a-button" type="submit">A button!</button><fieldset><legend>Data list</legend><input list="browsers"><datalist id="browsers"><option value="Internet Explorer"></option><option value="Mozilla Firefox"></option><option value="Google Chrome"></option></datalist></fieldset><fieldset><legend>Keygen</legend><keygen name="keygen-test"></keygen></fieldset><fieldset><legend>Output</legend><output name="output-test" value="Hello"></output></fieldset></form>')
 
 		});
-		
+
+
 	});
 
 	describe("Automatic build up of references to useful bits of the form", function(){
