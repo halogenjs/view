@@ -18,7 +18,7 @@ var fixtures = {
 						fieldset : [
 							{
 								legend : {
-									text : "Inputs (inc. checkbox)"
+									_text : "Inputs (inc. checkbox)"
 								}
 							},
 							{
@@ -31,108 +31,78 @@ var fixtures = {
 								}
 							},
 							{
-								label : {
-									input : {
-										type : "checkbox",
-										name : "checkbox-input",
-										value : "checked-1"
-									},
-									text : "Checkbox 1",
+								input : {
+									type : "checkbox",
+									name : "checkbox-input",
+									value : "checked-1",
+									_label : "Checkbox 1"
 								}
 							},
 							{
-
-								label : {
-									input : {
-										type : "checkbox",
-										name : "checkbox-input",
-										value : "checked-2"
-									},
-									text : "Checkbox 2",
+								input : {
+									type : "checkbox",
+									name : "checkbox-input",
+									value : "checked-2",
+									_label : "Checkbox 2"
 								}
 							},
 							{
-
-								label : {
-									input : {
-										type : "checkbox",
-										name : "checkbox-input",
-										value : "checked-3"
-									},
-									text : "Checkbox 3",
+								input : {
+									type : "checkbox",
+									name : "checkbox-input",
+									value : "checked-3",
+									_label : "Checkbox 3"
 								}
 							},
 							{
-								label : {
-									input : {
-										type : "radio",
-										name : "radio-input",
-										value : "radio-1",
-										checked : "checked"
-									},
-									text : "Radio 1"
+								input : {
+									type : "radio",
+									name : "radio-input",
+									value : "radio-1",
+									checked : "checked",
+									_label : "Radio 1"
 								}
-
 							},
 							{
-								label : {
-									input : {
-										type : "radio",
-										name : "radio-input",
-										value : "radio-1",
-										checked : "checked"
-									},
-									text : "Radio 2"
+								input : {
+									type : "radio",
+									name : "radio-input",
+									value : "radio-1",
+									checked : "checked",
+									_label : "Radio 2"
 								}
-
-							},
+							}
 						]
 					},
 					{
 						fieldset : [
 							{
 								legend : {
-									innerText : "Text area and labels"
-								},
-							},
-							{
-
-								label : {
-									"for" : "textarea-input-1",
-									text : "Text input"
-								},
+									_text : "Text area and labels"
+								}
 							},
 							{
 								textarea : {
 									id : "textarea-input-1",
 									name : "textarea-input-1",
-									text : "a lot of text goes here"
-								},
-							},
-							{
-								label : {
-									"for" : "textarea-input-2",
-									innerText : "Text input"
-								},
+									_text : "a lot of text goes here",
+									_label : "Big Text input"
+								}
 							},
 							{
 								textarea : {
 									id : "textarea-input-2",
 									name : "textarea-input-2",
-									innerText : "a lot of text goes here"
-								},
-							},
-							{
-								label : {
-									"for" : "textarea-input-3",
-									innerText : "Text input"
-								},
+									_text : "a lot of text goes here",
+									_label : "Big Text input 2"
+								}
 							},
 							{
 								textarea : {
 									id : "textarea-input-3",
 									name : "textarea-input-3",
-									innerText: "a lot of text goes here"
+									_text: "a lot of text goes here",
+									_label : "Big Text input 3"
 								}
 							}
 						]
@@ -141,38 +111,38 @@ var fixtures = {
 						select : {
 							name : "select-input",
 							value : "1",
-							options : [
+							_options : [
 								{
 									optgroup : {
 										label : "Options group 1",
-										options : [
+										_options : [
 											{
 												option : {
-													text : "option 1",
+													_text : "option 1",
 													value : "1",
 												},
 											},
 											{
 												option : {
-													text : "option 2",
+													_text : "option 2",
 													value : "2"
 												}
 											}
 										]
-									},
+									}
 								},
 								{
 									option : {
-										text : "option 3",
+										_text : "option 3",
 										value : "3"
 									}
 								},
 								{
 									option : {
-										text : "option 4",
+										_text : "option 4",
 										value : "4"
 									}
-								},
+								}
 							]
 						}
 					},
@@ -180,20 +150,20 @@ var fixtures = {
 						select : {
 							name : "select-multiple-input",
 							multiple : "multiple",
-							options : [
+							_options : [
 								{
 									optgroup : {
 										label : "Options group 1",
-										options : [
+										_options : [
 											{
 												option : {
-													text : "option 1",
+													_text : "option 1",
 													value : "1",
 												},
 											},
 											{
 												option : {
-													text : "option 2",
+													_text : "option 2",
 													value : "2",
 													selected : "selected"
 												}
@@ -203,14 +173,14 @@ var fixtures = {
 								},
 								{
 									option : {
-										text : "option 3",
+										_text : "option 3",
 										value : "3"
 									}
 
 								},
 								{
 									option : {
-										text : "option 4",
+										_text : "option 4",
 										value : "4"
 									}
 								}
@@ -220,7 +190,7 @@ var fixtures = {
 					{
 						button : {
 							name : "a-button",
-							text : "A button!",
+							_text : "A button!",
 							type : "submit"
 						}
 					},
@@ -228,7 +198,7 @@ var fixtures = {
 						fieldset : [
 							{
 								legend : {
-									text : "Data list"
+									_text : "Data list"
 								}
 							},
 							{
@@ -239,7 +209,7 @@ var fixtures = {
 							{
 								datalist : {
 									id : "browsers",
-									options : [
+									_options : [
 										{
 											option : {
 												value : "Internet Explorer"
@@ -254,7 +224,7 @@ var fixtures = {
 											option : {
 												value : "Google Chrome"
 											}
-										},
+										}
 									]
 								}
 							}
@@ -264,7 +234,7 @@ var fixtures = {
 						fieldset : [
 							{
 								legend : {
-									text : "Keygen"
+									_text : "Keygen"
 								}
 							},
 							{
@@ -278,7 +248,7 @@ var fixtures = {
 						fieldset : [
 							{
 								legend : {
-									text : "Output"
+									_text : "Output"
 								}
 							},
 							{
@@ -288,7 +258,7 @@ var fixtures = {
 								}
 							}
 						]
-					},
+					}
 				]
 			}
 		}
