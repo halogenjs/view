@@ -27,7 +27,8 @@ var fixtures = {
 									name : "text-input",
 									value : "I am some text",
 									required : "required",
-									placeholder : "Some default helptext"
+									placeholder : "Some default helptext",
+									_label : "Free text"
 								}
 							},
 							{
@@ -40,36 +41,54 @@ var fixtures = {
 							},
 							{
 								input : {
-									type : "checkbox",
-									name : "checkbox-input",
-									value : "checked-2",
-									_label : "Checkbox 2"
-								}
-							},
-							{
-								input : {
-									type : "checkbox",
-									name : "checkbox-input",
-									value : "checked-3",
-									_label : "Checkbox 3"
-								}
-							},
-							{
-								input : {
 									type : "radio",
 									name : "radio-input",
 									value : "radio-1",
 									checked : "checked",
 									_label : "Radio 1"
 								}
+							}
+						]
+					},
+					{
+						fieldset : [
+							{
+								legend : {
+									_text : "Checkboxes and radios (special)"
+								}
 							},
 							{
-								input : {
-									type : "radio",
-									name : "radio-input",
-									value : "radio-1",
-									checked : "checked",
-									_label : "Radio 2"
+								checkboxes : {
+									name : "checkboxes",
+									_label : "Checkbox options",
+									_options : [
+										{
+											value : "1",
+											_label : "One",
+											checked : "checked"
+										},
+										{
+											value : "2",
+											_label : "Two"
+										}
+									]
+								}
+							},
+							{
+								radios : {
+									name : "radios",
+									_label : "Radio options",
+									_options : [
+										{
+											value : "1",
+											_label : "One",
+											checked : "checked"
+										},
+										{
+											value : "2",
+											_label : "Two"
+										}
+									]
 								}
 							}
 						]
@@ -248,5 +267,58 @@ var fixtures = {
 				]
 			}
 		}
+	} /*,
+	"/eventtest" : {
+		_links : {
+			self : {
+				href : "/eventtest"
+			},
+			"controls:test" : {
+				href : '#_controls/test'
+			}
+		},
+		_controls : {
+
+			test : {
+				method : "POST",
+				action : "/eventtest/form",
+				encoding : "application/x-www-form-urlencoded",
+				properties : [
+					{
+						fieldset : [
+							{
+								legend : {
+									label : "Inputs"
+								}
+							},
+							{
+								checkboxes : {
+									_label : "checkboxes",
+									_options : [
+										{
+											input : {
+												type : "checkbox",
+												checked : "checked",
+												value : ""
+											}											
+										},
+										{
+											input : {
+
+
+											}											
+										}
+									]
+								}								
+							}
+						]
+					}
+				]
+
+			}
+
+		}
+
 	}
+	*/
 };

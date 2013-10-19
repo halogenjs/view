@@ -5,7 +5,11 @@ var dom = require('dom');
 var HyperboneForm = function( control ){
 
   this.control = control;
-  this.refs = {};
+
+  this.modelRefs = {};
+  this.partialRefs = {};
+
+  this.fields = [];
 
   if(control){
 
@@ -21,15 +25,73 @@ var validElements = ["fieldset", "legend", "input", "textarea", "select", "optgr
 
 HyperboneForm.prototype = {
 
-	form : function( control, options ){
+  toHTML : function(){
+
+    var self = this;
+
+    _.each(this.fields, function( formField ){
+
+      var br, label, innerLabel;
+
+      switch(formField.type){
+
+        case "input" : 
+        case "select" :
+        case "textarea" :
+
+          label = dom('<label></label>')
+                        .text( formField.model.get('_label') || formField.name )
+                        .insertAfter(formField.partial);
+
+          formField.partial.insertAfter(label);
+
+          br = dom('<br>')
+                        .insertAfter(formField.partial);
+
+          break;
+
+        case "checkboxes" :
+        case "radios" : 
+
+          formField.model.get("_options").each(function(option, index){
+
+            label = dom('<label></label')
+                      .text( (index===0 ? formField.model.get("_label") : "") )
+                      .insertAfter(formField.partial[index]);
+
+            formField.partial[index].insertAfter(label);
+
+            innerLabel = dom('<label></label>')
+                          .insertAfter( formField.partial[index] );
+
+            innerLabel
+              .append( formField.partial[index] )
+
+            dom( document.createTextNode( " " + option.get("_label") ) ).insertAfter( formField.partial[index] );
+
+            br = dom('<br>')
+                          .insertAfter(innerLabel);
+
+          }, this);
+
+          break;
+        case "default" :
+          console.log("Oh shit!", formField);
+
+      }
 
 
+    }, this);
 
-	},
+    return this.html;
 
-	traverse : function( node, name ){
+  },
 
-		var frag = (name ? dom('<'+ name +'></' + name + '>') :  dom( document.createDocumentFragment() ) );
+	traverse : function( node, tag ){
+
+    var self = this;
+
+		var frag = (tag ? dom('<'+ tag +'></' + tag + '>') :  dom( document.createDocumentFragment() ) );
 
 		var attr = node.models || node.attributes;
 
@@ -38,6 +100,33 @@ HyperboneForm.prototype = {
            if(_.isObject(obj) && _.indexOf(validElements, name) !== -1){
 
                frag.append( this.traverse(obj, name) );
+
+           }else if(_.isObject(obj) && (name==="checkboxes" || name==="radios") ){
+
+              var fieldName = obj.get("name");
+
+              var els = [];
+
+              obj.get("_options").each(function(option){
+
+                var el = dom('<input></input')
+                  .attr('type', (name === "checkboxes" ? "checkbox" : "radio"))
+                  .attr('name', fieldName);
+
+                _.each(option.attributes, function(o, name){
+
+                  if(name!=="_label"){
+                    el.attr(name, o);
+                  }
+
+                });
+
+                els.push(el);
+                frag.append(el);
+
+              });
+
+              this.registerFormInput(name, fieldName, obj, els);
 
            }else if(_.isObject(obj)){ // any other object we recurse with a document fragment not a node
 
@@ -51,18 +140,7 @@ HyperboneForm.prototype = {
 
               if(name==="name"){
                 
-                if(!this.refs[obj]){
-                  this.refs[obj] = {
-                    models : [],
-                    partials : frag
-                  };
-
-                }else{
-
-                    this.refs[obj].partials.els.push(frag.els[0]);
-                }
-                
-                this.refs[obj].models.push( node );
+                this.registerFormInput(tag, obj, node, frag);
               }
 
               frag.attr(name, obj);
@@ -75,64 +153,19 @@ HyperboneForm.prototype = {
 
 	},
 
-  models : function( name ){
+  registerFormInput : function( type, name, model, partial ){
 
-    if(this.refs[name]){
+    this.fields.push({
+      type : type,
+      name : name,
+      model : model,
+      partial : partial 
+    });
 
-      if(this.refs[name].models.length === 1){
-
-        return this.refs[name].models[0];
-
-      }else{
-
-        return this.refs[name].models;
-
-      }
-
-    }
-
-    var results = []
-    _.each(this.refs, function(refs){
-
-      _.each(refs.models, function(ref){
-
-        results.push(ref);
-
-      });
-
-    }, this);
-
-    return results;
-  },
-
-  partials : function( name ){
-
-    if(this.refs[name]){
-
-      if(this.refs[name].partials.length === 1){
-
-        return this.refs[name].partials[0];
-
-      }else{
-
-        return this.refs[name].partials;
-
-      }
-
-    }
-
-    var results = [];
-
-    _.each(this.refs, function(refs){
-
-      results.push(refs.partials);
-
-    
-    }, this);
-
-    return results;
+    return this;
 
   }
+
 
 };
 
