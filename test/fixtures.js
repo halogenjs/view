@@ -222,7 +222,8 @@ var fixtures = {
 							},
 							{
 								input : {
-									list : "browsers"
+									list : "browsers",
+									name : "datalisted"
 								}
 							},
 							{

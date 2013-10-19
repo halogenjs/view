@@ -27,8 +27,6 @@ HyperboneForm.prototype = {
 
   toHTML : function(){
 
-    var self = this;
-
     _.each(this.fields, function( formField ){
 
       var br, label, innerLabel;
@@ -38,6 +36,8 @@ HyperboneForm.prototype = {
         case "input" : 
         case "select" :
         case "textarea" :
+        case "button" :
+        case "output" :
 
           label = dom('<label></label>')
                         .text( formField.model.get('_label') || formField.name )
@@ -75,9 +75,116 @@ HyperboneForm.prototype = {
           }, this);
 
           break;
-        case "default" :
-          console.log("Oh shit!", formField);
+      }
 
+
+    }, this);
+
+    return this.html;
+
+  },
+
+  toBootstrap2HTML : function( inline ){
+
+    this.html.addClass('form-horizontal');
+
+    _.each(this.fields, function( formField ){
+
+      var ctrlGroup, ctrls, label, innerLabel, type;
+
+      switch(formField.type){
+
+        case "input" : 
+        case "select" :
+        case "textarea" :
+        case "button" :
+        case "output" :
+
+/*
+   var controlGroup = dom('<div></div>').addClass('control-group');
+   var label = dom('<label></label>').text( partial.attr('name') ).addClass('control-label');
+   label.appendTo( controlGroup );
+   var div = dom('<div></div>').addClass('controls');
+
+   controlGroup.insertAfter(partial);
+   div.appendTo(controlGroup);
+   partial.appendTo(div);
+*/
+          type = formField.model.get('type');
+
+          ctrlGroup = dom('<div></div>').addClass('control-group'); 
+          label = dom('<label></label>');
+
+          ctrls = dom('<div></div>').addClass('controls');
+
+          ctrlGroup.insertAfter( formField.partial );
+
+          ctrls.appendTo( ctrlGroup );
+
+
+
+          if(type==="radio" || type==="checkbox"){
+
+            label.appendTo( ctrls );
+            label.addClass( type );
+            formField.partial.appendTo( label );
+
+            dom( document.createTextNode(' ' + formField.model.get('_label') ) ).appendTo( label );
+
+
+          }else{
+
+            label
+              .text( formField.model.get('_label') )
+              .addClass('control-label');
+
+            label.appendTo( ctrlGroup );
+            formField.partial.appendTo(ctrls);
+            ctrls.insertAfter(label);
+            
+
+          }
+
+          break;
+
+        case "checkboxes" :
+        case "radios" : 
+
+        
+
+          formField.model.get("_options").each(function(option, index){
+
+            ctrlGroup = dom('<div></div>').addClass('control-group');  
+            label = dom('<label></label>')
+                      .text( (index===0 ? formField.model.get("_label") : "") )
+                      .addClass('control-label');
+
+            label.appendTo( ctrlGroup );
+
+            ctrls = dom('<div></div>').addClass('controls');
+
+            ctrlGroup.insertAfter( formField.partial[index] );
+            ctrls.appendTo( ctrlGroup );
+
+            formField.partial[index].appendTo(ctrls);
+
+
+            innerLabel = dom('<label></label>')
+                          .addClass( option.get('type') )
+                          .insertAfter( formField.partial[index] );
+
+            innerLabel
+              .append( formField.partial[index] );
+
+            dom( document.createTextNode( " " + option.get("_label") ) ).insertAfter( formField.partial[index] );
+
+
+          }, this);
+
+
+          break;
+          default:
+            console.log(formField);
       }
 
 
