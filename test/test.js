@@ -192,56 +192,7 @@ describe("suite", function(){
 					m.control("controls:test"), 'form'
 				).els[0].outerHTML
 			).to.equal(
-				'<form action="/tasklist/create" method="POST" encoding="application/x-www-form-urlencoded">' +
-					'<fieldset>' + 
-						'<legend>Inputs (inc. checkbox)</legend>' + 
-						'<input type="text" name="text-input" value="I am some text" required="required" placeholder="Some default helptext">' + 
-						'<input type="checkbox" name="checkbox-input" value="checked-1">' + 
-						'<input type="checkbox" name="checkbox-input" value="checked-2">' + 
-						'<input type="checkbox" name="checkbox-input" value="checked-3">' + 
-						'<input type="radio" name="radio-input" value="radio-1" checked="checked">' + 
-						'<input type="radio" name="radio-input" value="radio-1" checked="checked">' + 
-					'</fieldset>' + 
-					'<fieldset>' + 
-						'<legend>Text area and labels</legend>' + 
-						'<textarea id="textarea-input-1" name="textarea-input-1">a lot of text goes here</textarea>' + 
-						'<textarea id="textarea-input-2" name="textarea-input-2">a lot of text goes here</textarea>' + 
-						'<textarea id="textarea-input-3" name="textarea-input-3">a lot of text goes here</textarea>' + 
-					'</fieldset>' + 
-					'<select name="select-input" value="1">' + 
-						'<optgroup label="Options group 1">' + 
-							'<option value="1">option 1</option>' + 
-							'<option value="2">option 2</option>' + 
-						'</optgroup>' + 
-						'<option value="3">option 3</option>' + 
-						'<option value="4">option 4</option>' + 
-					'</select>' + 
-					'<select name="select-multiple-input" multiple="multiple">' + 
-						'<optgroup label="Options group 1">' + 
-							'<option value="1">option 1</option>' + 
-							'<option value="2" selected="selected">option 2</option>' + 
-						'</optgroup>' + 
-						'<option value="3">option 3</option>' + 
-						'<option value="4">option 4</option>' + 
-					'</select>' + 
-					'<button name="a-button" type="submit">A button!</button>' + 
-					'<fieldset>' + 
-						'<legend>Data list</legend>' + 
-						'<input list="browsers">' + 
-						'<datalist id="browsers">' + 
-							'<option value="Internet Explorer"></option>' + 
-							'<option value="Mozilla Firefox"></option>' + 
-							'<option value="Google Chrome"></option>' + 
-						'</datalist>' + 
-					'</fieldset>' + 
-					'<fieldset>' + 
-						'<legend>Keygen</legend>' + 
-						'<keygen name="keygen-test"></keygen>' + 
-					'</fieldset>' + 
-					'<fieldset>' + 
-						'<legend>Output</legend>' + 
-						'<output name="output-test" value="Hello"></output>' + 
-					'</fieldset>' + '</form>');
+				'<form action="/tasklist/create" method="POST" encoding="application/x-www-form-urlencoded"><fieldset><legend>Inputs (inc. checkbox)</legend><input type="text" name="text-input" value="I am some text" required="required" placeholder="Some default helptext"><input type="checkbox" name="checkbox-input" value="checked-1"><input type="checkbox" name="checkbox-input" value="checked-2"><input type="checkbox" name="checkbox-input" value="checked-3"><input type="radio" name="radio-input" value="radio-1" checked="checked"><input type="radio" name="radio-input" value="radio-1" checked="checked"></fieldset><fieldset><legend>Text area and labels</legend><textarea id="textarea-input-1" name="textarea-input-1">a lot of text goes here</textarea><textarea id="textarea-input-2" name="textarea-input-2">a lot of text goes here</textarea><textarea id="textarea-input-3" name="textarea-input-3">a lot of text goes here</textarea></fieldset><select name="select-input" value="1"><optgroup label="Options group 1"><option value="1">option 1</option><option value="2">option 2</option></optgroup><option value="3">option 3</option><option value="4">option 4</option></select><select name="select-multiple-input" multiple="multiple"><optgroup label="Options group 1"><option value="1">option 1</option><option value="2" selected="selected">option 2</option></optgroup><option value="3">option 3</option><option value="4">option 4</option></select><button name="a-button" type="submit">A button!</button><fieldset><legend>Data list</legend><input list="browsers"><datalist id="browsers"><option value="Internet Explorer"></option><option value="Mozilla Firefox"></option><option value="Google Chrome"></option></datalist></fieldset><fieldset><legend>Output</legend><output name="output-test" value="Hello"></output></fieldset></form>');
 
 		})
 
@@ -261,7 +212,7 @@ describe("suite", function(){
 			control.partials();
 
 			expect( control.control ).to.equal( m.control("controls:test") );
-			expect( control.html.els[0].outerHTML ).to.equal('<form action="/tasklist/create" method="POST" encoding="application/x-www-form-urlencoded"><fieldset><legend>Inputs (inc. checkbox)</legend><input type="text" name="text-input" value="I am some text" required="required" placeholder="Some default helptext"><input type="checkbox" name="checkbox-input" value="checked-1"><input type="checkbox" name="checkbox-input" value="checked-2"><input type="checkbox" name="checkbox-input" value="checked-3"><input type="radio" name="radio-input" value="radio-1" checked="checked"><input type="radio" name="radio-input" value="radio-1" checked="checked"></fieldset><fieldset><legend>Text area and labels</legend><textarea id="textarea-input-1" name="textarea-input-1">a lot of text goes here</textarea><textarea id="textarea-input-2" name="textarea-input-2">a lot of text goes here</textarea><textarea id="textarea-input-3" name="textarea-input-3">a lot of text goes here</textarea></fieldset><select name="select-input" value="1"><optgroup label="Options group 1"><option value="1">option 1</option><option value="2">option 2</option></optgroup><option value="3">option 3</option><option value="4">option 4</option></select><select name="select-multiple-input" multiple="multiple"><optgroup label="Options group 1"><option value="1">option 1</option><option value="2" selected="selected">option 2</option></optgroup><option value="3">option 3</option><option value="4">option 4</option></select><button name="a-button" type="submit">A button!</button><fieldset><legend>Data list</legend><input list="browsers"><datalist id="browsers"><option value="Internet Explorer"></option><option value="Mozilla Firefox"></option><option value="Google Chrome"></option></datalist></fieldset><fieldset><legend>Keygen</legend><keygen name="keygen-test"></keygen></fieldset><fieldset><legend>Output</legend><output name="output-test" value="Hello"></output></fieldset></form>')
+			expect( control.html.els[0].outerHTML ).to.equal('<form action="/tasklist/create" method="POST" encoding="application/x-www-form-urlencoded"><fieldset><legend>Inputs (inc. checkbox)</legend><input type="text" name="text-input" value="I am some text" required="required" placeholder="Some default helptext"><input type="checkbox" name="checkbox-input" value="checked-1"><input type="checkbox" name="checkbox-input" value="checked-2"><input type="checkbox" name="checkbox-input" value="checked-3"><input type="radio" name="radio-input" value="radio-1" checked="checked"><input type="radio" name="radio-input" value="radio-1" checked="checked"></fieldset><fieldset><legend>Text area and labels</legend><textarea id="textarea-input-1" name="textarea-input-1">a lot of text goes here</textarea><textarea id="textarea-input-2" name="textarea-input-2">a lot of text goes here</textarea><textarea id="textarea-input-3" name="textarea-input-3">a lot of text goes here</textarea></fieldset><select name="select-input" value="1"><optgroup label="Options group 1"><option value="1">option 1</option><option value="2">option 2</option></optgroup><option value="3">option 3</option><option value="4">option 4</option></select><select name="select-multiple-input" multiple="multiple"><optgroup label="Options group 1"><option value="1">option 1</option><option value="2" selected="selected">option 2</option></optgroup><option value="3">option 3</option><option value="4">option 4</option></select><button name="a-button" type="submit">A button!</button><fieldset><legend>Data list</legend><input list="browsers"><datalist id="browsers"><option value="Internet Explorer"></option><option value="Mozilla Firefox"></option><option value="Google Chrome"></option></datalist></fieldset><fieldset><legend>Output</legend><output name="output-test" value="Hello"></output></fieldset></form>')
 
 		});
 

@@ -17,7 +17,7 @@ var HyperboneForm = function( control ){
 
 };
 
-var validElements = ["fieldset", "legend", "input", "textarea", "select", "optgroup", "option", "button", "datalist", "keygen", "output"];
+var validElements = ["fieldset", "legend", "input", "textarea", "select", "optgroup", "option", "button", "datalist", "output"];
 
 HyperboneForm.prototype = {
 

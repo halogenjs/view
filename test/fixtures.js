@@ -234,20 +234,6 @@ var fixtures = {
 						fieldset : [
 							{
 								legend : {
-									_text : "Keygen"
-								}
-							},
-							{
-								keygen : {
-									name : "keygen-test"
-								}
-							}
-						]
-					},
-					{
-						fieldset : [
-							{
-								legend : {
 									_text : "Output"
 								}
 							},
