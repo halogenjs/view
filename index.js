@@ -53,7 +53,7 @@ HyperboneForm.prototype = {
         case "checkboxes" :
         case "radios" : 
 
-          formField.model.get("_options").each(function(option, index){
+          formField.model.get("_children").each(function(option, index){
 
             label = dom('<label></label')
                       .text( (index===0 ? formField.model.get("_label") : "") )
@@ -100,16 +100,6 @@ HyperboneForm.prototype = {
         case "button" :
         case "output" :
 
-/*
-   var controlGroup = dom('<div></div>').addClass('control-group');
-   var label = dom('<label></label>').text( partial.attr('name') ).addClass('control-label');
-   label.appendTo( controlGroup );
-   var div = dom('<div></div>').addClass('controls');
-
-   controlGroup.insertAfter(partial);
-   div.appendTo(controlGroup);
-   partial.appendTo(div);
-*/
           type = formField.model.get('type');
 
           ctrlGroup = dom('<div></div>').addClass('control-group'); 
@@ -120,8 +110,6 @@ HyperboneForm.prototype = {
           ctrlGroup.insertAfter( formField.partial );
 
           ctrls.appendTo( ctrlGroup );
-
-
 
           if(type==="radio" || type==="checkbox"){
 
@@ -152,7 +140,7 @@ HyperboneForm.prototype = {
 
         
 
-          formField.model.get("_options").each(function(option, index){
+          formField.model.get("_children").each(function(option, index){
 
             ctrlGroup = dom('<div></div>').addClass('control-group');  
             label = dom('<label></label>')
@@ -204,86 +192,91 @@ HyperboneForm.prototype = {
 
 		_.each(attr, function(obj,name){
 
-      if (_.isObject(obj) && _.indexOf(validElements, name) !== -1){
+      if (_.isObject(obj)){
 
-        frag.append( this.traverse(obj, name) );
+        if ( _.indexOf(validElements, name) !== -1 ){ // recurse for recognised HTML elements
 
-      } else if (_.isObject(obj) && (name==="checkboxes" || name==="radios") ){
+          frag.append( this.traverse(obj, name) );
 
-        var fieldName = obj.get("name");
+        } else if (name==="checkboxes" || name==="radios"){ // custom handler for 'checkboxes' and 'radios'
 
-        var els = [];
+          var fieldName = obj.get("name");
 
-        obj.get("_options").each(function(option){
+          var els = [];
 
-          var el = dom('<input></input')
-            .attr('type', (name === "checkboxes" ? "checkbox" : "radio"))
-            .attr('name', fieldName);
+          obj.get("_children").each(function(option){
 
-          _.each(option.attributes, function(o, name){
+            var el = dom('<input></input')
+              .attr('type', (name === "checkboxes" ? "checkbox" : "radio"))
+              .attr('name', fieldName);
 
-            if(name!=="_label"){
-              el.attr(name, o);
-            }
+            _.each(option.attributes, function(o, name){
+
+              if(name!=="_label"){
+                el.attr(name, o);
+              }
+
+            });
+
+            els.push(el);
+            frag.append(el);
 
           });
 
-          els.push(el);
-          frag.append(el);
+          this.registerFormInput(name, fieldName, obj, els);
 
-        });
+        } else if (name!=="_value"){ // recurse for any other object that doesn't require a specific tag generating.
 
-        this.registerFormInput(name, fieldName, obj, els);
+          frag.append( this.traverse(obj) );
 
-      }else if(_.isObject(obj) && name!=="value"){ // any other object we recurse with a document fragment not a node
+          if(name==="_children"){ // re-set the value here, in case the value comes before the options. 
 
-        frag.append( this.traverse(obj) );
+            frag.val(node.get("_value"));
 
-        if(name==="_options"){ // re-set the value here, in case the value comes before the options. 
-
-          frag.val(node.get("value"));
+          }
 
         }
 
-      }else if(name==="_text"){
+      } else if (name==="_text"){ // _text is a special reserved attribute
 
-           frag.append( dom( document.createTextNode(obj) ) );
+        frag.append( dom( document.createTextNode(obj) ) );
 
-      }else if (name === "value"){
+      } else if (name === "_value"){
 
-          frag.val(node.get("value"));
+        frag.val(node.get("_value"));
 
-          node.on("change:value", function(model, val){
+        node.on("change:_value", function(model, val){
 
-            var oldVal = frag.val();
+          var oldVal = frag.val();
 
-            if(oldVal !== val){
-              frag.val(val);
-            }
+          if(oldVal !== val){
+            frag.val(val);
+          }
 
-          });
+        });
 
-          frag.on("change", function(e){
+        frag.on("change", function(e){
 
-            var oldVal = node.get("value");
+          var oldVal = node.get("_value");
 
-            if(oldVal !== frag.val()){
-              node.set("value", frag.val());
-            }
+          if(oldVal !== frag.val()){
+            node.set("_value", frag.val());
+          }
 
-          });
+        });
 
       }else if(name!=="_label"){
 
         if(name==="name"){
-            
+          
           this.registerFormInput(tag, obj, node, frag);
-        
+      
         }
 
         frag.attr(name, obj);
 
       }
+
 
 		}, this);
 

@@ -13,7 +13,7 @@ var fixtures = {
 				action : "/tasklist/create",
 				method : "POST",
 				encoding : "application/x-www-form-urlencoded",
-				properties : [
+				_children : [
 					{
 						fieldset : [
 							{
@@ -25,7 +25,7 @@ var fixtures = {
 								input : {
 									type : "text",
 									name : "text-input",
-									value : "I am some text",
+									_value : "I am some text",
 									required : "required",
 									placeholder : "Some default helptext",
 									_label : "Free text"
@@ -35,7 +35,7 @@ var fixtures = {
 								input : {
 									type : "checkbox",
 									name : "checkbox-input",
-									value : "checked-1",
+									_value : "checked-1",
 									_label : "Checkbox 1"
 								}
 							},
@@ -43,7 +43,7 @@ var fixtures = {
 								input : {
 									type : "radio",
 									name : "radio-input",
-									value : "radio-1",
+									_value : "radio-1",
 									checked : "checked",
 									_label : "Radio 1"
 								}
@@ -61,8 +61,8 @@ var fixtures = {
 								checkboxes : {
 									name : "checkboxes",
 									_label : "Checkbox options",
-									value : "1",
-									_options : [
+									_value : "1",
+									_children : [
 										{
 											value : "1",
 											_label : "One",
@@ -78,8 +78,8 @@ var fixtures = {
 								radios : {
 									name : "radios",
 									_label : "Radio options",
-									value : "1",
-									_options : [
+									_value : "1",
+									_children : [
 										{
 											value : "1",
 											_label : "One",
@@ -129,12 +129,12 @@ var fixtures = {
 					{
 						select : {
 							name : "select-input",
-							value : "1",
-							_options : [
+							_value : "1",
+							_children : [
 								{
 									optgroup : {
 										label : "Options group 1",
-										_options : [
+										_children : [
 											{
 												option : {
 													_text : "option 1",
@@ -169,12 +169,12 @@ var fixtures = {
 						select : {
 							name : "select-multiple-input",
 							multiple : "multiple",
-							value : ["2", "3"],
-							_options : [
+							_value : ["2", "3"],
+							_children : [
 								{
 									optgroup : {
 										label : "Options group 1",
-										_options : [
+										_children : [
 											{
 												option : {
 													_text : "option 1",
@@ -229,7 +229,7 @@ var fixtures = {
 							{
 								datalist : {
 									id : "browsers",
-									_options : [
+									_children : [
 										{
 											option : {
 												value : "Internet Explorer"
@@ -260,7 +260,7 @@ var fixtures = {
 							{
 								output : {
 									name : "output-test",
-									value : "Hello"
+									_value : "Hello"
 								}
 							}
 						]

@@ -26,7 +26,7 @@ describe("suite", function(){
 
 			var gen = new HyperboneForm();
 			var m = new Model({
-				properties : [
+				_children : [
 					{
 						input : {
 							type : "text",
@@ -37,7 +37,7 @@ describe("suite", function(){
 				]
 			});
 
-			var html = gen.traverse( m.get("properties") ).find('input');
+			var html = gen.traverse( m.get("_children") ).find('input');
 
 			expect( html.val() ).to.equal('some text');
 			expect( html.attr('name') ).to.equal('text-test');
@@ -48,19 +48,19 @@ describe("suite", function(){
 
 			var gen = new HyperboneForm();
 			var m = new Model({
-				properties : [
+				_children : [
 					{
 						input : {
 							type : "text",
 							name : "text-test",
-							value : "some text",
+							_value : "some text",
 							_label : "Some label"
 						}
 					}
 				]
 			});
 
-			var html = gen.traverse( m.get("properties") ).find('input');
+			var html = gen.traverse( m.get("_children") ).find('input');
 		
 			expect( html.attr('_label') ).to.be.null;
 
@@ -70,7 +70,7 @@ describe("suite", function(){
 
 			var gen = new HyperboneForm();
 			var m = new Model({
-				properties : [
+				_children : [
 					{
 						legend : {
 							_text : "Some text"
@@ -82,7 +82,7 @@ describe("suite", function(){
 			expect(
 			
 				gen.traverse(
-					m.get("properties")
+					m.get("_children")
 				).find('legend').els[0].outerHTML
 		
 			).to.equal('<legend>Some text</legend>');
@@ -93,7 +93,7 @@ describe("suite", function(){
 
 			var gen = new HyperboneForm();
 			var m = new Model({
-				properties : [
+				_children : [
 					{
 						fieldset : [
 							{
@@ -104,7 +104,7 @@ describe("suite", function(){
 							{
 								input : {
 									name : "text-input",
-									value : "I have some text"
+									_value : "I have some text"
 								}
 							}
 						]
@@ -113,27 +113,27 @@ describe("suite", function(){
 				]
 			});
 
-			var html = gen.traverse( m.get("properties") ).find('fieldset')
+			var html = gen.traverse( m.get("_children") ).find('fieldset')
 
 			expect( html.find('legend').text() ).to.equal('Some text'); 
 			expect( html.find('input').val() ).to.equal('I have some text');
 
 		});
 
-		it("supports _options for adding option elements to selects", function(){
+		it("supports _children for adding option elements to selects", function(){
 
 			var gen = new HyperboneForm();
 			var m = new Model({
-				properties : [
+				_children : [
 					{
 						select : {
 							name : "select",
-							value : "1",
-							_options : [
+							_value : "1",
+							_children : [
 								{
 									optgroup : {
 										label : "Some options",
-										_options : [
+										_children : [
 											{
 												option : {
 													_text : "Option 1",
@@ -163,7 +163,7 @@ describe("suite", function(){
 				]
 			});
 
-			var html = gen.traverse( m.get("properties") ).find('select');
+			var html = gen.traverse( m.get("_children") ).find('select');
 
 			expect( html.find('option').length() ).to.equal(3);
 			expect( html.find('optgroup').length() ).to.equal(1);
@@ -177,17 +177,17 @@ describe("suite", function(){
 
 			var gen = new HyperboneForm();
 			var m = new Model({
-				properties : [
+				_children : [
 					{
 						select : {
 							name : "select",
 							multiple : "multiple",
-							value : ["1", "2"],
-							_options : [
+							_value : ["1", "2"],
+							_children : [
 								{
 									optgroup : {
 										label : "Some options",
-										_options : [
+										_children : [
 											{
 												option : {
 													_text : "Option 1",
@@ -217,7 +217,7 @@ describe("suite", function(){
 				]
 			});
 
-			var html = gen.traverse( m.get("properties") ).find('select');
+			var html = gen.traverse( m.get("_children") ).find('select');
 
 			expect( html.val() ).to.deep.equal(["1", "2"]);
 
@@ -229,12 +229,12 @@ describe("suite", function(){
 			var gen = new HyperboneForm();
 			var m = new Model({
 
-				properties : [
+				_children : [
 					{
 						checkboxes : {
 							_label : "An array of checkboxes",
 							name : "checkboxes",
-							_options : [
+							_children : [
 								{
 									value : "1",
 									checked : "checked",
@@ -251,7 +251,7 @@ describe("suite", function(){
 
 			});
 
-			var html = gen.traverse( m.get("properties") ).find('input');
+			var html = gen.traverse( m.get("_children") ).find('input');
 
 			expect( html.at(0).attr('value') ).to.equal('1');
 			expect( html.at(0).attr('name') ).to.equal('checkboxes');
@@ -268,12 +268,12 @@ describe("suite", function(){
 			var gen = new HyperboneForm();
 			var m = new Model({
 
-				properties : [
+				_children : [
 					{
 						radios : {
 							_label : "An array of radio buttons",
 							name : "radios",
-							_options : [
+							_children : [
 								{
 									value : "1",
 									checked : "checked",
@@ -290,7 +290,7 @@ describe("suite", function(){
 
 			});
 
-			var html = gen.traverse( m.get("properties") ).find('input');
+			var html = gen.traverse( m.get("_children") ).find('input');
 
 			expect( html.at(0).attr('value') ).to.equal('1');
 			expect( html.at(0).attr('name') ).to.equal('radios');
@@ -436,13 +436,13 @@ describe("suite", function(){
 			it("automatically updates the form value when the model changes", function(){
 
 				var m = new Model({
-					properties : [
+					_children : [
 						{
 							fieldset : [
 								{
 									input : {
 										type : "text",
-										value : "lol",
+										_value : "lol",
 										name : "text-input"
 									}
 								}
@@ -452,11 +452,11 @@ describe("suite", function(){
 
 				});
 
-				var html = new HyperboneForm().traverse( m.get("properties") );
+				var html = new HyperboneForm().traverse( m.get("_children") );
 
 				expect( html.find('input[name="text-input"]').val() ).to.equal("lol");
 
-				m.set("properties[0].fieldset[0].input.value", "rofl");
+				m.set("_children[0].fieldset[0].input._value", "rofl");
 
 				expect( html.find('input[name="text-input"]').val() ).to.equal("rofl");
 
@@ -466,13 +466,13 @@ describe("suite", function(){
 			it("automatically updates the model when the form value is changed", function( done ){
 
 				var m = new Model({
-					properties : [
+					_children : [
 						{
 							fieldset : [
 								{
 									input : {
 										type : "text",
-										value : "lol",
+										_value : "lol",
 										name : "text-input"
 									}
 								}
@@ -482,15 +482,15 @@ describe("suite", function(){
 
 				});
 
-				var html = new HyperboneForm().traverse( m.get("properties") );
+				var html = new HyperboneForm().traverse( m.get("_children") );
 
-				expect( m.get("properties[0].fieldset[0].input.value") ).to.equal("lol");
+				expect( m.get("_children[0].fieldset[0].input._value") ).to.equal("lol");
 
 				setValueAndTrigger( html.find('input'), "rofl", "change");
 
 				setTimeout(function(){
 
-					expect( m.get("properties[0].fieldset[0].input.value") ).to.equal("rofl");
+					expect( m.get("_children[0].fieldset[0].input._value") ).to.equal("rofl");
 					done();
 
 				},50);
@@ -505,14 +505,14 @@ describe("suite", function(){
 			it("automatically updates the form value when the model changes", function(){
 
 				var m = new Model({
-					properties : [
+					_children : [
 						{
 							fieldset : [
 								{
 									select : {
 										name : "select-input",
-										value : "1",
-										_options : [
+										_value : "1",
+										_children : [
 											{
 												option : {
 													value : "1"
@@ -537,11 +537,11 @@ describe("suite", function(){
 
 				});
 
-				var html = new HyperboneForm().traverse( m.get("properties") );
+				var html = new HyperboneForm().traverse( m.get("_children") );
 
 				expect( html.find('select[name="select-input"]').val() ).to.equal("1");
 
-				m.set("properties[0].fieldset[0].select.value", "2");
+				m.set("_children[0].fieldset[0].select._value", "2");
 
 				expect( html.find('select[name="select-input"]').val() ).to.equal("2");
 
@@ -550,14 +550,14 @@ describe("suite", function(){
 			it("automatically updates the model when the form value is changed", function( done ){
 
 				var m = new Model({
-					properties : [
+					_children : [
 						{
 							fieldset : [
 								{
 									select : {
 										name : "select-input",
-										value : "1",
-										_options : [
+										_value : "1",
+										_children : [
 											{
 												option : {
 													value : "1"
@@ -582,15 +582,15 @@ describe("suite", function(){
 
 				});
 
-				var html = new HyperboneForm().traverse( m.get("properties") );
+				var html = new HyperboneForm().traverse( m.get("_children") );
 
-				expect( m.get("properties[0].fieldset[0].select.value") ).to.equal("1");
+				expect( m.get("_children[0].fieldset[0].select._value") ).to.equal("1");
 
 				setValueAndTrigger( html.find('select'), "2", "change");
 
 				setTimeout(function(){
 
-					expect( m.get("properties[0].fieldset[0].select.value") ).to.equal("2");
+					expect( m.get("_children[0].fieldset[0].select._value") ).to.equal("2");
 					done();
 
 				},50);
@@ -604,13 +604,13 @@ describe("suite", function(){
 			it("automatically updates the form value when the model changes", function(){
 
 				var m = new Model({
-					properties : [
+					_children : [
 						{
 							fieldset : [
 								{
 									textarea : {
 										name : "select-input",
-										value : "This is some wacky shit right here"
+										_value : "This is some wacky shit right here"
 									}
 								}
 							]
@@ -619,11 +619,11 @@ describe("suite", function(){
 
 				});
 
-				var html = new HyperboneForm().traverse( m.get("properties") );
+				var html = new HyperboneForm().traverse( m.get("_children") );
 
 				expect( html.find('textarea').val() ).to.equal("This is some wacky shit right here");
 
-				m.set("properties[0].fieldset[0].textarea.value", "Excuse me. Have you seen Colin Baker's bottom?");
+				m.set("_children[0].fieldset[0].textarea._value", "Excuse me. Have you seen Colin Baker's bottom?");
 
 				expect( html.find('textarea').val() ).to.equal("Excuse me. Have you seen Colin Baker's bottom?");
 
@@ -632,13 +632,13 @@ describe("suite", function(){
 			it("automatically updates the model when the form value is changed", function( done ){
 
 				var m = new Model({
-					properties : [
+					_children : [
 						{
 							fieldset : [
 								{
 									textarea : {
 										name : "select-input",
-										value : "This is some wacky shit right here"
+										_value : "This is some wacky shit right here"
 									}
 								}
 							]
@@ -647,15 +647,15 @@ describe("suite", function(){
 
 				});
 
-				var html = new HyperboneForm().traverse( m.get("properties") );
+				var html = new HyperboneForm().traverse( m.get("_children") );
 
-				expect( m.get("properties[0].fieldset[0].textarea.value") ).to.equal("This is some wacky shit right here");
+				expect( m.get("_children[0].fieldset[0].textarea._value") ).to.equal("This is some wacky shit right here");
 
 				setValueAndTrigger( html.find('textarea'), "Excuse me. Have you seen Colin Baker's bottom?", "change");
 
 				setTimeout(function(){
 
-					expect( m.get("properties[0].fieldset[0].textarea.value") ).to.equal("Excuse me. Have you seen Colin Baker's bottom?");
+					expect( m.get("_children[0].fieldset[0].textarea._value") ).to.equal("Excuse me. Have you seen Colin Baker's bottom?");
 					done();
 
 				},50);
