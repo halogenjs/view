@@ -61,11 +61,11 @@ var fixtures = {
 								checkboxes : {
 									name : "checkboxes",
 									_label : "Checkbox options",
+									value : "1",
 									_options : [
 										{
 											value : "1",
 											_label : "One",
-											checked : "checked"
 										},
 										{
 											value : "2",
@@ -78,11 +78,11 @@ var fixtures = {
 								radios : {
 									name : "radios",
 									_label : "Radio options",
+									value : "1",
 									_options : [
 										{
 											value : "1",
 											_label : "One",
-											checked : "checked"
 										},
 										{
 											value : "2",
@@ -169,6 +169,7 @@ var fixtures = {
 						select : {
 							name : "select-multiple-input",
 							multiple : "multiple",
+							value : ["2", "3"],
 							_options : [
 								{
 									optgroup : {
@@ -183,8 +184,7 @@ var fixtures = {
 											{
 												option : {
 													_text : "option 2",
-													value : "2",
-													selected : "selected"
+													value : "2"
 												}
 											}
 										]
@@ -268,58 +268,6 @@ var fixtures = {
 				]
 			}
 		}
-	} /*,
-	"/eventtest" : {
-		_links : {
-			self : {
-				href : "/eventtest"
-			},
-			"controls:test" : {
-				href : '#_controls/test'
-			}
-		},
-		_controls : {
-
-			test : {
-				method : "POST",
-				action : "/eventtest/form",
-				encoding : "application/x-www-form-urlencoded",
-				properties : [
-					{
-						fieldset : [
-							{
-								legend : {
-									label : "Inputs"
-								}
-							},
-							{
-								checkboxes : {
-									_label : "checkboxes",
-									_options : [
-										{
-											input : {
-												type : "checkbox",
-												checked : "checked",
-												value : ""
-											}											
-										},
-										{
-											input : {
-
-
-											}											
-										}
-									]
-								}								
-							}
-						]
-					}
-				]
-
-			}
-
-		}
-
 	}
-	*/
+
 };

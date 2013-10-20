@@ -7,10 +7,11 @@ describe("suite", function(){
 
 		it("Environment", function(){
 
-			should.exist($);
+			should.exist(dom);
 			should.exist(useFixture);
 			should.exist(fixtures);
 			should.exist(Model);
+			should.exist(setValueAndTrigger);
 			should.exist(require('hyperbone-form'));
 
 		});
@@ -21,7 +22,7 @@ describe("suite", function(){
 
 		var HyperboneForm = require('hyperbone-form').HyperboneForm;
 
-		it("creates input element", function(){
+		it("creates void elements", function(){
 
 			var gen = new HyperboneForm();
 			var m = new Model({
@@ -36,17 +37,14 @@ describe("suite", function(){
 				]
 			});
 
-			expect(
-			
-				gen.traverse(
-					m.get("properties")
-				).find('input').els[0].outerHTML
-		
-			).to.equal('<input type="text" name="text-test" value="some text">');
+			var html = gen.traverse( m.get("properties") ).find('input');
+
+			expect( html.val() ).to.equal('some text');
+			expect( html.attr('name') ).to.equal('text-test');
 
 		});
 
-		it("creates doesn't add _label as an attribute", function(){
+		it("doesn't add _label as an attribute", function(){
 
 			var gen = new HyperboneForm();
 			var m = new Model({
@@ -62,17 +60,13 @@ describe("suite", function(){
 				]
 			});
 
-			expect(
-			
-				gen.traverse(
-					m.get("properties")
-				).find('input').els[0].outerHTML
+			var html = gen.traverse( m.get("properties") ).find('input');
 		
-			).to.equal('<input type="text" name="text-test" value="some text">');
+			expect( html.attr('_label') ).to.be.null;
 
 		});
 
-		it("creates legend element (with _text)", function(){
+		it("creates non-void elements", function(){
 
 			var gen = new HyperboneForm();
 			var m = new Model({
@@ -95,7 +89,7 @@ describe("suite", function(){
 
 		});
 
-		it("can create a fieldset with nested inputs", function(){
+		it("creates nested elements", function(){
 
 			var gen = new HyperboneForm();
 			var m = new Model({
@@ -119,17 +113,14 @@ describe("suite", function(){
 				]
 			});
 
-			expect(
-			
-				gen.traverse(
-					m.get("properties")
-				).find('fieldset').els[0].outerHTML
-		
-			).to.equal('<fieldset><legend>Some text</legend><input name="text-input" value="I have some text"></fieldset>');
+			var html = gen.traverse( m.get("properties") ).find('fieldset')
+
+			expect( html.find('legend').text() ).to.equal('Some text'); 
+			expect( html.find('input').val() ).to.equal('I have some text');
 
 		});
 
-		it("can deal with select with options and option groups", function(){
+		it("supports _options for adding option elements to selects", function(){
 
 			var gen = new HyperboneForm();
 			var m = new Model({
@@ -172,15 +163,66 @@ describe("suite", function(){
 				]
 			});
 
-			expect(
-			
-				gen.traverse(
-					m.get("properties")
-				).find('select').els[0].outerHTML
-		
-			).to.equal('<select name="select" value="1"><optgroup label="Some options"><option value="1">Option 1</option><option value="2">Option 2</option></optgroup><option value="3">Option 3</option></select>');
+			var html = gen.traverse( m.get("properties") ).find('select');
+
+			expect( html.find('option').length() ).to.equal(3);
+			expect( html.find('optgroup').length() ).to.equal(1);
+
+			expect( html.find('optgroup').find('option').length() ).to.equal(2);
+			expect( html.val() ).to.equal("1");
 
 		});
+
+		it("correctly generates a multi select with the correct value", function(){
+
+			var gen = new HyperboneForm();
+			var m = new Model({
+				properties : [
+					{
+						select : {
+							name : "select",
+							multiple : "multiple",
+							value : ["1", "2"],
+							_options : [
+								{
+									optgroup : {
+										label : "Some options",
+										_options : [
+											{
+												option : {
+													_text : "Option 1",
+													value : "1"
+												}
+											},
+											{
+												option : {
+													_text : "Option 2",
+													value : "2"
+												}
+											}
+										]
+									}
+								},
+								{
+									option : {
+											_text : "Option 3",
+											value : "3"
+										}
+								}
+							]
+
+						}
+					}
+
+				]
+			});
+
+			var html = gen.traverse( m.get("properties") ).find('select');
+
+			expect( html.val() ).to.deep.equal(["1", "2"]);
+
+		});
+
 
 		it("Can generate a array of checkboxes with a single label using 'checkboxes'", function(){
 
@@ -209,11 +251,16 @@ describe("suite", function(){
 
 			});
 
-			var inputs = gen.traverse( m.get("properties") )
+			var html = gen.traverse( m.get("properties") ).find('input');
 
-			expect( inputs.find('input').els[0].outerHTML ).to.equal('<input type="checkbox" name="checkboxes" value="1" checked="checked">');
-			expect( inputs.find('input').els[1].outerHTML ).to.equal('<input type="checkbox" name="checkboxes" value="2">');
+			expect( html.at(0).attr('value') ).to.equal('1');
+			expect( html.at(0).attr('name') ).to.equal('checkboxes');
 
+			expect( html.at(1).attr('value') ).to.equal('2');
+			expect( html.at(1).attr('name') ).to.equal('checkboxes');
+
+			expect( html.at(0).val() ).to.equal( '1' );	
+			expect( html.at(1).val() ).to.equal( false );
 		});
 
 		it("Can generate a array of radio buttons with a single label using 'radios'", function(){
@@ -243,10 +290,16 @@ describe("suite", function(){
 
 			});
 
-			var inputs = gen.traverse( m.get("properties") )
+			var html = gen.traverse( m.get("properties") ).find('input');
 
-			expect( inputs.find('input').els[0].outerHTML ).to.equal('<input type="radio" name="radios" value="1" checked="checked">');
-			expect( inputs.find('input').els[1].outerHTML ).to.equal('<input type="radio" name="radios" value="2">');
+			expect( html.at(0).attr('value') ).to.equal('1');
+			expect( html.at(0).attr('name') ).to.equal('radios');
+
+			expect( html.at(1).attr('value') ).to.equal('2');
+			expect( html.at(1).attr('name') ).to.equal('radios');
+
+			expect( html.at(0).val() ).to.equal( '1' );	
+			expect( html.at(1).val() ).to.equal( false );
 
 		});
 
@@ -255,15 +308,33 @@ describe("suite", function(){
 			var gen = new HyperboneForm();
 			var m = new Model( useFixture('/everything') );
 
-			expect(
-				gen.traverse(
-					m.control("controls:test"), 'form'
-				).els[0].outerHTML
-			).to.equal('<form action="/tasklist/create" method="POST" encoding="application/x-www-form-urlencoded"><fieldset><legend>Inputs (inc. checkbox)</legend><input type="text" name="text-input" value="I am some text" required="required" placeholder="Some default helptext"><input type="checkbox" name="checkbox-input" value="checked-1"><input type="radio" name="radio-input" value="radio-1" checked="checked"></fieldset><fieldset><legend>Checkboxes and radios (special)</legend><input type="checkbox" name="checkboxes" value="1" checked="checked"><input type="checkbox" name="checkboxes" value="2"><input type="radio" name="radios" value="1" checked="checked"><input type="radio" name="radios" value="2"></fieldset><fieldset><legend>Text area and labels</legend><textarea id="textarea-input-1" name="textarea-input-1">a lot of text goes here</textarea><textarea id="textarea-input-2" name="textarea-input-2">a lot of text goes here</textarea><textarea id="textarea-input-3" name="textarea-input-3">a lot of text goes here</textarea></fieldset><select name="select-input" value="1"><optgroup label="Options group 1"><option value="1">option 1</option><option value="2">option 2</option></optgroup><option value="3">option 3</option><option value="4">option 4</option></select><select name="select-multiple-input" multiple="multiple"><optgroup label="Options group 1"><option value="1">option 1</option><option value="2" selected="selected">option 2</option></optgroup><option value="3">option 3</option><option value="4">option 4</option></select><button name="a-button" type="submit">A button!</button><fieldset><legend>Data list</legend><input list="browsers" name="datalisted"><datalist id="browsers"><option value="Internet Explorer"></option><option value="Mozilla Firefox"></option><option value="Google Chrome"></option></datalist></fieldset><fieldset><legend>Output</legend><output name="output-test" value="Hello"></output></fieldset></form>')
-		
+			var html = gen.traverse( m.control("controls:test"), 'form');
+
+			expect( html.attr('action') ).to.equal('/tasklist/create');
+			expect( html.attr('method') ).to.equal('POST');
+
+			expect( html.find('input').length() ).to.equal(8);
+			expect( html.find('select').length() ).to.equal(2);
+			expect( html.find('fieldset').length() ).to.equal(5);
+			expect( html.find('legend').length() ).to.equal(5);
+			expect( html.find('option').length() ).to.equal(11);
+			expect( html.find('optgroup').length() ).to.equal(2);
+			expect( html.find('textarea').length() ).to.equal(3);
+
 		});
 
+		it("Sets the value of attributes correctly", function(){
 
+			var gen = new HyperboneForm();
+			var m = new Model( useFixture('/everything') );
+
+			var html = gen.traverse( m.control("controls:test"), 'form');
+
+			expect( html.find('input[name="text-input"').val() ).to.equal("I am some text");
+			expect( html.find('select[name="select-input"').val() ).to.equal("1");
+			expect( html.find('select[name="select-multiple-input"').val() ).to.deep.equal(["2", "3"]);
+
+		});
 
 	});
 
@@ -277,8 +348,18 @@ describe("suite", function(){
 
 			var control = new HyperboneForm( m.control("controls:test") );
 
-			expect( control.control ).to.equal( m.control("controls:test") );
-			expect( control.html.els[0].outerHTML ).to.equal('<form action="/tasklist/create" method="POST" encoding="application/x-www-form-urlencoded"><fieldset><legend>Inputs (inc. checkbox)</legend><input type="text" name="text-input" value="I am some text" required="required" placeholder="Some default helptext"><input type="checkbox" name="checkbox-input" value="checked-1"><input type="radio" name="radio-input" value="radio-1" checked="checked"></fieldset><fieldset><legend>Checkboxes and radios (special)</legend><input type="checkbox" name="checkboxes" value="1" checked="checked"><input type="checkbox" name="checkboxes" value="2"><input type="radio" name="radios" value="1" checked="checked"><input type="radio" name="radios" value="2"></fieldset><fieldset><legend>Text area and labels</legend><textarea id="textarea-input-1" name="textarea-input-1">a lot of text goes here</textarea><textarea id="textarea-input-2" name="textarea-input-2">a lot of text goes here</textarea><textarea id="textarea-input-3" name="textarea-input-3">a lot of text goes here</textarea></fieldset><select name="select-input" value="1"><optgroup label="Options group 1"><option value="1">option 1</option><option value="2">option 2</option></optgroup><option value="3">option 3</option><option value="4">option 4</option></select><select name="select-multiple-input" multiple="multiple"><optgroup label="Options group 1"><option value="1">option 1</option><option value="2" selected="selected">option 2</option></optgroup><option value="3">option 3</option><option value="4">option 4</option></select><button name="a-button" type="submit">A button!</button><fieldset><legend>Data list</legend><input list="browsers" name="datalisted"><datalist id="browsers"><option value="Internet Explorer"></option><option value="Mozilla Firefox"></option><option value="Google Chrome"></option></datalist></fieldset><fieldset><legend>Output</legend><output name="output-test" value="Hello"></output></fieldset></form>')
+			var html = control.html;
+
+			expect( html.attr('action') ).to.equal('/tasklist/create');
+			expect( html.attr('method') ).to.equal('POST');
+
+			expect( html.find('input').length() ).to.equal(8);
+			expect( html.find('select').length() ).to.equal(2);
+			expect( html.find('fieldset').length() ).to.equal(5);
+			expect( html.find('legend').length() ).to.equal(5);
+			expect( html.find('option').length() ).to.equal(11);
+			expect( html.find('optgroup').length() ).to.equal(2);
+			expect( html.find('textarea').length() ).to.equal(3);
 
 		});
 
@@ -296,8 +377,24 @@ describe("suite", function(){
 
 			var html = gen.toHTML();
 
-			expect( html.els[0].outerHTML ).to.equal('<form action="/tasklist/create" method="POST" encoding="application/x-www-form-urlencoded"><fieldset><legend>Inputs (inc. checkbox)</legend><label>Free text</label><input type="text" name="text-input" value="I am some text" required="required" placeholder="Some default helptext"><br><label>Checkbox 1</label><input type="checkbox" name="checkbox-input" value="checked-1"><br><label>Radio 1</label><input type="radio" name="radio-input" value="radio-1" checked="checked"><br></fieldset><fieldset><legend>Checkboxes and radios (special)</legend><label>Checkbox options</label><label><input type="checkbox" name="checkboxes" value="1" checked="checked"> One</label><br><label></label><label><input type="checkbox" name="checkboxes" value="2"> Two</label><br><label>Radio options</label><label><input type="radio" name="radios" value="1" checked="checked"> One</label><br><label></label><label><input type="radio" name="radios" value="2"> Two</label><br></fieldset><fieldset><legend>Text area and labels</legend><label>Big Text input</label><textarea id="textarea-input-1" name="textarea-input-1">a lot of text goes here</textarea><br><label>Big Text input 2</label><textarea id="textarea-input-2" name="textarea-input-2">a lot of text goes here</textarea><br><label>Big Text input 3</label><textarea id="textarea-input-3" name="textarea-input-3">a lot of text goes here</textarea><br></fieldset><label>select-input</label><select name="select-input" value="1"><optgroup label="Options group 1"><option value="1">option 1</option><option value="2">option 2</option></optgroup><option value="3">option 3</option><option value="4">option 4</option></select><br><label>select-multiple-input</label><select name="select-multiple-input" multiple="multiple"><optgroup label="Options group 1"><option value="1">option 1</option><option value="2" selected="selected">option 2</option></optgroup><option value="3">option 3</option><option value="4">option 4</option></select><br><label>a-button</label><button name="a-button" type="submit">A button!</button><br><fieldset><legend>Data list</legend><label>datalisted</label><input list="browsers" name="datalisted"><br><datalist id="browsers"><option value="Internet Explorer"></option><option value="Mozilla Firefox"></option><option value="Google Chrome"></option></datalist></fieldset><fieldset><legend>Output</legend><label>output-test</label><output name="output-test" value="Hello"></output><br></fieldset></form>');
+			expect( html.attr('action') ).to.equal('/tasklist/create');
+			expect( html.attr('method') ).to.equal('POST');
 
+			expect( html.find('input').length() ).to.equal(8);
+			expect( html.find('select').length() ).to.equal(2);
+			expect( html.find('fieldset').length() ).to.equal(5);
+			expect( html.find('legend').length() ).to.equal(5);
+			expect( html.find('option').length() ).to.equal(11);
+			expect( html.find('optgroup').length() ).to.equal(2);
+			expect( html.find('textarea').length() ).to.equal(3);
+
+			expect( html.find('label').length() ).to.equal(19); 
+			expect( html.find('br').length() ).to.equal(15); 
+
+			expect( html.find('label').first().text() ).to.equal("Free text");
+			expect( html.find('label').at(3).text() ).to.equal("Checkbox options");
+			expect( html.find('label').at(4).text() ).to.equal(" One");
+	
 		});
 
 		it("can transform form to Bootstrap 2 Horizontal Form", function(){
@@ -307,9 +404,266 @@ describe("suite", function(){
 
 			var html = gen.toBootstrap2HTML();
 
-			expect( html.els[0].outerHTML ).to.equal('<form action="/tasklist/create" method="POST" encoding="application/x-www-form-urlencoded" class="form-horizontal"><fieldset><legend>Inputs (inc. checkbox)</legend><div class="control-group"><label class="control-label">Free text</label><div class="controls"><input type="text" name="text-input" value="I am some text" required="required" placeholder="Some default helptext"></div></div><div class="control-group"><div class="controls"><label class="checkbox"><input type="checkbox" name="checkbox-input" value="checked-1"> Checkbox 1</label></div></div><div class="control-group"><div class="controls"><label class="radio"><input type="radio" name="radio-input" value="radio-1" checked="checked"> Radio 1</label></div></div></fieldset><fieldset><legend>Checkboxes and radios (special)</legend><div class="control-group"><label class="control-label">Checkbox options</label><div class="controls"><label class="null"><input type="checkbox" name="checkboxes" value="1" checked="checked"> One</label></div></div><div class="control-group"><label class="control-label"></label><div class="controls"><label class="null"><input type="checkbox" name="checkboxes" value="2"> Two</label></div></div><div class="control-group"><label class="control-label">Radio options</label><div class="controls"><label class="null"><input type="radio" name="radios" value="1" checked="checked"> One</label></div></div><div class="control-group"><label class="control-label"></label><div class="controls"><label class="null"><input type="radio" name="radios" value="2"> Two</label></div></div></fieldset><fieldset><legend>Text area and labels</legend><div class="control-group"><label class="control-label">Big Text input</label><div class="controls"><textarea id="textarea-input-1" name="textarea-input-1">a lot of text goes here</textarea></div></div><div class="control-group"><label class="control-label">Big Text input 2</label><div class="controls"><textarea id="textarea-input-2" name="textarea-input-2">a lot of text goes here</textarea></div></div><div class="control-group"><label class="control-label">Big Text input 3</label><div class="controls"><textarea id="textarea-input-3" name="textarea-input-3">a lot of text goes here</textarea></div></div></fieldset><div class="control-group"><label class="control-label"></label><div class="controls"><select name="select-input" value="1"><optgroup label="Options group 1"><option value="1">option 1</option><option value="2">option 2</option></optgroup><option value="3">option 3</option><option value="4">option 4</option></select></div></div><div class="control-group"><label class="control-label"></label><div class="controls"><select name="select-multiple-input" multiple="multiple"><optgroup label="Options group 1"><option value="1">option 1</option><option value="2" selected="selected">option 2</option></optgroup><option value="3">option 3</option><option value="4">option 4</option></select></div></div><div class="control-group"><label class="control-label"></label><div class="controls"><button name="a-button" type="submit">A button!</button></div></div><fieldset><legend>Data list</legend><div class="control-group"><label class="control-label"></label><div class="controls"><input list="browsers" name="datalisted"></div></div><datalist id="browsers"><option value="Internet Explorer"></option><option value="Mozilla Firefox"></option><option value="Google Chrome"></option></datalist></fieldset><fieldset><legend>Output</legend><div class="control-group"><label class="control-label"></label><div class="controls"><output name="output-test" value="Hello"></output></div></div></fieldset></form>');
+			expect( html.attr('action') ).to.equal('/tasklist/create');
+			expect( html.attr('method') ).to.equal('POST');
 
+			expect( html.find('input').length() ).to.equal(8);
+			expect( html.find('select').length() ).to.equal(2);
+			expect( html.find('fieldset').length() ).to.equal(5);
+			expect( html.find('legend').length() ).to.equal(5);
+			expect( html.find('option').length() ).to.equal(11);
+			expect( html.find('optgroup').length() ).to.equal(2);
+			expect( html.find('textarea').length() ).to.equal(3);
+
+			expect( html.find('label.control-label').length() ).to.equal(13); 
+			expect( html.find('label.checkbox').length() ).to.equal(1); 
+			expect( html.find('label.radio').length() ).to.equal(1); 
+			expect( html.find('div.control-group').length() ).to.equal(15); 
+
+			expect( html.find('label').first().text() ).to.equal("Free text");
+			expect( html.find('label').at(3).text() ).to.equal("Checkbox options");
+			expect( html.find('label').at(4).text() ).to.equal(" One");
 		});
+
+	});
+
+	describe("Two way binding", function(){
+
+		var HyperboneForm = require('hyperbone-form').HyperboneForm;
+
+		describe("input", function(){
+
+			it("automatically updates the form value when the model changes", function(){
+
+				var m = new Model({
+					properties : [
+						{
+							fieldset : [
+								{
+									input : {
+										type : "text",
+										value : "lol",
+										name : "text-input"
+									}
+								}
+							]
+						}
+					]
+
+				});
+
+				var html = new HyperboneForm().traverse( m.get("properties") );
+
+				expect( html.find('input[name="text-input"]').val() ).to.equal("lol");
+
+				m.set("properties[0].fieldset[0].input.value", "rofl");
+
+				expect( html.find('input[name="text-input"]').val() ).to.equal("rofl");
+
+
+			});
+
+			it("automatically updates the model when the form value is changed", function( done ){
+
+				var m = new Model({
+					properties : [
+						{
+							fieldset : [
+								{
+									input : {
+										type : "text",
+										value : "lol",
+										name : "text-input"
+									}
+								}
+							]
+						}
+					]
+
+				});
+
+				var html = new HyperboneForm().traverse( m.get("properties") );
+
+				expect( m.get("properties[0].fieldset[0].input.value") ).to.equal("lol");
+
+				setValueAndTrigger( html.find('input'), "rofl", "change");
+
+				setTimeout(function(){
+
+					expect( m.get("properties[0].fieldset[0].input.value") ).to.equal("rofl");
+					done();
+
+				},50);
+
+
+			});
+			
+		});
+
+		describe("select", function(){
+
+			it("automatically updates the form value when the model changes", function(){
+
+				var m = new Model({
+					properties : [
+						{
+							fieldset : [
+								{
+									select : {
+										name : "select-input",
+										value : "1",
+										_options : [
+											{
+												option : {
+													value : "1"
+												}
+											},
+											{
+												option : {
+													value : "2"
+												}
+											},
+											{
+												option : {
+													value : "3"
+												}
+											}							
+										]
+									}
+								}
+							]
+						}
+					]
+
+				});
+
+				var html = new HyperboneForm().traverse( m.get("properties") );
+
+				expect( html.find('select[name="select-input"]').val() ).to.equal("1");
+
+				m.set("properties[0].fieldset[0].select.value", "2");
+
+				expect( html.find('select[name="select-input"]').val() ).to.equal("2");
+
+			});
+
+			it("automatically updates the model when the form value is changed", function( done ){
+
+				var m = new Model({
+					properties : [
+						{
+							fieldset : [
+								{
+									select : {
+										name : "select-input",
+										value : "1",
+										_options : [
+											{
+												option : {
+													value : "1"
+												}
+											},
+											{
+												option : {
+													value : "2"
+												}
+											},
+											{
+												option : {
+													value : "3"
+												}
+											}							
+										]
+									}
+								}
+							]
+						}
+					]
+
+				});
+
+				var html = new HyperboneForm().traverse( m.get("properties") );
+
+				expect( m.get("properties[0].fieldset[0].select.value") ).to.equal("1");
+
+				setValueAndTrigger( html.find('select'), "2", "change");
+
+				setTimeout(function(){
+
+					expect( m.get("properties[0].fieldset[0].select.value") ).to.equal("2");
+					done();
+
+				},50);
+
+			});
+			
+		});
+
+		describe("textarea", function(){
+
+			it("automatically updates the form value when the model changes", function(){
+
+				var m = new Model({
+					properties : [
+						{
+							fieldset : [
+								{
+									textarea : {
+										name : "select-input",
+										value : "This is some wacky shit right here"
+									}
+								}
+							]
+						}
+					]
+
+				});
+
+				var html = new HyperboneForm().traverse( m.get("properties") );
+
+				expect( html.find('textarea').val() ).to.equal("This is some wacky shit right here");
+
+				m.set("properties[0].fieldset[0].textarea.value", "Excuse me. Have you seen Colin Baker's bottom?");
+
+				expect( html.find('textarea').val() ).to.equal("Excuse me. Have you seen Colin Baker's bottom?");
+
+			});
+
+			it("automatically updates the model when the form value is changed", function( done ){
+
+				var m = new Model({
+					properties : [
+						{
+							fieldset : [
+								{
+									textarea : {
+										name : "select-input",
+										value : "This is some wacky shit right here"
+									}
+								}
+							]
+						}
+					]
+
+				});
+
+				var html = new HyperboneForm().traverse( m.get("properties") );
+
+				expect( m.get("properties[0].fieldset[0].textarea.value") ).to.equal("This is some wacky shit right here");
+
+				setValueAndTrigger( html.find('textarea'), "Excuse me. Have you seen Colin Baker's bottom?", "change");
+
+				setTimeout(function(){
+
+					expect( m.get("properties[0].fieldset[0].textarea.value") ).to.equal("Excuse me. Have you seen Colin Baker's bottom?");
+					done();
+
+				},50);
+
+			});
+			
+		});
+
 
 	});
 

@@ -204,55 +204,86 @@ HyperboneForm.prototype = {
 
 		_.each(attr, function(obj,name){
 
-           if(_.isObject(obj) && _.indexOf(validElements, name) !== -1){
+      if (_.isObject(obj) && _.indexOf(validElements, name) !== -1){
 
-               frag.append( this.traverse(obj, name) );
+        frag.append( this.traverse(obj, name) );
 
-           }else if(_.isObject(obj) && (name==="checkboxes" || name==="radios") ){
+      } else if (_.isObject(obj) && (name==="checkboxes" || name==="radios") ){
 
-              var fieldName = obj.get("name");
+        var fieldName = obj.get("name");
 
-              var els = [];
+        var els = [];
 
-              obj.get("_options").each(function(option){
+        obj.get("_options").each(function(option){
 
-                var el = dom('<input></input')
-                  .attr('type', (name === "checkboxes" ? "checkbox" : "radio"))
-                  .attr('name', fieldName);
+          var el = dom('<input></input')
+            .attr('type', (name === "checkboxes" ? "checkbox" : "radio"))
+            .attr('name', fieldName);
 
-                _.each(option.attributes, function(o, name){
+          _.each(option.attributes, function(o, name){
 
-                  if(name!=="_label"){
-                    el.attr(name, o);
-                  }
+            if(name!=="_label"){
+              el.attr(name, o);
+            }
 
-                });
+          });
 
-                els.push(el);
-                frag.append(el);
+          els.push(el);
+          frag.append(el);
 
-              });
+        });
 
-              this.registerFormInput(name, fieldName, obj, els);
+        this.registerFormInput(name, fieldName, obj, els);
 
-           }else if(_.isObject(obj)){ // any other object we recurse with a document fragment not a node
+      }else if(_.isObject(obj) && name!=="value"){ // any other object we recurse with a document fragment not a node
 
-               frag.append( this.traverse(obj) );
+        frag.append( this.traverse(obj) );
 
-           }else if(name==="_text"){
+        if(name==="_options"){ // re-set the value here, in case the value comes before the options. 
 
-               frag.append( dom( document.createTextNode(obj) ) );
+          frag.val(node.get("value"));
 
-           }else if(name!=="_label"){
+        }
 
-              if(name==="name"){
-                
-                this.registerFormInput(tag, obj, node, frag);
-              }
+      }else if(name==="_text"){
 
-              frag.attr(name, obj);
+           frag.append( dom( document.createTextNode(obj) ) );
 
-           }
+      }else if (name === "value"){
+
+          frag.val(node.get("value"));
+
+          node.on("change:value", function(model, val){
+
+            var oldVal = frag.val();
+
+            if(oldVal !== val){
+              frag.val(val);
+            }
+
+          });
+
+          frag.on("change", function(e){
+
+            var oldVal = node.get("value");
+
+            if(oldVal !== frag.val()){
+              node.set("value", frag.val());
+            }
+
+          });
+
+      }else if(name!=="_label"){
+
+        if(name==="name"){
+            
+          this.registerFormInput(tag, obj, node, frag);
+        
+        }
+
+        frag.attr(name, obj);
+
+      }
 
 		}, this);
 
