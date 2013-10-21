@@ -1,27 +1,34 @@
 # Hyperbone Form
 
-## Summary
+## tldr; 
 
-Working with [Hyperbone Model](http://github.com/green-mesa/hyperbone-model), this module is for turning JSON hypermedia controls into fully two-way bound, styleable, correct HTML.
+Generate JSON representations of forms on your server. Add to JSON hypermedia document as hypermedia controls.
+
+Client loads the Hypermedia JSON. Automatically turns the controls into styleable HTML forms with two-way binding. Never touch form HTML ever again.
+
+
+## Intro
+
+Working with [Hyperbone Model](http://github.com/green-mesa/hyperbone-model), this module is for turning JSON hypermedia controls into fully two-way bound, styleable HTML.
 
 A "JSON Hypermedia Control" is a semantic JSON representation of an HTML form, in that it specifies the names, values and types of specific controls but does not expect to be used with any particular layout style.
 
 For a control to be rendered into HTML, there are three requirements:
 
 - The JSON representation of the form must be inside a Hyperbone model. A standard backbone model or naked javascript object will not work.
-- There must be a 'properties' attribute at the root, containing the individual form controls.
+- There must be a 'method' attribute at the top level and probably at least one form field defined.
 - The JSON representation must match the spec detailed here.
 
-The typical/expected use case is to transform controls that exist in full Hypermedia Documents using the `.control()` method:
+The typical/expected use case is to transform controls that exist in full Hypermedia Documents using the `.control()` method on Hyperbone Models.
 
 ```js
-	var converter = new HyperboneForm( myHypermediaDoc.control("controls:mycontrol") );
+var converter = new HyperboneForm( myHypermediaDoc.control("controls:mycontrol") );
 
-	dom('body').append( converter.toHTML() );
+dom('body').append( converter.toHTML() );
 
-	// body now has an HTML representation of the form. 
-	// changes to the form are applied to the model. 
-	// changes to the model are applied to the form.
+// body now has an HTML representation of the form. 
+// changes to the form are applied to the model. 
+// changes to the model are applied to the form.
 ```
 
 It can also be used without a complete hypermedia document by passing your JSON representation into a Hyperbone model first.
@@ -79,8 +86,7 @@ var converter = new HyperboneForm( control );
 
 dom('body').append( converter.toHTML() );
 ```
-which generates a default HTML transformation which adds a simple line break after each control group and any labels that are necessary. The HTML is not exactly ideal in this transformation but it is exceptionally simple to style:
-
+which generates a default HTML transformation which adds a simple line break after each control group along with labels etc:
 ```html
 <body>
 	<form method="POST" action="/login" encoding="application/x-form-www-urlencoded">
@@ -128,16 +134,19 @@ They are:
 
 All other attributes are treated as normal HTML element attributes and added to generated elements.
 
-### Creating form elements
+### Defining form elements
 
 JSON Controls are a hierachical and ordered list of objects representing form elements, where the name of an object represents the HTML tagName, and the contents of the object represent the attributes.
 
 ```js
-	tagName : {
-		attribute : value,
-		attribute : value,
-		attribute : value
+	tagname : {
+		attribute1 : "value",
+		attribute2 : "value"
 	}
+```
+```html
+<!-- raw untransformed generated html -->
+<tagname attribute1="value" attribute2="value"></tagName>
 ```
 
 Valid tagNames are:
@@ -165,12 +174,17 @@ All other tagnames will generate document fragments instead of HTML Elements.
 },
 {
 	button : {
-		type : "checkbox",
-		name : "a-checkbox",
-		checked : checked
+		type : "button",
+		name : "the-button",
+		_text : "Click me!"
 	}
 },
 
+```
+```html
+<!-- raw untransformed generated html -->
+<input type="checkbox" name="a-checkbox" checked="checked">
+<button type="button" name="the-button">Click me!</button>
 ```
 
 ### Adding child nodes with `_children`
@@ -246,6 +260,7 @@ Select example:
 ```
 which generates...
 ```html
+<!-- raw untransformed generated html -->
 <select name="select-one">
 	<optgroup label="Group 1">
 		<option value="a">A</option>
@@ -256,29 +271,6 @@ which generates...
 		<option value="d">D</option>
 	</optgroup>
 </select>
-```
-
-and the following is true:
-
-```js
-dom('select').val() === "a"; // true
-```
-
-Note that declaring a `fieldset` as an array instead of an object with a `_children` property also works, assuming you don't want to set any other attributes.
-
-This...
-```js
-{
-	fieldset : [
-		// ...
-	]
-}
-```
-Generates this...
-```html
-<fieldset>
-...
-</fieldset>
 ```
 
 
@@ -297,10 +289,11 @@ This...
 ```
 Generates this...
 ```html
+<!-- raw untransformed generated html -->
 <option value="GB">United Kingdom</option>
 ```
 
-Note that for `textarea` elements `_value` (the literal value of the form field) is preferred to `_text` although they're functionally identical. 
+Note that for `textarea` elements `_value` (the _actual_ value of the form field) is preferred to `_text` although they're functionally identical. 
 
 This...
 ```js
@@ -313,503 +306,115 @@ This...
 ```
 Generates this...
 ```html
+<!-- raw untransformed generated html -->
 <textarea name="big-intput">This is my content</textarea>
 ```
 
+### Defining labels
 
+Because we want to preserve the semantic labels, the `_label` reserved attribute lets the JSON define an element's label independently of the HTML layout to be used.
 
-### _children
-
-Is an array (ordered) of nodes. Every JSON control must have at least one `_children` property at the top level.
-
-```js
-{	
-	_children : [
-		select : {
-			_children : [
-				{
-					option : {
-						// ...
-					},
-					option : {
-						// ...
-					}
-				}
-			]
-		}
-	]
-}
-```
-
-### _label
-
-Label inputs, selects, textareas, buttons etc. Also add a label to a group of checkboxes and radio buttons (each checkbox/radio button can have its own individual label too). 
-
-```js
-{
-	checkboxes	
-}
-
-```
-
-### input
-### select
-### optgroup
-### option
-### textarea
-### legend
-### button
+This becomes especially useful when wishing to label both an individual checkbox input and a group of checkbox inputs separately. More on `_checkboxes` and `_radios`
 
 ```js
 {
 	input : {
-		name : "some-name",
 		type : "text",
-		value : "This is my current value",
-		_label : "A Text field"
+		_label  : "I'm a text box",
+		name : "text-input"
 	}
 }
-	
+```
+```html
+<!-- default basic tranformation -->
+<label>I'm a text box</label>
+<input type="text" name="text-input">
+<br>
 ```
 
+### Groups of Checkboxes and Radios
 
+Because groups of checkboxes and radio buttons is a fairly common use case for forms, two special objects have been added to make defining these groups easier.
 
-### fieldset : array
+Note that it is assumed that the `_children` of `_checkboxes` and `_radios` are inputs of the relevant type, so you only need declare the value the child input represents and a label. 
 
+```js
+{
+	_checkboxes : {
+		name : "group-of-checkboxes",
+		_value : "a",
+		_label : "I am the label for this group",
+		_children : [
+			{
+				value : "a",
+				_label : "I am the label for this checkbox"
+			},
+			{
+				value : "b",
+				_label : "And I'm the label for this checkbox"
+			}
+		]
+	}
+},
+{
+	_radios : {
+		name : "group-of-radios",
+		_value : "a",
+		_label : "I am the label for this group",
+		_children : [
+			{
+				value : "a",
+				_label : "I am the label for this checkbox"
+			},
+			{
+				value : "b",
+				_label : "And I'm the label for this checkbox"
+			}
+		]
+	}
+}
+```
 
-
-
-
-
-Still to do:
-- Serialisation of models for server interactions
-- Ability to project JSON controls onto templates
-
-## WARNING!
-
-  Because of the need to remove the jQuery dependency (in keeping with the component philosophy of not bundling huge libraries with components) the .sync functionality of the Backbone models has been disabled. It can be readded. See [backbone-sync](http://github.com/green-mesa/backbone-sync). 
-  
-  In practice this will not be replaced. Hypermedia interactions are either read only (in the form of a self-discoverable API) or via controls (embedded forms). Sync is basically 'reload' and little more. It's likely that this functionality will be moved somewhere else and the Models themselves will not be responsible for loading themselves.
-
-## Features
-
-  - _links support, with 'self' mapped to .url()
-  - Curie support with fully qualified rel uri lookup for curied rels
-  - support for uri templating to RFC6570, thanks to https://github.com/ericgj/uritemplate
-  - automatic mapping of _embedded data to attributes
-  - automatic conversion of objects and arrays of objects to models and collections (including from _embedded) with events cascaded to the parent
-  - ability to assign specific Model prototypes for use with specific attributes with custom _prototypes attribute.
-
-
-
+```html
+<!-- default basic transformation -->
+<label>I am the label for this group</label>
+<label>
+	<input type="checkbox" value="a"> I am the label for this checkbox
+</label>
+<br>
+<label></label> <!-- we don't show the group label a second time -->
+<label>
+	<input type="checkbox" value="b"> And I'm the label for this checkbox
+</label>
+<br>
+```
 
 ## API
 
-### Creating a model
+### new HyperboneForm( control )
 
-Creating a hyperbone model. The minimum valid HAL document contains a _links object, but according to the spec is this optional, so you can invoke a 
-hyperbone model with an empty object.
+Create a new converter from a control. 
 
-```javascript
-  var Model = require('hyperbone-model').Model;
-
-  var model = new Model({
-    _links : {
-      self : {
-        href : "/helloworld"
-      }
-    }
-
-  });
-
+```js
+var HyperboneForm = require('hyperbone-form').Hyperbone;
+var control = new HyperboneForm( aHyperboneModel.control('controls:some-control') );
 ```
 
-### .set( attr, data, options )
+### .toHTML()
 
-Usual Backbone .set(), but all objects added as attributes to a model are converted into hyperbone models. Arrays of objects are automatically converted
-into a backbone Collection of models, too.
+Project the control onto the default basic line break based layout
 
-To prevent this behaviour (to make it behave rather like generic Backbone) use `{noTraverse : true}` in options. 
+### .toBackbone2HTML()
 
-Setting can be done via chaining of these models 
+Project the control onto the Backbone 2 Horizontal Form based layout. Lots and lots of divs and classes.
 
-```javascript
-// nested models means no more breaking out of Backbone
-m.get('thing').get('nestedthing').set("property", "hello")
-```
-
-or through dot notation
-
-```javascript
-m.set("thing.nestedthing.property", "hello");
-
-//  internally this does... 
-//  {
-//    thing : {
-//      nestedthing : { 
-//        property : "hello"
-//      }
-//    }  
-//  }
-```
-
-This has obvious implications - you can't, by default, use attribute names with periods in. You can, however, disabled this functionality
-
-```javascript
-m.set("foo.bar.lol", "hello", { ignoreDotNotation: true });
-// creates an attribute called "foo.bar.lol" in model m.
-
-```
-
-Preventing recursive traversal (i.e, for DOM elements or anything with cyclical references)
-
-```javascript
-  m.set("body", document.getElementsByTagName('body')[0], { noTraverse: true });
-```
-
-### .get( attr )
-
-Hyperbone extends the .get() method to allow dot notation and indexed access notation to access these nested properties. The attribute names can be just about anything.
-
-The dot notation feature is just basic string manipulation and recursive calls to .get(), and obviously you can always fall back to basic chaining if there's an issue - although reports of issues are welcome.
-
-### More about using get and set...
-
-The philosophy behind Hyperbone means resources are embeddable within resources which means it's models and collections all the way down. 
-
-Automatic models... 
-
-```javascript
-
-  var model = new Model({
-    _links : {
-      self : {
-        href : "/helloworld"
-      }
-    }
-
-  });
-
-  model.set("test", { name : "Test", value : "Testing"});
-
-  // chaining...
-  expect( model.get("test").get("name") ).to.equal("Test"); // TRUE
-
-  // or use the handy dot notation. This works for deeply nested models, too.
-  expect( model.get("test.name").to.equal("Test") ); // TRUE!
-
-```
-
-And automatic collections...
-
-```javascript
-
-  var model = new Model({
-    _links : {
-      self : {
-        href : "/helloworld"
-      }
-    }
-
-  });
-
-  model.set("test", [{ name : "one"}, { name : "two"}, { name : "three"}]);
-
-  expect( model.get("test").length ).to.equal( 3 ); // TRUE
-
-  // using chaining...
-  expect( model.get("test").at(0).get("name") ).to.equal("one"); // TRUE
-
-  // or using dot notation and indexed access notiation...
-  expect( model.get("test[0].name") ).to.equal("one"); // TRUE
-
-  // arrays of objects automatically get all the power of Backbone collections... 
-  model.get("test").each(function( item ){
-
-    console.log(item.get("name"));
-
-  });
-
-  > one
-  > two
-  > three
-
-```
-
-
-In addition, events are triggered on the parent model when nested models are manipulated
-
-```javascript
-
-  model.on("change:test", function(){
- 
-    console.log("Test has been changed!")
-
-  })
-
-  model.get("test").set("name", "Not Test. Something else entirely");
-
-  > Test has been changed!
-```
-
-If you want to use a specific model, the API is as follows:
-
-```javascript
-
-  var ModelForThings = Model.extend({
-     defaults : {
-        "bar" : "ren and stimpy"
-     }
-  });
-
-  var ModelForResource = Model.extend({
-    _prototypes : {
-      "things" : ModelForThings
-    }
-  });
-
-  var model = new ModelForResource({
-    _links : { self : { href : "/test"} },
-    "things" : {
-      "foo" : "bar"
-    }
-  });
-
-  // model.things is an instance of ModelForThings rather than a default empty model...
-  expect( model.get("things").get("bar") ).to.equal( "ren and stimpy" ); // TRUE
-```
-
-This applies to _embedded and generic attributes.
-
-The main difference between an model that comes from _embedded and one that's just inside the attributes is that _embedded models have a self.href
-
-```javascript
-  
-  var m = new Model({
-    _links : {
-      self : {
-        href : "/test"
-      }
-    },
-    _embedded : {
-      "foo" : {
-        _links : {
-          self : {
-            href : "/foo/1"
-          }
-        }
-        "bar" : "kbo"
-      }
-    }
-
-  });
-
-  expect( m.get("foo").url() ).to.equal("/foo/1"); // TRUE
-
-  
-```
-
-### .url()
-
-Shortcut to .rel('self');
-
-```javascript
-  var model = new Model({
-    _links : {
-      self : {
-        href : "/helloworld"
-      }
-    }
-  });
-
-  expect( model.url() ).to.equal("/helloworld"); // TRUE
-```
-
-### .rel( rel [, data])
-
-Get a link to another rel of the resource. If a particular rel is a URI template and `templated: true` is set, then rel
-can be used to expand the uri template with the data. There is currently no way of discovering the requirements for a URI template - it's on the to-do list.
-
-```javascript
-  var model = new Model({
-    _links : {
-      self : {
-        href : "/helloworld"
-      },
-      test : {
-        href : "/test"
-      },
-      clever : {
-        href : "/clever/{ id }",
-        templated : true
-      }
-    }
-  });
-
-  expect( model.rel( "self" ) ).to.equal("/helloworld"); // TRUE
-  expect( model.rel( "test" ) ).to.equal("/test"); // TRUE
-  expect( model.rel( "clever", { id : "lol"} ) ).to.equal("/clever/lol"); // TRUE
-
-
-```
-### .rels()
-
-Returns all the links. Hypermedia is about self discovery, after all. 
-
-### .fullyQualifiedRel( rel )
-
-Hyperbone supports curie (and `curies` with an array, incidentally), and offers a neato utility to recover the fully qualitied uri of a curied rel.
-
-```javascript
-  var model = new Model({
-    _links : {
-      self : {
-        href : "/helloworld"
-      },
-      curie : {
-        href : "http://www.helloworld.com/rels/{rel}",
-        name : "rofl",
-        templated : true
-      },
-      "rofl:test" : {
-        href : "/test"
-      }
-    }
-  });
-
-  expect( model.rel( "rofl:test" ) ).to.equal("/test"); // TRUE
-  expect( model.fullyQualitiedRel( "rofl:test" ) ).to.equal("http://www.helloworld.com/rels/test"); // TRUE
-```
-
-## Controls
-
-A foreword about controls. Hyperbone model adds another reserved property, `_controls` and offers some lightweight additional utility for those that care to use it. However, `_controls` is not part of the HAL Spec and is a Hyperbone specific thing. Mike Kelly has said that dealing with forms will be part of a separate spec, however as we are in need of this functionality now, therefore it has been included in this.
-
-The spec for controls has not been finalised yet, but the current thinking is that `_controls` should be simple _semantic_ JSON representation of a form. It looks very similar to a straight HTML->JSON conversion but without any additional layout HTML and with a few additional reserved properties for supporting childNodes and textNodes.
-
-Because the intention is that this JSON will only hold semantic information about the form, the following are the supported tags:
-
-  - input
-  - select
-  - fieldset
-  - textarea
-  - legend
-  - optgroup
-  - option
-  - button
-  - datalist
-  - keygen
-  - output
-
-Note that `<label />` is _not_ a supported tag.
-
-In addition each field object has some special reserved properties, in the style of HAL: `_text` and `_options` and `_label`. 
-
-`_text` is for declaring innerText for a field (textarea, legend, option). `_options` is for declaring nested options on select, datalist etc. (or optgroups with, itself, an `_options` property). 
-
-`_label` is for defining a default label, independently of the eventually generated HTML. 
-
-### Example control
-
-```javascript
-{
-  _links : {
-    "controls:test" : {
-       href : "#_controls/test"
-    }
-  }
-}
-{
-  _controls : {
-    test : {
-     {
-        method : "/testform",
-        action : "POST",
-        encoding : "x-form-www-url-encoded",
-        properties : [
-          {
-            input : {
-              name : "text-input",
-              value : "",
-              placeholder : "Insert text here",
-              _label : "Text control"
-            }
-          },
-          {
-            fieldset : [
-              {
-                legend : {
-                  _text : "Select controls"
-                }
-              },
-              {
-                select : {
-                  name : "select-control",
-                  value : "1",
-                  _label : "Select control"
-                  _options : [
-                    {
-                      option : {
-                        _text : "Option 1",
-                        value : "1"
-                      }
-                    },
-                    {
-                      option : {
-                        _text : "Option 2",
-                        value : "2"
-                      }
-                    },       
-                  ]
-                }
-              }
-            }
-          ]
-        ]
-      }
-    }
-  
-  }
-}
-```
-
-### .control( [rel / id] )
-
-If, as in the above example, you're using an internal rel for your controls, you can access the control with:
-
-```javascript
-  model.control("controls:test");
-```
-
-The convention is that an internal rel to a control begins `#controls` or `#_controls` or `#control` and the path to the specific control is separated by a slash. 
-
-
-Or you can access using .get() style dot notation, but this is not recommended - better to have a consistent interface for a particular 
-type of resource as depending on your server side implementation, control names may not be predictable in advance.
-
-```javascript
-  model.control("edit.sample");
-```
-
-This returns the control as a Hyperbone Model, so all the usual stuff applies - the array of properties becomes a collection, etc.
-
-```javascript
-  model.control("controls:sample").get("properties").each(function(field){
-
-    // do something with each property in the control.
-
-  })
-```
 
 ## Testing
-
-Hyperbone is covered by tests. It does not test underlying Backbone Model functionality, but the Backbone-model component used as a dependency
-has been evalated against the real Backbone test suite and passes all tests.
 
 Install testing tools. You probably need PhantomJS on your path.
 
 ```back
-  $ npm install
+  $ npm install && npm install -g grunt-cli
 ```
 
 Run the tests:
@@ -817,7 +422,6 @@ Run the tests:
 ```bash
   $ grunt test
 ```
-
 
 ## License
 
