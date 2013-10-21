@@ -30,7 +30,6 @@ dom('body').append( converter.toHTML() );
 // changes to the form are applied to the model. 
 // changes to the model are applied to the form.
 ```
-
 It can also be used without a complete hypermedia document by passing your JSON representation into a Hyperbone model first.
 
 ```js
