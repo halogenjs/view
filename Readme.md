@@ -1,5 +1,8 @@
 # Hyperbone Form
 
+[![Build Status](https://travis-ci.org/green-mesa/hyperbone-form.png?branch=master)](https://travis-ci.org/green-mesa/hyperbone-form)
+(Waiting on a pull request being accepted on a third party dependency)
+
 ## tldr; 
 
 Generate JSON representations of forms on your server. Add to JSON hypermedia document as hypermedia controls.
