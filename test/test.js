@@ -231,7 +231,7 @@ describe("suite", function(){
 
 				_children : [
 					{
-						checkboxes : {
+						_checkboxes : {
 							_label : "An array of checkboxes",
 							name : "checkboxes",
 							_children : [
@@ -270,7 +270,7 @@ describe("suite", function(){
 
 				_children : [
 					{
-						radios : {
+						_radios : {
 							_label : "An array of radio buttons",
 							name : "radios",
 							_children : [

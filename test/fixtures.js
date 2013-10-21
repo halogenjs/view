@@ -15,40 +15,42 @@ var fixtures = {
 				encoding : "application/x-www-form-urlencoded",
 				_children : [
 					{
-						fieldset : [
-							{
-								legend : {
-									_text : "Inputs (inc. checkbox)"
+						fieldset : {
+							_children : [
+								{
+									legend : {
+										_text : "Inputs (inc. checkbox)"
+									}
+								},
+								{
+									input : {
+										type : "text",
+										name : "text-input",
+										_value : "I am some text",
+										required : "required",
+										placeholder : "Some default helptext",
+										_label : "Free text"
+									}
+								},
+								{
+									input : {
+										type : "checkbox",
+										name : "checkbox-input",
+										_value : "checked-1",
+										_label : "Checkbox 1"
+									}
+								},
+								{
+									input : {
+										type : "radio",
+										name : "radio-input",
+										_value : "radio-1",
+										checked : "checked",
+										_label : "Radio 1"
+									}
 								}
-							},
-							{
-								input : {
-									type : "text",
-									name : "text-input",
-									_value : "I am some text",
-									required : "required",
-									placeholder : "Some default helptext",
-									_label : "Free text"
-								}
-							},
-							{
-								input : {
-									type : "checkbox",
-									name : "checkbox-input",
-									_value : "checked-1",
-									_label : "Checkbox 1"
-								}
-							},
-							{
-								input : {
-									type : "radio",
-									name : "radio-input",
-									_value : "radio-1",
-									checked : "checked",
-									_label : "Radio 1"
-								}
-							}
-						]
+							]
+						}
 					},
 					{
 						fieldset : [
@@ -58,7 +60,7 @@ var fixtures = {
 								}
 							},
 							{
-								checkboxes : {
+								_checkboxes : {
 									name : "checkboxes",
 									_label : "Checkbox options",
 									_value : "1",
@@ -75,7 +77,7 @@ var fixtures = {
 								}
 							},
 							{
-								radios : {
+								_radios : {
 									name : "radios",
 									_label : "Radio options",
 									_value : "1",

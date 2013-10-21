@@ -50,8 +50,8 @@ HyperboneForm.prototype = {
 
           break;
 
-        case "checkboxes" :
-        case "radios" : 
+        case "_checkboxes" :
+        case "_radios" :
 
           formField.model.get("_children").each(function(option, index){
 
@@ -135,8 +135,8 @@ HyperboneForm.prototype = {
 
           break;
 
-        case "checkboxes" :
-        case "radios" : 
+        case "_checkboxes" :
+        case "_radios" : 
 
         
 
@@ -198,7 +198,7 @@ HyperboneForm.prototype = {
 
           frag.append( this.traverse(obj, name) );
 
-        } else if (name==="checkboxes" || name==="radios"){ // custom handler for 'checkboxes' and 'radios'
+        } else if (name==="_checkboxes" || name==="_radios"){ // custom handler for 'checkboxes' and 'radios'
 
           var fieldName = obj.get("name");
 
@@ -207,7 +207,7 @@ HyperboneForm.prototype = {
           obj.get("_children").each(function(option){
 
             var el = dom('<input></input')
-              .attr('type', (name === "checkboxes" ? "checkbox" : "radio"))
+              .attr('type', (name === "_checkboxes" ? "checkbox" : "radio"))
               .attr('name', fieldName);
 
             _.each(option.attributes, function(o, name){
