@@ -1,5 +1,4 @@
 var _ = require('underscore');
-var Events = require('backbone-events');
 var dom = require('dom');
 
 var HyperboneForm = function( control ){
@@ -301,20 +300,3 @@ HyperboneForm.prototype = {
 };
 
 module.exports.HyperboneForm = HyperboneForm;
-
-/*
-
-bootstrap 2 projection stuff:
-
-var _ = require('underscore'); _.each(control.partials(), function(partial){
-   var controlGroup = dom('<div></div>').addClass('control-group');
-   var label = dom('<label></label>').text( partial.attr('name') ).addClass('control-label');
-   label.appendTo( controlGroup );
-   var div = dom('<div></div>').addClass('controls');
-
-   controlGroup.insertAfter(partial);
-   div.appendTo(controlGroup);
-   partial.appendTo(div);
-})
-
-*/

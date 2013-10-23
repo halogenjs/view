@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "http://github.com/charlottegore/component-skeleton"
+    "url": "http://github.com/green-mesa/hyperbone-form"
   },
   "keywords": [
     "grunt"
