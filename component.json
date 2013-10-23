@@ -7,7 +7,7 @@
   "dependencies": {
     "green-mesa/backbone-events" : "1.0.0",
     "components/underscore" : "1.4.4",
-    "component/dom" : "0.9.0"
+    "green-mesa/dom" : "0.9.0"
   },
   "development": {},
   "license": "MIT",
