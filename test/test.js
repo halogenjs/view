@@ -330,9 +330,9 @@ describe("suite", function(){
 
 			var html = gen.traverse( m.control("controls:test"), 'form');
 
-			expect( html.find('input[name="text-input"').val() ).to.equal("I am some text");
-			expect( html.find('select[name="select-input"').val() ).to.equal("1");
-			expect( html.find('select[name="select-multiple-input"').val() ).to.deep.equal(["2", "3"]);
+			expect( html.find('input').select(function(input){ return input.attr('name')==="text-input"}).val() ).to.equal("I am some text");
+			expect( html.find('select').select(function(select){ return select.attr('name')==="select-input"}).val() ).to.equal("1");
+			expect( html.find('select').select(function(select){ return select.attr('name')==="select-multiple-input"}).val() ).to.deep.equal(["2", "3"]);
 
 		});
 
