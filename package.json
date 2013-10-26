@@ -1,14 +1,14 @@
 {
-  "name": "hyperbone-form",
+  "name": "hyperbone-view",
   "version": "0.0.1",
-  "description": "Generates two way bound HTML forms from Hyperbone model controls",
+  "description": "Automatic bindings to the DOM for Hyperbone Models",
   "main": "index.js",
   "scripts": {
     "test": "grunt install-build-test"
   },
   "repository": {
     "type": "git",
-    "url": "http://github.com/green-mesa/hyperbone-form"
+    "url": "http://github.com/green-mesa/hyperbone-view"
   },
   "keywords": [
     "grunt"

@@ -1,302 +1,278 @@
-var _ = require('underscore');
-var dom = require('dom');
+var _ = require('underscore'),
+  dom = require('dom'),
+  walkDOM,
+  getExpressions,
+  tachRegex = /\{\{|\}\}/,
+  findHelperRegex = /^([A-Za-z\_]+)\(([A-Za-z0-9\_\.]+)\)$/,
+  passExpression = /^([A-Za-z\_]+)\((|(.+))\)$/
+  aliasRegex = /^[A-Za-z0-9\_\.]+$/,
+  TEXTNODE = 3,
+  NODE = 1
 
-var HyperboneForm = function( control ){
+walkDOM = function(node, func){
+  func(node);
+  node = node.firstChild;
+  while (node){
+    walkDOM(node, func);
+    node = node.nextSibling;
+  }
+};
 
-  this.control = control;
+getExpressions = function(toks){
 
-  this.modelRefs = {};
-  this.partialRefs = {};
+  var expr = [];
 
-  this.fields = [];
+  _.each(toks, function(t, i){
+    if(i % 2 === 1){
+      expr.push(t.trim());
+    }
 
-  if(control){
+  })
 
-    this.html = dom( document.createDocumentFragment() ).append(this.traverse( this.control, 'form' ));    
+  return expr;
 
+}
+
+
+
+var HyperboneView = function( el, model ){
+
+  var self = this;
+
+  this.activeNodes = [];
+
+  this.helpers = {
+    get : function(prop){
+      return self.model.get(prop);
+    },
+    url : function(){
+      return self.model.url();
+    },
+    rel : function(rel){
+      return self.model.rel(rel);
+    }
   }
 
-	return this;
+  return this;
 
 };
 
-var validElements = ["fieldset", "legend", "input", "textarea", "select", "optgroup", "option", "button", "datalist", "output"];
 
-HyperboneForm.prototype = {
+HyperboneView.prototype = {
 
-  toHTML : function(){
+  create : function(el, model){
 
-    _.each(this.fields, function( formField ){
+    this.el = _.isString(el) ? dom(el) : el;
+    this.model = model;
 
-      var br, label, innerLabel;
+    this.setup();
 
-      switch(formField.type){
-
-        case "input" : 
-        case "select" :
-        case "textarea" :
-        case "button" :
-        case "output" :
-
-          label = dom('<label></label>')
-                        .text( formField.model.get('_label') || formField.name )
-                        .insertAfter(formField.partial);
-
-          formField.partial.insertAfter(label);
-
-          br = dom('<br>')
-                        .insertAfter(formField.partial);
-
-          break;
-
-        case "_checkboxes" :
-        case "_radios" :
-
-          formField.model.get("_children").each(function(option, index){
-
-            label = dom('<label></label')
-                      .text( (index===0 ? formField.model.get("_label") : "") )
-                      .insertAfter(formField.partial[index]);
-
-            formField.partial[index].insertAfter(label);
-
-            innerLabel = dom('<label></label>')
-                          .insertAfter( formField.partial[index] );
-
-            innerLabel
-              .append( formField.partial[index] )
-
-            dom( document.createTextNode( " " + option.get("_label") ) ).insertAfter( formField.partial[index] );
-
-            br = dom('<br>')
-                          .insertAfter(innerLabel);
-
-          }, this);
-
-          break;
-      }
-
-
-    }, this);
-
-    return this.html;
+    return this;
 
   },
 
-  toBootstrap2HTML : function( inline ){
+  addHelper : function(name, fn){
 
-    this.html.addClass('form-horizontal');
-
-    _.each(this.fields, function( formField ){
-
-      var ctrlGroup, ctrls, label, innerLabel, type;
-
-      switch(formField.type){
-
-        case "input" : 
-        case "select" :
-        case "textarea" :
-        case "button" :
-        case "output" :
-
-          type = formField.model.get('type');
-
-          ctrlGroup = dom('<div></div>').addClass('control-group'); 
-          label = dom('<label></label>');
-
-          ctrls = dom('<div></div>').addClass('controls');
-
-          ctrlGroup.insertAfter( formField.partial );
-
-          ctrls.appendTo( ctrlGroup );
-
-          if(type==="radio" || type==="checkbox"){
-
-            label.appendTo( ctrls );
-            label.addClass( type );
-            formField.partial.appendTo( label );
-
-            dom( document.createTextNode(' ' + formField.model.get('_label') ) ).appendTo( label );
-
-
-          }else{
-
-            label
-              .text( formField.model.get('_label') )
-              .addClass('control-label');
-
-            label.appendTo( ctrlGroup );
-            formField.partial.appendTo(ctrls);
-            ctrls.insertAfter(label);
-            
-
-          }
-
-          break;
-
-        case "_checkboxes" :
-        case "_radios" : 
-
-        
-
-          formField.model.get("_children").each(function(option, index){
-
-            ctrlGroup = dom('<div></div>').addClass('control-group');  
-            label = dom('<label></label>')
-                      .text( (index===0 ? formField.model.get("_label") : "") )
-                      .addClass('control-label');
-
-            label.appendTo( ctrlGroup );
-
-            ctrls = dom('<div></div>').addClass('controls');
-
-            ctrlGroup.insertAfter( formField.partial[index] );
-            ctrls.appendTo( ctrlGroup );
-
-            formField.partial[index].appendTo(ctrls);
-
-
-            innerLabel = dom('<label></label>')
-                          .addClass( option.get('type') )
-                          .insertAfter( formField.partial[index] );
-
-            innerLabel
-              .append( formField.partial[index] );
-
-            dom( document.createTextNode( " " + option.get("_label") ) ).insertAfter( formField.partial[index] );
-
-
-          }, this);
-
-
-          break;
-          default:
-            console.log(formField);
-      }
-
-
-    }, this);
-
-    return this.html;
+    this.helpers[name] = fn;
+    return this;
 
   },
 
-	traverse : function( node, tag ){
+  setup : function(){
 
     var self = this;
 
-		var frag = (tag ? dom('<'+ tag +'></' + tag + '>') :  dom( document.createDocumentFragment() ) );
+    walkDOM(this.el.els[0], function(node){
 
-		var attr = node.models || node.attributes;
+      var toks;
 
-		_.each(attr, function(obj,name){
+      if (node.nodeType === NODE){
 
-      if (_.isObject(obj)){
+        // check for templated attributes
 
-        if ( _.indexOf(validElements, name) !== -1 ){ // recurse for recognised HTML elements
+        _.each(node.attributes, function(attr){
 
-          frag.append( this.traverse(obj, name) );
+          var toks = attr.nodeValue.split(tachRegex);
 
-        } else if (name==="_checkboxes" || name==="_radios"){ // custom handler for 'checkboxes' and 'radios'
+          if(toks.length > 1){
 
-          var fieldName = obj.get("name");
-
-          var els = [];
-
-          obj.get("_children").each(function(option){
-
-            var el = dom('<input></input')
-              .attr('type', (name === "_checkboxes" ? "checkbox" : "radio"))
-              .attr('name', fieldName);
-
-            _.each(option.attributes, function(o, name){
-
-              if(name!=="_label"){
-                el.attr(name, o);
-              }
-
+            self.activeNodes.push({
+              node : node,
+              attribute : attr.name,
+              type : NODE,
+              original : attr.nodeValue,
+              expressions : getExpressions(toks)
             });
 
-            els.push(el);
-            frag.append(el);
+          }
 
+        });
+
+        if(node.tagName === "A" && node.getAttribute('rel') && node.getAttribute('rel').split(tachRegex).length === 1){
+
+          node.setAttribute('href', self.model.rel( node.getAttribute('rel') ) );
+
+        }
+
+      } else if (node.nodeType === TEXTNODE){
+
+        // check for textnodes that are templates
+        toks = node.wholeText.split(tachRegex);
+
+        if (toks.length > 1){
+
+          self.activeNodes.push({
+            node : node,
+            expressions : getExpressions(toks),
+            type : TEXTNODE,
+            original : node.wholeText
           });
 
-          this.registerFormInput(name, fieldName, obj, els);
-
-        } else if (name!=="_value"){ // recurse for any other object that doesn't require a specific tag generating.
-
-          frag.append( this.traverse(obj) );
-
-          if(name==="_children"){ // re-set the value here, in case the value comes before the options. 
-
-            frag.val(node.get("_value"));
-
-          }
-
         }
-
-      } else if (name==="_text"){ // _text is a special reserved attribute
-
-        frag.append( dom( document.createTextNode(obj) ) );
-
-      } else if (name === "_value"){
-
-        frag.val(node.get("_value"));
-
-        node.on("change:_value", function(model, val){
-
-          var oldVal = frag.val();
-
-          if(oldVal !== val){
-            frag.val(val);
-          }
-
-        });
-
-        frag.on("change", function(e){
-
-          var oldVal = node.get("_value");
-
-          if(oldVal !== frag.val()){
-            node.set("_value", frag.val());
-          }
-
-        });
-
-      }else if(name!=="_label"){
-
-        if(name==="name"){
-          
-          this.registerFormInput(tag, obj, node, frag);
-      
-        }
-
-        frag.attr(name, obj);
 
       }
 
-
-		}, this);
-
-		return frag;
-
-	},
-
-  registerFormInput : function( type, name, model, partial ){
-
-    this.fields.push({
-      type : type,
-      name : name,
-      model : model,
-      partial : partial 
     });
+
+    _.each(this.activeNodes, function( node ){
+
+      node.fn = compile(node.original);
+
+      _.each(node.expressions, function( expr ){
+
+        var matches, ev = "change";
+
+        if (aliasRegex.test(expr)){
+
+          ev = 'change:' + expr;
+
+        } else if (matches = expr.match(findHelperRegex)){
+
+          if(aliasRegex.test(matches[2])) {
+
+            ev = 'change:' + matches[2];
+
+          }
+
+        }
+
+        this.model.on(ev, function(val){
+
+          if (node.type === TEXTNODE){
+
+            node.node.replaceWholeText( node.fn(self.model, self.helpers) );
+
+          } else {
+
+            node.node.setAttribute(node.attribute, node.fn(self.model, self.helpers));
+
+          }
+
+        });
+
+        this.model.trigger(ev);
+
+      }, this);
+
+
+    }, this);
 
     return this;
 
   }
 
-
 };
 
-module.exports.HyperboneForm = HyperboneForm;
+module.exports.HyperboneView = HyperboneView;
+
+// temporary working gubbins
+
+/**
+ * Compile the given `str` to a `Function`.
+ *
+ * @param {String} str
+ * @return {Function}
+ * @api public
+ */
+
+function compile(str) {
+  var js = [];
+  var toks = parse(str);
+  var tok;
+  var matches;
+
+  for (var i = 0; i < toks.length; ++i) {
+    tok = toks[i];
+    if (i % 2 == 0) {
+      js.push('"' + tok.replace(/"/g, '\\"') + '"');
+    } else {
+      switch (tok[0]) {
+        case '!':
+          tok = tok.slice(1);
+          assertProperty(tok);
+          js.push(' + model.get("' + tok + '") + ');
+          break;
+        default:
+          if (aliasRegex.test(tok)){
+            js.push(' + escape( model.get("' + tok + '") ) + ');
+          } else if (matches = tok.match(findHelperRegex)) {
+            if(aliasRegex.test(matches[2]) && matches[1] !== "get"){
+              js.push(' + escape( helpers["' + matches[1] + '"]( model.get("' + matches[2]+ '") ) ) + ')
+            }else if(aliasRegex.test(matches[2])){
+              js.push(' + escape( helpers["get"]("' + matches[2]+ '") ) + ')
+            }
+          }else if(matches = tok.match(passExpression)){
+            js.push(' + escape( helpers["' + matches[1] + '"](' + (matches[2] ? matches[2] : "")+ ') ) + ')
+          
+          }
+      }
+    }
+  }
+
+  js = '\n'
+    + indent(escape.toString()) + ';\n\n'
+    + '  return ' + js.join('').replace(/\n/g, '\\n');
+
+  return new Function('model','helpers', js);
+}
+
+
+/**
+ * Parse `str`.
+ *
+ * @param {String} str
+ * @return {Array}
+ * @api private
+ */
+
+function parse(str) {
+  return str.split(/\{\{|\}\}/);
+}
+
+/**
+ * Indent `str`.
+ *
+ * @param {String} str
+ * @return {String}
+ * @api private
+ */
+
+function indent(str) {
+  return str.replace(/^/gm, '  ');
+}
+
+/**
+ * Escape the given `html`.
+ *
+ * @param {String} html
+ * @return {String}
+ * @api private
+ */
+
+function escape(html) {
+  return String(html)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}

@@ -12,664 +12,408 @@ describe("suite", function(){
 			should.exist(fixtures);
 			should.exist(Model);
 			should.exist(setValueAndTrigger);
-			should.exist(require('hyperbone-form'));
+			should.exist(require('hyperbone-view'));
 
-		});
+		})
 
-	});
+	})
 
-	describe("Generating html with traverse", function(){
+	describe("Registering helpers", function(){
 
-		var HyperboneForm = require('hyperbone-form').HyperboneForm;
+		var HyperboneView = require('hyperbone-view').HyperboneView;
 
-		it("creates void elements", function(){
+		it("Can set a helper", function( done ){
 
-			var gen = new HyperboneForm();
-			var m = new Model({
-				_children : [
-					{
-						input : {
-							type : "text",
-							name : "text-test",
-							value : "some text"
-						}
-					}
-				]
-			});
+			var view = new HyperboneView();
 
-			var html = gen.traverse( m.get("_children") ).find('input');
+			view.addHelper('test',function(val){
 
-			expect( html.val() ).to.equal('some text');
-			expect( html.attr('name') ).to.equal('text-test');
-
-		});
-
-		it("doesn't add _label as an attribute", function(){
-
-			var gen = new HyperboneForm();
-			var m = new Model({
-				_children : [
-					{
-						input : {
-							type : "text",
-							name : "text-test",
-							_value : "some text",
-							_label : "Some label"
-						}
-					}
-				]
-			});
-
-			var html = gen.traverse( m.get("_children") ).find('input');
-		
-			expect( html.attr('_label') ).to.be.null;
-
-		});
-
-		it("creates non-void elements", function(){
-
-			var gen = new HyperboneForm();
-			var m = new Model({
-				_children : [
-					{
-						legend : {
-							_text : "Some text"
-						}
-					}
-				]
-			});
-
-			expect(
-			
-				gen.traverse(
-					m.get("_children")
-				).find('legend').els[0].outerHTML
-		
-			).to.equal('<legend>Some text</legend>');
-
-		});
-
-		it("creates nested elements", function(){
-
-			var gen = new HyperboneForm();
-			var m = new Model({
-				_children : [
-					{
-						fieldset : [
-							{
-								legend : {
-									_text : "Some text"
-								}
-							},
-							{
-								input : {
-									name : "text-input",
-									_value : "I have some text"
-								}
-							}
-						]
-					}
-
-				]
-			});
-
-			var html = gen.traverse( m.get("_children") ).find('fieldset')
-
-			expect( html.find('legend').text() ).to.equal('Some text'); 
-			expect( html.find('input').val() ).to.equal('I have some text');
-
-		});
-
-		it("supports _children for adding option elements to selects", function(){
-
-			var gen = new HyperboneForm();
-			var m = new Model({
-				_children : [
-					{
-						select : {
-							name : "select",
-							_value : "1",
-							_children : [
-								{
-									optgroup : {
-										label : "Some options",
-										_children : [
-											{
-												option : {
-													_text : "Option 1",
-													value : "1"
-												}
-											},
-											{
-												option : {
-													_text : "Option 2",
-													value : "2"
-												}
-											}
-										]
-									}
-								},
-								{
-									option : {
-											_text : "Option 3",
-											value : "3"
-										}
-								}
-							]
-
-						}
-					}
-
-				]
-			});
-
-			var html = gen.traverse( m.get("_children") ).find('select');
-
-			expect( html.find('option').length() ).to.equal(3);
-			expect( html.find('optgroup').length() ).to.equal(1);
-
-			expect( html.find('optgroup').find('option').length() ).to.equal(2);
-			expect( html.val() ).to.equal("1");
-
-		});
-
-		it("correctly generates a multi select with the correct value", function(){
-
-			var gen = new HyperboneForm();
-			var m = new Model({
-				_children : [
-					{
-						select : {
-							name : "select",
-							multiple : "multiple",
-							_value : ["1", "2"],
-							_children : [
-								{
-									optgroup : {
-										label : "Some options",
-										_children : [
-											{
-												option : {
-													_text : "Option 1",
-													value : "1"
-												}
-											},
-											{
-												option : {
-													_text : "Option 2",
-													value : "2"
-												}
-											}
-										]
-									}
-								},
-								{
-									option : {
-											_text : "Option 3",
-											value : "3"
-										}
-								}
-							]
-
-						}
-					}
-
-				]
-			});
-
-			var html = gen.traverse( m.get("_children") ).find('select');
-
-			expect( html.val() ).to.deep.equal(["1", "2"]);
-
-		});
-
-
-		it("Can generate a array of checkboxes with a single label using 'checkboxes'", function(){
-
-			var gen = new HyperboneForm();
-			var m = new Model({
-
-				_children : [
-					{
-						_checkboxes : {
-							_label : "An array of checkboxes",
-							name : "checkboxes",
-							_children : [
-								{
-									value : "1",
-									checked : "checked",
-									_label : "Option One?"
-								},
-								{
-									value : "2",
-									_label : "Option Two?"
-								}
-							]
-						}						
-					}
-				]
+				expect(val).to.equal("Hello world");
+				done();
 
 			});
 
-			var html = gen.traverse( m.get("_children") ).find('input');
+			view.helpers['test']("Hello world");
 
-			expect( html.at(0).attr('value') ).to.equal('1');
-			expect( html.at(0).attr('name') ).to.equal('checkboxes');
+		})
 
-			expect( html.at(1).attr('value') ).to.equal('2');
-			expect( html.at(1).attr('name') ).to.equal('checkboxes');
 
-			expect( html.at(0).val() ).to.equal( '1' );	
-			expect( html.at(1).val() ).to.equal( false );
-		});
+	})
 
-		it("Can generate a array of radio buttons with a single label using 'radios'", function(){
 
-			var gen = new HyperboneForm();
-			var m = new Model({
+	describe("Templates within Innertext", function(){
 
-				_children : [
-					{
-						_radios : {
-							_label : "An array of radio buttons",
-							name : "radios",
-							_children : [
-								{
-									value : "1",
-									checked : "checked",
-									_label : "Option One"
-								},
-								{
-									value : "2",
-									_label : "Option Two"
-								}
-							]
-						}						
-					}
-				]
+		var HyperboneView = require('hyperbone-view').HyperboneView;
 
+		it("Can apply a model to template within innertext with property alias", function(){
+
+			var html, test, view;
+
+			html = dom('<p>{{test}}</p>');
+			test = new Model({
+				test : "Hello world"
 			});
 
-			var html = gen.traverse( m.get("_children") ).find('input');
+			view = new HyperboneView().create( html, test );
 
-			expect( html.at(0).attr('value') ).to.equal('1');
-			expect( html.at(0).attr('name') ).to.equal('radios');
+			expect( html.text() ).to.equal('Hello world');
 
-			expect( html.at(1).attr('value') ).to.equal('2');
-			expect( html.at(1).attr('name') ).to.equal('radios');
+		})
 
-			expect( html.at(0).val() ).to.equal( '1' );	
-			expect( html.at(1).val() ).to.equal( false );
+		it("Can apply a model to template within innertext with the get helper", function(){
 
-		});
+			var html, test, view;
 
-		it("Can generate a huge default form with at least one of everything", function(){
+			html = dom('<p>{{get(test)}}</p>');
+			test = new Model({
+				test : "Hello world"
+			});
 
-			var gen = new HyperboneForm();
-			var m = new Model( useFixture('/everything') );
+			view = new HyperboneView().create( html, test )
 
-			var html = gen.traverse( m.control("controls:test"), 'form');
-
-			expect( html.attr('action') ).to.equal('/tasklist/create');
-			expect( html.attr('method') ).to.equal('POST');
-
-			expect( html.find('input').length() ).to.equal(8);
-			expect( html.find('select').length() ).to.equal(2);
-			expect( html.find('fieldset').length() ).to.equal(5);
-			expect( html.find('legend').length() ).to.equal(5);
-			expect( html.find('option').length() ).to.equal(11);
-			expect( html.find('optgroup').length() ).to.equal(2);
-			expect( html.find('textarea').length() ).to.equal(3);
+			expect( html.text() ).to.equal('Hello world');
 
 		});
 
-		it("Sets the value of attributes correctly", function(){
+		it("Can apply a model to template within innertext using a custom helper", function(){
 
-			var gen = new HyperboneForm();
-			var m = new Model( useFixture('/everything') );
+			var html, test, view;
 
-			var html = gen.traverse( m.control("controls:test"), 'form');
+			html = dom('<p>{{uppercase(test)}}</p>');
+			test = new Model({
+				test : "Hello world"
+			});
 
-			expect( html.find('input').select(function(input){ return input.attr('name')==="text-input"}).val() ).to.equal("I am some text");
-			expect( html.find('select').select(function(select){ return select.attr('name')==="select-input"}).val() ).to.equal("1");
-			expect( html.find('select').select(function(select){ return select.attr('name')==="select-multiple-input"}).val() ).to.deep.equal(["2", "3"]);
+			view = new HyperboneView()
+				.addHelper('uppercase', function( str ){ return str.toUpperCase(); })
+				.create( html, test )
+
+			expect( html.text() ).to.equal('HELLO WORLD');
+
+		})
+
+		it("Automatically updates the view when the model changes for alias", function(){
+
+			var html, test, view;
+
+			html = dom('<p>{{test}}</p>');
+			test = new Model({
+				test : "Hello world"
+			});
+
+			view = new HyperboneView().create( html, test );
+
+			expect( html.text() ).to.equal('Hello world');
+
+			test.set('test', 'Goodbye, cruel world');
+
+			expect( html.text() ).to.equal('Goodbye, cruel world');
 
 		});
 
-	});
+		it("Automatically updates the view when the model changes for get helper", function(){
 
-	describe("Using controls", function(){
+			var html, test, view;
 
-		var HyperboneForm = require('hyperbone-form').HyperboneForm;
+			html = dom('<p>{{get(test)}}</p>');
+			test = new Model({
+				test : "Hello world"
+			});
 
-		it("accepts a control as a constructor parameter and automatically generates initial HTML",function(){
+			view = new HyperboneView().create( html, test );
 
-			var m = new Model( useFixture('/everything'))
+			expect( html.text() ).to.equal('Hello world');
 
-			var control = new HyperboneForm( m.control("controls:test") );
+			test.set('test', 'Goodbye, cruel world');
 
-			var html = control.html;
+			expect( html.text() ).to.equal('Goodbye, cruel world');
 
-			expect( html.attr('action') ).to.equal('/tasklist/create');
-			expect( html.attr('method') ).to.equal('POST');
+		});
 
-			expect( html.find('input').length() ).to.equal(8);
-			expect( html.find('select').length() ).to.equal(2);
-			expect( html.find('fieldset').length() ).to.equal(5);
-			expect( html.find('legend').length() ).to.equal(5);
-			expect( html.find('option').length() ).to.equal(11);
-			expect( html.find('optgroup').length() ).to.equal(2);
-			expect( html.find('textarea').length() ).to.equal(3);
+		it("Automatically updates the view when the model changes for custom helper", function(){
+
+			var html, test, view;
+
+			html = dom('<p>{{uppercase(test)}}</p>');
+			test = new Model({
+				test : "Hello world"
+			});
+
+			view = new HyperboneView()
+				.addHelper('uppercase', function( str ){ return str.toUpperCase(); })
+				.create( html, test )
+
+			expect( html.text() ).to.equal('HELLO WORLD');
+
+			test.set('test', 'Goodbye, cruel world');
+
+			expect( html.text() ).to.equal('GOODBYE, CRUEL WORLD');			
 
 		});
 
 
 	});
 
-	describe("Transformers", function(){
+	describe("Templates within attributes", function(){
 
-		var HyperboneForm = require('hyperbone-form').HyperboneForm;
+		var HyperboneView = require('hyperbone-view').HyperboneView;
 
-		it("can transform form to standard tableless layout with line breaks and labels", function(){
+		it("Can apply a model to template within an attribute with property alias", function(){
 
-			var m = new Model( useFixture('/everything') );
-			var gen = new HyperboneForm( m.control("controls:test") );
+			var html, test, view;
 
-			var html = gen.toHTML();
+			html = dom('<p class="paragraph {{className}}">Hello world</p>');
+			test = new Model({
+				className : "active"
+			});
 
-			expect( html.attr('action') ).to.equal('/tasklist/create');
-			expect( html.attr('method') ).to.equal('POST');
+			view = new HyperboneView().create( html, test );
 
-			expect( html.find('input').length() ).to.equal(8);
-			expect( html.find('select').length() ).to.equal(2);
-			expect( html.find('fieldset').length() ).to.equal(5);
-			expect( html.find('legend').length() ).to.equal(5);
-			expect( html.find('option').length() ).to.equal(11);
-			expect( html.find('optgroup').length() ).to.equal(2);
-			expect( html.find('textarea').length() ).to.equal(3);
+			expect( html.attr('class') ).to.equal('paragraph active');
 
-			expect( html.find('label').length() ).to.equal(19); 
-			expect( html.find('br').length() ).to.equal(15); 
-
-			expect( html.find('label').first().text() ).to.equal("Free text");
-			expect( html.find('label').at(3).text() ).to.equal("Checkbox options");
-			expect( html.find('label').at(4).text() ).to.equal(" One");
-	
 		});
 
-		it("can transform form to Bootstrap 2 Horizontal Form", function(){
+		it("Can apply a model to template within an attribute with the get helper", function(){
 
-			var m = new Model( useFixture('/everything') );
-			var gen = new HyperboneForm( m.control("controls:test") );
+			var html, test, view;
 
-			var html = gen.toBootstrap2HTML();
+			html = dom('<p class="paragraph {{get(className)}}">Hello world</p>');
+			test = new Model({
+				className : "active"
+			});
 
-			expect( html.attr('action') ).to.equal('/tasklist/create');
-			expect( html.attr('method') ).to.equal('POST');
+			view = new HyperboneView().create( html, test );
 
-			expect( html.find('input').length() ).to.equal(8);
-			expect( html.find('select').length() ).to.equal(2);
-			expect( html.find('fieldset').length() ).to.equal(5);
-			expect( html.find('legend').length() ).to.equal(5);
-			expect( html.find('option').length() ).to.equal(11);
-			expect( html.find('optgroup').length() ).to.equal(2);
-			expect( html.find('textarea').length() ).to.equal(3);
+			expect( html.attr('class') ).to.equal('paragraph active');
 
-			expect( html.find('label.control-label').length() ).to.equal(13); 
-			expect( html.find('label.checkbox').length() ).to.equal(1); 
-			expect( html.find('label.radio').length() ).to.equal(1); 
-			expect( html.find('div.control-group').length() ).to.equal(15); 
+		})
 
-			expect( html.find('label').first().text() ).to.equal("Free text");
-			expect( html.find('label').at(3).text() ).to.equal("Checkbox options");
-			expect( html.find('label').at(4).text() ).to.equal(" One");
+		it("Can apply a model to template within an attribute with a custom helper", function(){
+
+			var html, test, view;
+
+			html = dom('<p class="paragraph {{lowercase(className)}}">Hello world</p>');
+			test = new Model({
+				className : "ActIve"
+			});
+
+			view = new HyperboneView()
+				.addHelper('lowercase', function( str ){ return str.toLowerCase(); })
+				.create( html, test );
+
+			expect( html.attr('class') ).to.equal('paragraph active');
+
+		});
+
+		it("Can automatically update the attribute when the model changes", function(){
+
+			var html, test, view;
+
+			html = dom('<p class="paragraph {{active}}">Hello world</p>');
+			test = new Model({
+				active : "active"
+			});
+
+			view = new HyperboneView().create( html, test );
+
+			expect( html.attr('class') ).to.equal('paragraph active');
+
+			test.set('active', 'inactive');
+
+			expect( html.attr('class') ).to.equal('paragraph inactive');
+
+		});
+
+		it("Can automatically update the attribute with the get helper when the model changes", function(){
+
+			var html, test, view;
+
+			html = dom('<p class="paragraph {{get(active)}}">Hello world</p>');
+			test = new Model({
+				active : "active"
+			});
+
+			view = new HyperboneView().create( html, test );
+
+			expect( html.attr('class') ).to.equal('paragraph active');
+
+			test.set('active', 'inactive');
+
+			expect( html.attr('class') ).to.equal('paragraph inactive');
+
+		});
+
+		it("Can automatically update the attribute with a custom helper when the model changes", function(){
+
+			var html, test, view;
+
+			html = dom('<p class="paragraph {{lowercase(active)}}">Hello world</p>');
+			test = new Model({
+				active : "ACTIVE"
+			});
+
+			view = new HyperboneView()
+				.addHelper('lowercase', function( str ){ return str.toLowerCase(); })
+				.create( html, test );
+
+			expect( html.attr('class') ).to.equal('paragraph active');
+
+			test.set("active", "INACTIVE")
+
+			expect( html.attr('class') ).to.equal('paragraph inactive');
+
+
 		});
 
 	});
 
-	describe("Two way binding", function(){
+	describe("Arbitrary expressions", function(){
 
-		var HyperboneForm = require('hyperbone-form').HyperboneForm;
+		var HyperboneView = require('hyperbone-view').HyperboneView;
 
-		describe("input", function(){
+		it("can do a sum if you like", function(){
 
-			it("automatically updates the form value when the model changes", function(){
+			var html, test, view;
 
-				var m = new Model({
-					_children : [
-						{
-							fieldset : [
-								{
-									input : {
-										type : "text",
-										_value : "lol",
-										name : "text-input"
-									}
-								}
-							]
-						}
-					]
-
-				});
-
-				var html = new HyperboneForm().traverse( m.get("_children") );
-
-				expect( html.find('input[name="text-input"]').val() ).to.equal("lol");
-
-				m.set("_children[0].fieldset[0].input._value", "rofl");
-
-				expect( html.find('input[name="text-input"]').val() ).to.equal("rofl");
-
-
+			html = dom('<div>{{expression(1 + 2)}}</div>');
+			test = new Model({
+				_links : {
+					self : {
+						href : "/hyperlink"
+					}
+				}
 			});
 
-			it("automatically updates the model when the form value is changed", function( done ){
+			view = new HyperboneView()
+				.addHelper('expression', function(params){
 
-				var m = new Model({
-					_children : [
-						{
-							fieldset : [
-								{
-									input : {
-										type : "text",
-										_value : "lol",
-										name : "text-input"
-									}
-								}
-							]
-						}
-					]
+					return params;
 
-				});
+				})
+				.create( html, test );
 
-				var html = new HyperboneForm().traverse( m.get("_children") );
+			expect( html.text() ).to.equal('3');
 
-				expect( m.get("_children[0].fieldset[0].input._value") ).to.equal("lol");
+		})
 
-				setValueAndTrigger( html.find('input'), "rofl", "change");
+		it("can manually access attributes", function(){
 
-				setTimeout(function(){
+			var html, test, view;
 
-					expect( m.get("_children[0].fieldset[0].input._value") ).to.equal("rofl");
-					done();
-
-				},50);
-
-
-			});
-			
-		});
-
-		describe("select", function(){
-
-			it("automatically updates the form value when the model changes", function(){
-
-				var m = new Model({
-					_children : [
-						{
-							fieldset : [
-								{
-									select : {
-										name : "select-input",
-										_value : "1",
-										_children : [
-											{
-												option : {
-													value : "1"
-												}
-											},
-											{
-												option : {
-													value : "2"
-												}
-											},
-											{
-												option : {
-													value : "3"
-												}
-											}							
-										]
-									}
-								}
-							]
-						}
-					]
-
-				});
-
-				var html = new HyperboneForm().traverse( m.get("_children") );
-
-				expect( html.find('select[name="select-input"]').val() ).to.equal("1");
-
-				m.set("_children[0].fieldset[0].select._value", "2");
-
-				expect( html.find('select[name="select-input"]').val() ).to.equal("2");
-
+			html = dom('<div>{{expression( model.url() )}}</div>');
+			test = new Model({
+				_links : {
+					self : {
+						href : "/hyperlink"
+					}
+				}
 			});
 
-			it("automatically updates the model when the form value is changed", function( done ){
+			view = new HyperboneView()
+				.addHelper('expression', function(params){
 
-				var m = new Model({
-					_children : [
-						{
-							fieldset : [
-								{
-									select : {
-										name : "select-input",
-										_value : "1",
-										_children : [
-											{
-												option : {
-													value : "1"
-												}
-											},
-											{
-												option : {
-													value : "2"
-												}
-											},
-											{
-												option : {
-													value : "3"
-												}
-											}							
-										]
-									}
-								}
-							]
-						}
-					]
+					return params;
 
-				});
+				})
+				.create( html, test );
 
-				var html = new HyperboneForm().traverse( m.get("_children") );
+			expect( html.text() ).to.equal('/hyperlink');
 
-				expect( m.get("_children[0].fieldset[0].select._value") ).to.equal("1");
+		})
 
-				setValueAndTrigger( html.find('select'), "2", "change");
+		it("can generally do evil horrible shit", function(){
 
-				setTimeout(function(){
+			var html, test, view;
 
-					expect( m.get("_children[0].fieldset[0].select._value") ).to.equal("2");
-					done();
-
-				},50);
-
-			});
-			
-		});
-
-		describe("textarea", function(){
-
-			it("automatically updates the form value when the model changes", function(){
-
-				var m = new Model({
-					_children : [
-						{
-							fieldset : [
-								{
-									textarea : {
-										name : "select-input",
-										_value : "This is some wacky shit right here"
-									}
-								}
-							]
-						}
-					]
-
-				});
-
-				var html = new HyperboneForm().traverse( m.get("_children") );
-
-				expect( html.find('textarea').val() ).to.equal("This is some wacky shit right here");
-
-				m.set("_children[0].fieldset[0].textarea._value", "Excuse me. Have you seen Colin Baker's bottom?");
-
-				expect( html.find('textarea').val() ).to.equal("Excuse me. Have you seen Colin Baker's bottom?");
-
+			html = dom('<div>{{expression( model.url() + ".xml" + (5 * 9) )}}</div>');
+			test = new Model({
+				_links : {
+					self : {
+						href : "/hyperlink"
+					}
+				}
 			});
 
-			it("automatically updates the model when the form value is changed", function( done ){
+			view = new HyperboneView()
+				.addHelper('expression', function(params){
 
-				var m = new Model({
-					_children : [
-						{
-							fieldset : [
-								{
-									textarea : {
-										name : "select-input",
-										_value : "This is some wacky shit right here"
-									}
-								}
-							]
-						}
-					]
+					return params;
 
-				});
+				})
+				.create( html, test );
 
-				var html = new HyperboneForm().traverse( m.get("_children") );
+			expect( html.text() ).to.equal('/hyperlink.xml45');
 
-				expect( m.get("_children[0].fieldset[0].textarea._value") ).to.equal("This is some wacky shit right here");
-
-				setValueAndTrigger( html.find('textarea'), "Excuse me. Have you seen Colin Baker's bottom?", "change");
-
-				setTimeout(function(){
-
-					expect( m.get("_children[0].fieldset[0].textarea._value") ).to.equal("Excuse me. Have you seen Colin Baker's bottom?");
-					done();
-
-				},50);
-
-			});
-			
-		});
-
+		})
 
 	});
 
-	describe("Form serialisation", function(){
+	describe("Hypermedia extensions", function(){
+
+		var HyperboneView = require('hyperbone-view').HyperboneView;
+
+		it("Can get the link to self from built in url() helper", function(){
+
+			var html, test, view;
+
+			html = dom('<div><a href={{url()}}>Myself</a></div>');
+			test = new Model({
+				_links : {
+					self : {
+						href : "/hyperlink"
+					}
+				}
+			});
+
+			view = new HyperboneView().create( html, test );
+
+			expect( html.find('a').first().attr('href') ).to.equal('/hyperlink');
+
+		})
+
+		it("Can get the link to a rel from built in rel() helper", function(){
+
+			var html, test, view;
+
+			html = dom('<div><a href={{rel("some-rel")}}>Some rel</a></div>');
+			test = new Model({
+				_links : {
+					"some-rel": {
+						href :  "/hyperlink"
+					}
+				}
+			});
+
+			view = new HyperboneView().create( html, test );
+
+			expect( html.find('a').first().attr('href') ).to.equal('/hyperlink');
+
+		})
+
+		it("Can add href to anchor tags where the rel is recognised", function(){
+
+			var html, test, view;
+
+			html = dom('<div><a rel="self">Myself</a><a rel="alternate">Alternate</a></div>');
+			test = new Model({
+				_links : {
+					self : {
+						href : "/hyperlink"
+					},
+					alternate : {
+						href : "/hyperlink.xml"
+					}
+				}
+			});
+
+			view = new HyperboneView().create( html, test );
+
+			expect( html.find('a').first().attr('href') ).to.equal('/hyperlink');
+			expect( html.find('a').last().attr('href') ).to.equal('/hyperlink.xml');
+
+		})
 
 
-	});
+	})	
 
 });
