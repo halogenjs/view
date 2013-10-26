@@ -85,7 +85,7 @@ Then back in the page...
 
   Install with [component(1)](http://component.io):
 
-    $ component install green-mesa/hyperbone-model
+    $ component install green-mesa/hyperbone-view
 
 
 ## API
