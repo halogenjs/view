@@ -101,12 +101,24 @@ Pass in a reference to an element and a model and this then goes through
 
 ## Template rules
 
-It looks like moustache templating but it's not. It supports referencing model attributes, calling custom helpers (which are passed the referenced model attribute) and... that's about it. 
+It looks like moustache templating but it's not. It supports referencing model attributes, calling custom helpers (which are passed the referenced model attribute) and... if you really really must... you can just send in arbitrary javascript so long as it's inside a call to a custom helper.
+
+Built ins:
 
 - `{{property}}` automatically becomes model.get("property")
 - `{{get(property)}}` for when you absolutely want everyone to know there's some backbone happening
-- `{{somethingelse(property)}}` passes model.get('property') to your custom handler
+- `{{url()}}` gets the _links.self.href
+- `{{rel('some-rel')}}` gets a specific rel
 
+Custom helpers:
+
+- `{{somethingelse(property)}}` passes model.get('property') to your custom handler
+- `{{expression( model.url() + ".json" )}}` passes the custom helper `expression` the result of the expression
+- `{{expression( model.get('somevalue') + 5 * 9 )}}` etc
+
+Won't work:
+
+- `{{1 + 2}}` because seriously. stop it. 
 
 ## Testing
 
