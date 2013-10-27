@@ -1,55 +1,39 @@
 var _ = require('underscore'),
   dom = require('dom'),
-  walkDOM,
-  getExpressions,
-  tachRegex = /\{\{|\}\}/,
-  findHelperRegex = /^([A-Za-z\_]+)\(([A-Za-z0-9\_\.]+)\)$/,
-  passExpression = /^([A-Za-z\_]+)\((|(.+))\)$/
-  aliasRegex = /^[A-Za-z0-9\_\.]+$/,
-  TEXTNODE = 3,
-  NODE = 1
-
-walkDOM = function(node, func){
-  func(node);
-  node = node.firstChild;
-  while (node){
-    walkDOM(node, func);
-    node = node.nextSibling;
-  }
-};
-
-getExpressions = function(toks){
-
-  var expr = [];
-
-  _.each(toks, function(t, i){
-    if(i % 2 === 1){
-      expr.push(t.trim());
-    }
-
-  })
-
-  return expr;
-
-}
+  regex = {
+    alias : /^[A-Za-z0-9\_\.]+$/,
+    helper : /^([A-Za-z\_]+)\(([A-Za-z0-9\_\.]+)\)$/,
+    expression : /^([A-Za-z\_]+)\((|(.+))\)$/,
+    tache : /\{\{|\}\}/
+  };
 
 
+/**
+ * Constructor.
+ *
+ * @param null
+ * @return {Object} this
+ * @api public
+ */
 
-var HyperboneView = function( el, model ){
+var HyperboneView = function(){
 
   var self = this;
 
   this.activeNodes = [];
 
   this.helpers = {
-    get : function(prop){
-      return self.model.get(prop);
+    get : function( prop ){
+      return  prop;
     },
     url : function(){
       return self.model.url();
     },
     rel : function(rel){
       return self.model.rel(rel);
+    },
+    expression : function( result ){
+      return result;
     }
   }
 
@@ -59,6 +43,14 @@ var HyperboneView = function( el, model ){
 
 
 HyperboneView.prototype = {
+
+/**
+ * Initialise this instance of Hyperbone View with an element and model.
+ *
+ * @param {Object} element, {Object} hyperboneModel
+ * @return {Object} this
+ * @api public
+ */
 
   create : function(el, model){
 
@@ -71,6 +63,14 @@ HyperboneView.prototype = {
 
   },
 
+/**
+ * Register a helper function.
+ *
+ * @param {String} name, {Function}, fn
+ * @return {Object} this
+ * @api public
+ */
+
   addHelper : function(name, fn){
 
     this.helpers[name] = fn;
@@ -78,54 +78,70 @@ HyperboneView.prototype = {
 
   },
 
+/**
+ * Traverse the DOM, generate templates and bind to events.
+ *
+ * @param null
+ * @return {Object} this
+ * @api private
+ */
+
   setup : function(){
 
     var self = this;
 
+    // Visit every node in the dom to check for templated attributes and innerText
     walkDOM(this.el.els[0], function(node){
 
-      var toks;
+      var toks, rel;
 
-      if (node.nodeType === NODE){
+      if (isNode(node)){
 
         // check for templated attributes
 
         _.each(node.attributes, function(attr){
 
-          var toks = attr.nodeValue.split(tachRegex);
+          var toks = tokenise(attr.nodeValue);
 
           if(toks.length > 1){
 
             self.activeNodes.push({
               node : node,
               attribute : attr.name,
-              type : NODE,
               original : attr.nodeValue,
-              expressions : getExpressions(toks)
+              expressions : getExpressions(toks),
+              tokens : toks
             });
 
           }
 
         });
 
-        if(node.tagName === "A" && node.getAttribute('rel') && node.getAttribute('rel').split(tachRegex).length === 1){
+        // want to be careful that we only operate on anchor tags with untemplated rels
+        if(node.tagName === "A"){
 
-          node.setAttribute('href', self.model.rel( node.getAttribute('rel') ) );
+          rel = node.getAttribute('rel');
+
+          if(rel && tokenise(rel).length === 1){
+
+            node.setAttribute('href', self.model.rel( rel ) );
+
+          }
 
         }
 
-      } else if (node.nodeType === TEXTNODE){
+      } else if (isTextNode(node)){
 
         // check for textnodes that are templates
-        toks = node.wholeText.split(tachRegex);
+        toks = tokenise(node.wholeText);
 
         if (toks.length > 1){
 
           self.activeNodes.push({
             node : node,
             expressions : getExpressions(toks),
-            type : TEXTNODE,
-            original : node.wholeText
+            original : node.wholeText,
+            tokens : toks
           });
 
         }
@@ -134,45 +150,35 @@ HyperboneView.prototype = {
 
     });
 
+    // having established our list of templates, iterate through
+    // bind to model events and execute the template immediately.
     _.each(this.activeNodes, function( node ){
 
-      node.fn = compile(node.original);
+      node.fn = compile(node.tokens);
 
       _.each(node.expressions, function( expr ){
 
-        var matches, ev = "change";
+        var expr, ev = "change";
 
-        if (aliasRegex.test(expr)){
+        if (isAlias(expr)){
 
           ev = 'change:' + expr;
 
-        } else if (matches = expr.match(findHelperRegex)){
+        } else if (expr = tokeniseHelper(expr)){
 
-          if(aliasRegex.test(matches[2])) {
-
-            ev = 'change:' + matches[2];
-
-          }
+            ev = 'change:' + expr.val;
 
         }
 
         this.model.on(ev, function(val){
 
-          if (node.type === TEXTNODE){
-
-            node.node.replaceWholeText( node.fn(self.model, self.helpers) );
-
-          } else {
-
-            node.node.setAttribute(node.attribute, node.fn(self.model, self.helpers));
-
-          }
+          render.call(self, node);
 
         });
 
-        this.model.trigger(ev);
-
       }, this);
+
+      render.call(self, node);
 
 
     }, this);
@@ -183,9 +189,61 @@ HyperboneView.prototype = {
 
 };
 
+// Export HyperboneView
 module.exports.HyperboneView = HyperboneView;
 
-// temporary working gubbins
+
+/**
+ * Render a template to a node.
+ *
+ * @param {Object} node, {Function} mode
+ * @return null
+ * @api private
+ */
+
+function render( node ){
+  if (isNode(node.node)){
+    node.node.setAttribute( node.attribute, node.fn( this.model, this.helpers ) );
+  } else {
+    node.node.replaceWholeText( node.fn( this.model, this.helpers ) );
+  }
+};
+
+/**
+ * Walk Dom `node` and call `func`.
+ *
+ * @param {Object} domNode, {Function} callback
+ * @return null
+ * @api private
+ */
+
+function walkDOM(node, func){
+  func(node);
+  node = node.firstChild;
+  while (node){
+    walkDOM(node, func);
+    node = node.nextSibling;
+  }
+};
+
+/**
+ * Find expressions within an array of Tokens.
+ *
+ * @param {Array} toks
+ * @return {Array} expressions
+ * @api private
+ */
+
+function getExpressions(toks){
+  var expr = [];
+  _.each(toks, function(t, i){
+    if(i % 2 === 1){
+      expr.push(t.trim());
+    }
+
+  })
+  return expr;
+}
 
 /**
  * Compile the given `str` to a `Function`.
@@ -195,59 +253,119 @@ module.exports.HyperboneView = HyperboneView;
  * @api public
  */
 
-function compile(str) {
-  var js = [];
-  var toks = parse(str);
-  var tok;
-  var matches;
+function compile(tokens) {
+  var js = [],
+      tokens,
+      token,
+      expr,
+      subTokens;
 
-  for (var i = 0; i < toks.length; ++i) {
-    tok = toks[i];
+  for (var i = 0; i < tokens.length; ++i) {
+
+    token = tokens[i];
+
     if (i % 2 == 0) {
-      js.push('"' + tok.replace(/"/g, '\\"') + '"');
+
+      js.push('"' + token.replace(/"/g, '\\"') + '"');
+
     } else {
-      switch (tok[0]) {
-        case '!':
-          tok = tok.slice(1);
-          assertProperty(tok);
-          js.push(' + model.get("' + tok + '") + ');
-          break;
-        default:
-          if (aliasRegex.test(tok)){
-            js.push(' + escape( model.get("' + tok + '") ) + ');
-          } else if (matches = tok.match(findHelperRegex)) {
-            if(aliasRegex.test(matches[2]) && matches[1] !== "get"){
-              js.push(' + escape( helpers["' + matches[1] + '"]( model.get("' + matches[2]+ '") ) ) + ')
-            }else if(aliasRegex.test(matches[2])){
-              js.push(' + escape( helpers["get"]("' + matches[2]+ '") ) + ')
-            }
-          }else if(matches = tok.match(passExpression)){
-            js.push(' + escape( helpers["' + matches[1] + '"](' + (matches[2] ? matches[2] : "")+ ') ) + ')
-          
-          }
+
+      if (isAlias(token)){
+
+        js.push(' + model.get("' + token + '") + ');
+
+      } else if (expr = tokeniseHelper( token )) {
+
+        js.push(' + helpers["' + expr.fn + '"]( model.get("' + expr.val + '") ) + ')
+
+      }else if (expr = tokeniseExpression( token )){
+
+        js.push(' + helpers["' + expr.fn + '"](' + (expr.val ? expr.val : "")+ ') + ')   
+      
       }
     }
   }
 
-  js = '\n'
-    + indent(escape.toString()) + ';\n\n'
-    + '  return ' + js.join('').replace(/\n/g, '\\n');
-
+  js = '\n return ' + js.join('').replace(/\n/g, '\\n');
+  
   return new Function('model','helpers', js);
+
 }
 
-
 /**
- * Parse `str`.
+ * Tokenise `str`.
  *
  * @param {String} str
  * @return {Array}
  * @api private
  */
 
-function parse(str) {
-  return str.split(/\{\{|\}\}/);
+function tokenise(str) {
+  return str.split( regex.tache );
 }
+
+/**
+ * Check if the node is a standard node.
+ *
+ * @param {Object} node
+ * @return {Boolean}
+ * @api private
+ */
+
+function isNode(node) {
+  return node.nodeType === 1;
+}
+
+/**
+ * Check if the node is a standard node.
+ *
+ * @param {Object} node
+ * @return {Boolean}
+ * @api private
+ */
+
+function isTextNode(node) {
+  return node.nodeType === 3;
+}
+
+/**
+ * Check if `str` looks like a model property name.
+ *
+ * @param {String} str
+ * @return {Boolean}
+ * @api private
+ */
+
+function isAlias(str) {
+  return regex.alias.test(str);
+}
+
+/**
+ * Validate and return tokens for a call to a helper with a model property alias
+ *
+ * @param {String} str
+ * @return {Array}
+ * @api private
+ */
+
+function tokeniseHelper(str) {
+  var matches = str.match( regex.helper );
+  return (matches ? { fn : matches[1], val : matches[2] } : false);
+}
+
+/**
+ * Validate and return tokens for a call to a helper with freeform expression.
+ *
+ * @param {String} str
+ * @return {Array}
+ * @api private
+ */
+
+function tokeniseExpression(str) {
+  var matches = str.match( regex.expression );
+  return (matches ? { fn : matches[1], val : matches[2] } : false);
+}
+
 
 /**
  * Indent `str`.
@@ -259,20 +377,4 @@ function parse(str) {
 
 function indent(str) {
   return str.replace(/^/gm, '  ');
-}
-
-/**
- * Escape the given `html`.
- *
- * @param {String} html
- * @return {String}
- * @api private
- */
-
-function escape(html) {
-  return String(html)
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
 }
