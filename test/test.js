@@ -416,4 +416,155 @@ describe("suite", function(){
 
 	})	
 
+	describe("Event delegates", function(){
+
+		var HyperboneView = require('hyperbone-view').HyperboneView;
+
+		// could really do with more extensive testing of this but really we're just testing DOM's event 
+		// handler. I found the actual delegate stuff didn't work which is infuriating really.
+
+		// Because the DOM is preserved and never just resplatted actual delegates aren't necessary. We can 
+		// just use the selector to bind to the actual element. 
+
+		it("Allows us to bind a callback to a dom event", function( done ){
+
+			html = dom('<div><a class="{{status}}" rel="self">Myself</a></div>');
+			test = new Model({
+				_links : {
+					self : {
+						href : "/hyperlink"
+					}
+				},
+				status : 'inactive'
+			});
+
+			view = new HyperboneView();
+
+			view.addDelegate({
+				'click a[rel="self"]' : function(event){
+
+					this.set('status', 'active');
+
+					// test that we've actually done the work.
+					expect( html.find('a').attr('class') ).to.equal('active');
+					// test we're being passed the element wrapped in a dom object
+					expect( test.get('status') ).to.equal('active');
+
+					done();
+				}
+			}).create( html, test );
+
+			simulateClick( html.find('a') );
+
+		});
+
+	});
+
+	describe("Issues its own events", function(){
+
+		var HyperboneView = require('hyperbone-view').HyperboneView;
+
+		// could really do with more extensive testing of this but really we're just testing DOM's event 
+		// handler. I found the actual delegate stuff didn't work which is infuriating really.
+
+		// Because the DOM is preserved and never just resplatted actual delegates aren't necessary. We can 
+		// just use the selector to bind to the actual element. 
+
+		it("issues an 'initialised' event'", function( done ){
+
+			html = dom('<div><a class="{{status}}" rel="self">Myself</a></div>');
+			test = new Model({
+				_links : {
+					self : {
+						href : "/hyperlink"
+					}
+				},
+				status : 'inactive'
+			});
+
+			view = new HyperboneView();
+
+			view
+				.on('initialised', function( el, model ){
+
+					expect(model.get('status')).to.equal('inactive');
+
+					done();
+
+				})
+				.create( html, test );
+
+		});
+
+		it("issues an 'updated' event", function( done ){
+
+			html = dom('<div><a class="{{status}}" rel="self">Myself</a></div>');
+			test = new Model({
+				_links : {
+					self : {
+						href : "/hyperlink"
+					}
+				},
+				status : 'inactive'
+			});
+
+			view = new HyperboneView();
+
+			view
+				.on('updated', function( el, model, event ){
+
+					expect(event).to.equal('change:status');
+					expect(model.get('status')).to.equal('active');
+
+					done();
+
+				})
+				.create( html, test );
+
+			test.set('status', 'active');
+
+		});
+
+		it("issues an 'updated' event when something changes", function( done ){
+
+			html = dom('<div><a class="{{status}}" rel="self">Myself</a></div>');
+			test = new Model({
+				_links : {
+					self : {
+						href : "/hyperlink"
+					}
+				},
+				status : 'inactive'
+			});
+
+			view = new HyperboneView();
+
+			var triggerCount = 0;
+
+			view
+				.addDelegate({
+					'click a[rel="self"]' : function(event){
+
+						this.set('status', 'active');
+
+					}
+				})
+				.on('delegate-fired', function(el, model, selector){
+
+					expect(++triggerCount).to.equal(1);
+
+					expect(model.get('status')).to.equal('active');
+					expect(selector).to.equal('click a[rel="self"]')
+
+					done();
+
+				})
+				.create( html, test );
+
+			simulateClick( html.find('a') );
+
+		});
+
+	});
+
 });

@@ -5,7 +5,8 @@ var _ = require('underscore'),
     helper : /^([A-Za-z\_]+)\(([A-Za-z0-9\_\.]+)\)$/,
     expression : /^([A-Za-z\_]+)\((|(.+))\)$/,
     tache : /\{\{|\}\}/
-  };
+  },
+  Events = require('backbone-events').Events;
 
 
 /**
@@ -21,6 +22,7 @@ var HyperboneView = function(){
   var self = this;
 
   this.activeNodes = [];
+  this.delegates = [];
 
   this.helpers = {
     get : function( prop ){
@@ -36,6 +38,8 @@ var HyperboneView = function(){
       return result;
     }
   }
+
+  _.extend(this, Events);
 
   return this;
 
@@ -55,9 +59,16 @@ HyperboneView.prototype = {
   create : function(el, model){
 
     this.el = _.isString(el) ? dom(el) : el;
+
+    this._original = this.el.clone();
+
     this.model = model;
 
-    this.setup();
+    this.evaluate();
+    this.bindToModel();
+    this.activateDelegates();
+
+    this.trigger('initialised', this.el, this.model);
 
     return this;
 
@@ -79,14 +90,37 @@ HyperboneView.prototype = {
   },
 
 /**
- * Traverse the DOM, generate templates and bind to events.
+ * Register an event delegate.
+ *
+ * @param {String} selector, {Function}, fn
+ * @return {Object} this
+ * @api public
+ */
+
+  addDelegate: function(selector, fn){
+
+    if(_.isObject(selector)){
+      _.each(selector, function(fn, sel){
+        this.addDelegate(sel, fn);
+      }, this);
+      return this;
+    }
+
+    this.delegates.push({ selector : selector, fn : fn});
+    return this;
+
+  },
+
+
+/**
+ * Traverse the DOM, finding templates.
  *
  * @param null
  * @return {Object} this
  * @api private
  */
 
-  setup : function(){
+  evaluate : function(){
 
     var self = this;
 
@@ -150,6 +184,22 @@ HyperboneView.prototype = {
 
     });
 
+    return this;
+
+  },
+
+/**
+ * Bind to the model, registering on change handlers and rendering templates.
+ *
+ * @param null
+ * @return {Object} this
+ * @api private
+ */
+
+  bindToModel : function(){
+
+    var self = this;
+
     // having established our list of templates, iterate through
     // bind to model events and execute the template immediately.
     _.each(this.activeNodes, function( node ){
@@ -174,12 +224,50 @@ HyperboneView.prototype = {
 
           render.call(self, node);
 
+          self.trigger('updated', self.el, self.model, ev);
+
         });
 
       }, this);
 
       render.call(self, node);
 
+
+    }, this);
+
+    return this;
+
+  },
+
+/**
+ * register our delegates
+ *
+ * @param null
+ * @return {Object} this
+ * @api private
+ */
+
+  activateDelegates : function(){
+
+    var self = this;
+
+
+    var triggerCount = 0;
+
+    // having established our list of templates, iterate through
+    // bind to model events and execute the template immediately.
+    _.each(this.delegates, function( delegate ){
+
+      var parts = delegate.selector.split(' ');
+      var event = parts[0];
+      var selector = parts[1];
+
+      this.el.find(selector).on(event, function(e){
+        e.preventDefault();
+        delegate.fn.call( self.model, e );
+        self.trigger('delegate-fired', self.el, self.model, delegate.selector);
+        console.log(++triggerCount);
+      })
 
     }, this);
 
@@ -287,7 +375,7 @@ function compile(tokens) {
   }
 
   js = '\n return ' + js.join('').replace(/\n/g, '\\n');
-  
+
   return new Function('model','helpers', js);
 
 }
