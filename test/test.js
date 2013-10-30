@@ -428,6 +428,8 @@ describe("suite", function(){
 
 		it("Allows us to bind a callback to a dom event", function( done ){
 
+			var html, test, view;
+
 			html = dom('<div><a class="{{status}}" rel="self">Myself</a></div>');
 			test = new Model({
 				_links : {
@@ -525,7 +527,7 @@ describe("suite", function(){
 
 		});
 
-		it("issues an 'updated' event when something changes", function( done ){
+		it("issues an 'delegate-fired' event when a delegate is fired", function( done ){
 
 			html = dom('<div><a class="{{status}}" rel="self">Myself</a></div>');
 			test = new Model({
@@ -562,6 +564,103 @@ describe("suite", function(){
 				.create( html, test );
 
 			simulateClick( html.find('a') );
+
+		});
+
+	});
+
+	describe("Nested model handling", function(){
+
+		var HyperboneView = require('hyperbone-view').HyperboneView;
+
+		it("Can change scope to a nested model with hb-with attribute", function(){
+
+			var html, test, view;
+
+			html = dom('<div hb-with="embedded"><p>{{title}}</p></div>');
+			test = new Model({
+				embedded : {
+					title : "Hello world"
+				}
+			});
+
+			var view = new HyperboneView().create( html, test );
+
+			expect(html.find('p').text()).to.equal('Hello world');
+
+			test.set('embedded.title', 'Test');
+
+			expect(html.find('p').text()).to.equal('Test');
+			
+
+		});
+
+		it("passes on updated events from generated subview", function( done ){
+
+			var html, test, view;
+
+			html = dom('<div hb-with="embedded"><p>{{title}}</p></div>');
+			test = new Model({
+				embedded : {
+					title : "Hello world"
+				}
+			});
+
+			var view = new HyperboneView()
+				.on('updated', function(el, model, event){
+
+
+					expect(event).to.equal("subview embedded change:title");
+					expect(model.get('title')).to.equal('Test');
+					done();
+
+				})
+				.create( html, test );
+
+			expect(html.find('p').text()).to.equal('Hello world');
+
+			test.set('embedded.title', 'Test');
+
+			expect(html.find('p').text()).to.equal('Test');
+			
+
+		});
+
+	});
+
+	describe("Collection handling", function(){
+
+		var HyperboneView = require('hyperbone-view').HyperboneView;
+
+		it("Will iterate through a collection", function(){
+
+			var html, test, view;
+
+			html = dom('<ul hb-with="collection"><li><p>{{title}}</p></li></ul>');
+			test = new Model({
+				collection : [
+					{
+						title : "One"
+					},
+					{
+						title : "Two"
+					},
+					{
+						title : "Three"
+					}
+				]
+			});
+
+			var view = new HyperboneView().create( html, test );
+
+			expect( html.find('p').at(0).text() ).to.equal('One');
+			expect( html.find('p').at(1).text() ).to.equal('Two');
+			expect( html.find('p').at(2).text() ).to.equal('Three');
+
+			test.get('collection[0]').set('title', 'No longer one!');
+
+			expect( expect( html.find('p').at(0).text() ).to.equal('No longer one!'))
+			
 
 		});
 

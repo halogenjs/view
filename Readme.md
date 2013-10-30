@@ -8,16 +8,20 @@ Bind Hyperbone Models to the DOM.
 
 Currently implemented: 
 
-- Templates within attributes and innerText of nodes. 
-- Ability to register helper functions to do in template processing/formatting. 
+- Logicless templates within attributes and innerText of nodes. 
+- Ability to register helper functions to do in template processing/formatting.
 - Automatic mapping of urls to anchor tags if the rel is recognised inside the hypermedia model
+
 - Create delegates to handle DOM events
 - Subscribe to and trigger Backbone events on the View itself.
 
+- Iterate through collections - (very early functionality - dealing with add/change/delete still needs a lot of work)
+
 ## To Do:
 
-- Custom attribute functionality for iterating through collections and extending view capabiilties.
-- Subviews. 
+- Collection change/add/remove events. Another tricky one this
+- Extensions - Crucial, really, to allow for complex modules to 'own' sections of the view
+- Two way binding for forms, linked to an underlying `_control` in the model. This may be done as an extension. 
 
 ## Example
 
@@ -28,6 +32,9 @@ In the page..
   <div class="description">{{parser(description)}}</div>
   <a rel="some-rel"> Some link </a>
   <a rel="self" class="{{clicked}}">A link to myself</a>
+  <ul hb-with="noodle-flavours">
+    <li class="flavour {{className}}">{{flavour}}</li>
+  </ul>
 </div>
 ```
 
@@ -49,7 +56,21 @@ var model = new (require('hyperbone-model')).HyperboneModel({
 	},
 	description : "This is __very__ exciting",
 	type : "testing-thing",
-	clicked : ""
+	clicked : "",
+  "noodle-flavours" : [
+    {
+      flavour : "Chickenesque",
+      className : "edible"
+    },
+    {
+      flavour : "Spicy Beef substitute",
+      className : "toxic"
+    },
+    {
+      flavour : "Curry. Just Curry.",
+      className : "edible"
+    }
+  ]
 
 });
 
@@ -78,34 +99,27 @@ Back in the page, without you having to do anything else...
     </div>
   <a href="/some-link" rel="some-rel"> Some link </a>
   <a href="/a-link-to-me" rel="self" class="">A link to myself</a>
+  <ul>
+    <li class="flavour edible">Chickenesque</li>
+    <li class="flavour toxic">Spicy Beef substitute</li>
+    <li class="flavour edible">Curry. Just Curry.</li>
+    <li>
+  </ul>
 </div>
 ```
 Then if you happen to do this in your code....
 ```js
 model.set('type', 'sure-hope-this-works')
 ```
-Then your page automatically updates to..
+Then the page automatically updates to...
 ```html
 <div id="some-view" class="sure-hope-this-works">
-    <div class="description">
-    	<p>This is <strong>very</strong> exciting</p>
-    </div>
-  <a href="/some-link" rel="some-rel"> Some link </a>
-  <a href="/a-link-to-me" rel="self" class="">A link to myself</a>
-</div>
 ```
 And if you happen to click on `A link to myself`, the delegate fires, updates the model and that results in..
 ```html
-<div id="some-view" class="sure-hope-this-works">
-    <div class="description">
-    	<p>This is <strong>very</strong> exciting</p>
-    </div>
-  <a href="/some-link" rel="some-rel"> Some link </a>
   <a href="/a-link-to-me" rel="self" class="clicked">A link to myself</a>
 </div>
 ```
-
-
 
 ## Installation
 
@@ -203,6 +217,34 @@ view.on('delegate-fired', function(el, model, selector){
 ### .create( dom, hyperboneModel )
 
 Pass in a reference to an element and a model and this then goes through
+
+## Custom attributes
+
+Custom attributes are added to the HTML, and allow for additional functionality not provided in the logicless templates.
+
+### hb-with
+
+Changes the scope for the innerHTML to the selected model or collection.
+
+This HTML...
+```html
+<div hb-with="nested-model">
+  <p>{{greeting}}</p>
+</div>
+```
+... is equivilant to
+```html
+<div><p>{{nested-model.greeting}}</p></div>
+```
+... except when you use `hb-with` for a model you create a subview and any change events that fire show only the sub-view and the sub-model.
+
+Slightly more useful than this is the ability to iterate through collections with `hb-with`
+```html
+<ul hb-with="nested-collection">
+  <li>{{name}}</li>
+</ul>
+```
+... this then automatically clones the li tag for every model inside the collection.
 
 
 ## Template rules

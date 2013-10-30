@@ -127,12 +127,67 @@ HyperboneView.prototype = {
     // Visit every node in the dom to check for templated attributes and innerText
     walkDOM(this.el.els[0], function(node){
 
-      var toks, rel;
+      var toks, rel, prop, collection, subview;
 
       if (isNode(node)){
 
-        // check for templated attributes
+        // check for a nested model directive.
+        if(prop = node.getAttribute('hb-with')){
 
+          // remove this attribute so it's not found when the subview walks the dom
+          node.removeAttribute('hb-with');
+
+          collection = self.model.get(prop);
+
+          if(collection.models){
+
+            var inner = document.createDocumentFragment();
+
+            _.each(node.children, function(el){
+
+              inner.appendChild(el);
+
+            });
+
+            collection.__hyperbone_view = node;
+            collection.__hyperbone_subview = inner;
+
+            collection.on('change', function(){
+
+              // do we need to do this again?
+              collection._subview;
+
+            });
+
+            collection.each(function( model ){
+
+              var html = inner.cloneNode(true);
+                new HyperboneView()
+                  .create( dom(html), model);
+
+              node.appendChild(html);
+
+            });
+
+          } else {
+
+          // create a subview which passes updated events back to the primary view
+          new HyperboneView()
+            .on('updated', function( el, model, event){
+
+              self.trigger('updated', el, model, "subview " + prop + " " + event);
+
+            })
+            .create( dom(node), self.model.get(prop));
+
+          }
+
+          // prevent further recursion
+          return false;
+
+        }
+
+        // check for templated attributes
         _.each(node.attributes, function(attr){
 
           var toks = tokenise(attr.nodeValue);
@@ -181,6 +236,8 @@ HyperboneView.prototype = {
         }
 
       }
+
+      return true;
 
     });
 
@@ -306,11 +363,13 @@ function render( node ){
  */
 
 function walkDOM(node, func){
-  func(node);
-  node = node.firstChild;
-  while (node){
-    walkDOM(node, func);
-    node = node.nextSibling;
+  var go = func(node);
+  if(go){
+    node = node.firstChild;
+    while (node){
+      walkDOM(node, func);
+      node = node.nextSibling;
+    }
   }
 };
 
