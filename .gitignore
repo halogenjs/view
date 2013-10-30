@@ -3,3 +3,5 @@ node_modules
 # component stuff
 components
 build
+# Mac crap
+.DS_Store
