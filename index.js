@@ -308,9 +308,6 @@ HyperboneView.prototype = {
 
     var self = this;
 
-
-    var triggerCount = 0;
-
     // having established our list of templates, iterate through
     // bind to model events and execute the template immediately.
     _.each(this.delegates, function( delegate ){
@@ -323,7 +320,6 @@ HyperboneView.prototype = {
         e.preventDefault();
         delegate.fn.call( self.model, e );
         self.trigger('delegate-fired', self.el, self.model, delegate.selector);
-        console.log(++triggerCount);
       })
 
     }, this);
