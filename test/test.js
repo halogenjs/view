@@ -722,5 +722,34 @@ describe("suite", function(){
 
 	});
 
+	describe("Custom attribute handlers", function(){
+
+		var HyperboneView = require('hyperbone-view').HyperboneView;
+
+		it("will pass a node and all its contents to the custom attribute handler", function( done ){
+
+			var html, test, view;
+
+			html = dom('<div custom-attribute="test"><p>Hello</p></div>');
+			test = new Model({
+				test : "Hello"
+			});
+
+			var view = new HyperboneView()
+				.addCustomAttributeHandler('custom-attribute', function( node, prop ){
+
+					expect( prop ).to.equal('test');
+					expect( this.model.get('test') ).to.equal('Hello');
+					expect( node.outerHTML ).to.equal('<div custom-attribute="test"><p>Hello</p></div>')
+					done();
+
+				})
+				.create( html, test );
+			
+
+		});
+
+	});
+
 
 });

@@ -92,6 +92,21 @@ HyperboneView.prototype = {
   },
 
 /**
+ * Register custom attribute handler - basically a plugin API.
+ *
+ * @param {String} name, {Function}, fn
+ * @return {Object} this
+ * @api public
+ */
+
+  addCustomAttributeHandler : function(name, fn){
+
+    attributeHandlers[name] = fn;
+    return this;
+
+  },
+
+/**
  * Register an event delegate.
  *
  * @param {String} selector, {Function}, fn
@@ -304,7 +319,7 @@ _.extend(attributeHandlers, {
  * @return null
  * @api private
  */
-  "hb-with" : function( node, prop){
+  "hb-with" : function( node, prop ){
 
     var collection, inner, self = this;
 

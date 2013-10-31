@@ -15,6 +15,7 @@ Currently implemented:
 - Subscribe to and trigger Backbone events on the View itself.
 - Iterate through collections - (very early functionality - dealing with add/change/delete still needs a lot of work)
 - Classic 'Backbone' style two way binding of form inputs directly to models.
+- Register custom attributes to take control of parts of a view yourself
 
 ## To Do:
 
@@ -224,7 +225,67 @@ view.on('delegate-fired', function(el, model, selector){
 
 ### .create( dom, hyperboneModel )
 
-Pass in a reference to an element and a model and this then goes through
+Nothing happens until `.create()` is called. Pass it either a CSS selector or a `dom` List object along with the model and this then binds the model to the view.
+
+Generally best to call this 
+
+### .addCustomAttributeHandler( attributeName, fn )
+
+So this is pretty low level, but it's for releasing control of parts of a view back to you, the developer.
+
+It exposes the way HyperboneView is extended internally to support specific Hyperbone attributes such as `hb-bind` and `hb-with`. If you want to seriously play with this method it would be worth examining the source code for those.
+
+When a custom attribute is detected, the node is passed to the appropriate helper, skipping any further processing by HyperboneView. This means any templates on childNodes will not be parsed.
+
+The workaround for this is to create a new HyperboneView - a subview. 
+
+```html
+<p>
+  <div custom-thingy="something"><p>{{test}}</p></div>
+</p>
+```
+```js
+var model = new HyperboneModel({
+  test : "Hello"
+})
+
+var element;
+
+var view = new HyperboneView()
+  .addCustomAttributeHandler('custom-thingy', function(node, propertyValue){
+
+    var self = this; // hey, 'this' is the HyperboneView.
+
+    // node is the element that contains your custom attribute
+    // propertyValue is the value of the attribute
+
+    // all we want to do is keep a reference to this node.
+    element = dom(node);
+
+    // We have a template inside the childNodes of node. We want HyperboneView to look after this.
+    // so, first we delete the custom attribute because we don't want to call this helper again.
+    element.attr('custom-thingy', null);
+
+    // then create another hyperboneview. A subview.
+
+    new HyperboneView()
+
+      // we want to pass on any 'updated' signals to the parent view
+      .on('updated', function( event ){
+
+        self.trigger('updated', 'custom-thingy ' + event )
+
+      })
+
+      // and we pass in our wrapped node and the model.
+      .create( element, this.model );
+
+
+  })
+  .create( 'p', model )
+```
+This particular helper does nothing especially useful, but it could be used to inject a different model or do... well... anything you could possibly do a DOM object.
+
 
 ## Custom attributes
 
