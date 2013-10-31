@@ -666,4 +666,63 @@ describe("suite", function(){
 
 	});
 
+	describe("Input binding", function(){
+
+		var HyperboneView = require('hyperbone-view').HyperboneView;
+
+		it("will bind an input", function( done ){
+
+			var html, test, view;
+
+			html = dom('<p><input hb-bind="test"></p>');
+			test = new Model({
+				test : "Backbone style"
+			});
+
+			var view = new HyperboneView().create( html, test );
+
+			expect( html.find('input').val() ).to.equal('Backbone style');
+
+			
+			setValueAndTrigger( html.find('input'), "Yay REST level 2 friendly!", "change");
+
+			setTimeout(function(){
+
+				expect( test.get("test") ).to.equal("Yay REST level 2 friendly!");
+				done();
+
+			},50);
+
+
+		});
+
+		it("will bind a select", function( done ){
+
+			var html, test, view;
+
+			html = dom('<p><select hb-bind="test"><option value="backbone">Backbone</option><option value="knockout">Knockout</option><option value="angular">Angular</option></select></p>');
+			test = new Model({
+				test : "backbone"
+			});
+
+			var view = new HyperboneView().create( html, test );
+
+			expect( html.find('select').val() ).to.equal('backbone');
+
+			
+			setValueAndTrigger( html.find('select'), "knockout", "change");
+
+			setTimeout(function(){
+
+				expect( test.get("test") ).to.equal("knockout");
+				done();
+
+			},50);
+
+
+		});
+
+	});
+
+
 });

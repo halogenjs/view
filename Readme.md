@@ -11,11 +11,10 @@ Currently implemented:
 - Logicless templates within attributes and innerText of nodes. 
 - Ability to register helper functions to do in template processing/formatting.
 - Automatic mapping of urls to anchor tags if the rel is recognised inside the hypermedia model
-
 - Create delegates to handle DOM events
 - Subscribe to and trigger Backbone events on the View itself.
-
 - Iterate through collections - (very early functionality - dealing with add/change/delete still needs a lot of work)
+- Classic 'Backbone' style two way binding of form inputs directly to models.
 
 ## To Do:
 
@@ -29,6 +28,8 @@ In the page..
 
 ```html
 <div id="some-view" class="{{type}}">
+  <p>Hello, {{name}}</p>
+  <label>Enter your name: <input hb-bind="name"></label>
   <div class="description">{{parser(description)}}</div>
   <a rel="some-rel"> Some link </a>
   <a rel="self" class="{{clicked}}">A link to myself</a>
@@ -70,7 +71,8 @@ var model = new (require('hyperbone-model')).HyperboneModel({
       flavour : "Curry. Just Curry.",
       className : "edible"
     }
-  ]
+  ],
+  name : ""
 
 });
 
@@ -94,9 +96,11 @@ view
 Back in the page, without you having to do anything else...
 ```html
 <div id="some-view" class="testing-thing">
-    <div class="description">
-    	<p>This is <strong>very</strong> exciting</p>
-    </div>
+  <p>Hello, </p>
+  <label>Enter your name: <input hb-bind="name"></label>
+  <div class="description">
+  	<p>This is <strong>very</strong> exciting</p>
+  </div>
   <a href="/some-link" rel="some-rel"> Some link </a>
   <a href="/a-link-to-me" rel="self" class="">A link to myself</a>
   <ul>
@@ -119,6 +123,10 @@ And if you happen to click on `A link to myself`, the delegate fires, updates th
 ```html
   <a href="/a-link-to-me" rel="self" class="clicked">A link to myself</a>
 </div>
+```
+And if you type something into the the 'Enter your name box'
+```html
+<p>Hello, something</p>
 ```
 
 ## Installation
@@ -246,6 +254,26 @@ Slightly more useful than this is the ability to iterate through collections wit
 ```
 ... this then automatically clones the li tag for every model inside the collection.
 
+### hb-bind
+
+This attribute allows two-way binding to form inputs to allow an easy way to let your users interact with your model.
+
+```html
+<body class="{{theme}}">
+  <select hb-bind="theme">
+    <option value="default">Default</option>
+    <option value="dark">Dark</option>
+    <option value="light">Light</option>
+  </select>
+</body>
+```
+When used with a model..
+```js
+{
+  theme : "default"
+}
+```
+...results in the class on the body tag being automatically updated when the user changes the select. Etc.
 
 ## Template rules
 

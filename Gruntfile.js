@@ -3,7 +3,7 @@ module.exports = function(grunt){
 		pkg: grunt.file.readJSON('package.json'),
 		mocha_phantomjs : {
 			options : {
-				'reporter' : 'spec'		
+				'reporter' : 'spec'
 			},
 			all : ['test/**/*.html']
 		},

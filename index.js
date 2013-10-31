@@ -6,7 +6,9 @@ var _ = require('underscore'),
     expression : /^([A-Za-z\_]+)\((|(.+))\)$/,
     tache : /\{\{|\}\}/
   },
-  Events = require('backbone-events').Events;
+  Events = require('backbone-events').Events,
+  attributeHandlers = {};
+
 
 
 /**
@@ -127,68 +129,24 @@ HyperboneView.prototype = {
     // Visit every node in the dom to check for templated attributes and innerText
     walkDOM(this.el.els[0], function(node){
 
-      var toks, rel, prop, collection, subview;
+      var toks, rel, escape = false;
 
       if (isNode(node)){
 
-        // check for a nested model directive.
-        if(prop = node.getAttribute('hb-with')){
-
-          // remove this attribute so it's not found when the subview walks the dom
-          node.removeAttribute('hb-with');
-
-          collection = self.model.get(prop);
-
-          if(collection.models){
-
-            var inner = document.createDocumentFragment();
-
-            _.each(node.children, function(el){
-
-              inner.appendChild(el);
-
-            });
-
-            collection.__hyperbone_view = node;
-            collection.__hyperbone_subview = inner;
-
-            collection.on('change', function(){
-
-              // do we need to do this again?
-              collection._subview;
-
-            });
-
-            collection.each(function( model ){
-
-              var html = inner.cloneNode(true);
-                new HyperboneView()
-                  .create( dom(html), model);
-
-              node.appendChild(html);
-
-            });
-
-          } else {
-
-          // create a subview which passes updated events back to the primary view
-          new HyperboneView()
-            .on('updated', function( el, model, event){
-
-              self.trigger('updated', el, model, "subview " + prop + " " + event);
-
-            })
-            .create( dom(node), self.model.get(prop));
-
-          }
-
-          // prevent further recursion
-          return false;
-
-        }
-
         // check for templated attributes
         _.each(node.attributes, function(attr){
+
+          if(attributeHandlers[attr.name]){
+
+            // custom attribute detected. 
+            attributeHandlers[attr.name].call(self, node, node.getAttribute(attr.name));
+
+            // do not traverse further.
+            escape = true;
+
+            return;
+
+          }
 
           var toks = tokenise(attr.nodeValue);
 
@@ -219,6 +177,8 @@ HyperboneView.prototype = {
 
         }
 
+        return !escape;
+
       } else if (isTextNode(node)){
 
         // check for textnodes that are templates
@@ -235,8 +195,10 @@ HyperboneView.prototype = {
 
         }
 
-      }
+        return true;
 
+      }
+      // in case we get DOM fragments...
       return true;
 
     });
@@ -332,6 +294,103 @@ HyperboneView.prototype = {
 
 // Export HyperboneView
 module.exports.HyperboneView = HyperboneView;
+
+_.extend(attributeHandlers, {
+
+/**
+ * "hb-with" custom attribute handler. Creates subview with a different scope.
+ *
+ * @param {Object} node, {String} hb-width value
+ * @return null
+ * @api private
+ */
+  "hb-with" : function( node, prop){
+
+    var collection, inner, self = this;
+
+    // remove this attribute so it's not found when the subview walks the dom
+    node.removeAttribute('hb-with');
+
+    collection = this.model.get(prop);
+
+    if(collection.models){
+
+      inner = document.createDocumentFragment();
+
+      _.each(node.children, function(el){
+
+        inner.appendChild(el);
+
+      });
+
+      collection.__hyperbone_view = node;
+      collection.__hyperbone_subview = inner;
+
+      collection.each(function( model ){
+
+        var html = inner.cloneNode(true);
+          new HyperboneView()
+            .create( dom(html), model);
+
+        node.appendChild(html);
+
+      });
+
+    } else {
+
+    // create a subview which passes updated events back to the primary view
+      new HyperboneView()
+        .on('updated', function( el, model, event){
+
+          self.trigger('updated', el, model, "subview " + prop + " " + event);
+
+        })
+        .create( dom(node), self.model.get(prop));
+
+    }
+
+  },
+/**
+ * "hb-bind" custom attribute handler
+ *
+ * @param {Object} node, {String} hb-width value
+ * @return null
+ * @api private
+ */
+  "hb-bind" : function( node, prop){
+
+    var self = this, el = dom(node), attrValue = this.model.get(prop);
+
+    el.on('change', function(){
+
+      var oldVal = self.model.get(prop);
+
+      if (oldVal !== el.val()){
+        self.model.set(prop, el.val());
+      }
+
+    });
+
+    this.model.on('change:' + prop, function( val ){
+
+      var oldVal = el.val();
+      if (oldVal !== val){
+        el.val(val);
+        self.trigger('updated', self.el, self.model, 'change:' + prop);
+      }
+
+    })
+
+    el.val( attrValue );
+
+  }
+  
+});
+/**
+ *
+ *
+ *
+ */
 
 
 /**
