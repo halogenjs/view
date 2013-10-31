@@ -674,25 +674,25 @@ describe("suite", function(){
 
 			var html, test, view;
 
-			html = dom('<p><input hb-bind="test"></p>');
+			html = dom('<p>{{test}}</p><input hb-bind="test">');
 			test = new Model({
 				test : "Backbone style"
 			});
 
 			var view = new HyperboneView().create( html, test );
 
-			expect( html.find('input').val() ).to.equal('Backbone style');
+			expect( html.find('p').text() ).to.equal('Backbone style');
 
-			
-			setValueAndTrigger( html.find('input'), "Yay REST level 2 friendly!", "change");
-
-			setTimeout(function(){
+			view.on('updated', function(){
 
 				expect( test.get("test") ).to.equal("Yay REST level 2 friendly!");
+				expect( html.find('input').val() ).to.equal("Yay REST level 2 friendly!");
+				expect( html.find('p').text() ).to.equal('Yay REST level 2 friendly!');
 				done();
 
-			},50);
+			})
 
+			setValueAndTrigger( html.find('input'), "Yay REST level 2 friendly!", "change");
 
 		});
 
@@ -700,7 +700,7 @@ describe("suite", function(){
 
 			var html, test, view;
 
-			html = dom('<p><select hb-bind="test"><option value="backbone">Backbone</option><option value="knockout">Knockout</option><option value="angular">Angular</option></select></p>');
+			html = dom('<p class="{{test}}""><select hb-bind="test"><option value="backbone">Backbone</option><option value="knockout">Knockout</option><option value="angular">Angular</option></select></p>');
 			test = new Model({
 				test : "backbone"
 			});
@@ -709,16 +709,14 @@ describe("suite", function(){
 
 			expect( html.find('select').val() ).to.equal('backbone');
 
-			
-			setValueAndTrigger( html.find('select'), "knockout", "change");
-
-			setTimeout(function(){
+			view.on('updated',function(){
 
 				expect( test.get("test") ).to.equal("knockout");
 				done();
 
-			},50);
+			});
 
+			setValueAndTrigger( html.find('select'), "knockout", "change");
 
 		});
 

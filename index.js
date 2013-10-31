@@ -364,21 +364,21 @@ _.extend(attributeHandlers, {
     el.on('change', function(){
 
       var oldVal = self.model.get(prop);
+      var val = el.val();
 
-      if (oldVal !== el.val()){
-        self.model.set(prop, el.val());
+      if (oldVal !== val){
+        self.model.set(prop, val);
       }
 
     });
 
-    this.model.on('change:' + prop, function( val ){
+    this.model.on('change:' + prop, function( model, val ){
 
       var oldVal = el.val();
       if (oldVal !== val){
         el.val(val);
-        self.trigger('updated', self.el, self.model, 'change:' + prop);
       }
-
+      
     })
 
     el.val( attrValue );
