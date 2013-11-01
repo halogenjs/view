@@ -9,7 +9,7 @@ Bind Hyperbone Models to the DOM.
 Currently implemented: 
 
 - Logicless templates within attributes and innerText of nodes. 
-- Ability to register helper functions to do in template processing/formatting.
+- Ability to register helper functions to do in-template processing/formatting.
 - Automatic mapping of urls to anchor tags if the rel is recognised inside the hypermedia model
 - Create delegates to handle DOM events
 - Subscribe to and trigger Backbone events on the View itself.
@@ -19,9 +19,7 @@ Currently implemented:
 
 ## To Do:
 
-- Collection change/add/remove events. Another tricky one this
-- Extensions - Crucial, really, to allow for complex modules to 'own' sections of the view
-- Two way binding for forms, linked to an underlying `_control` in the model. This may be done as an extension. 
+- Collection change/add/remove events. Another tricky one this 
 
 ## Example
 
@@ -142,7 +140,7 @@ Hyperbone View has a number of dependencies which are installed at the same time
 
 - Underscore
 - component/dom
--
+- Parts of Backbone
 
 Note that unlike Backbone View this does not have a dependency on jQuery. It does use a smaller dom manipulation component called Dom, and this is the recommended tool to use for Hyperbone applications. 
 
@@ -390,22 +388,27 @@ var view = new HyperboneView()
     // up the hrefs of rels.
     var uri = this.model.rel(propertyValue);
 
+    // wrap our naked element in a dom object.
+    var root = dom(node);
+
+    // hide it. We don't want to show the users the template until it's loaded and processed.
+    root.css({display : 'none'});
+
     // load the model...
-    request.get(uri).set('Accept', 'application/json+hal').end(function(err, doc){
+    request.get(uri).set('Accept', 'application/json+hal').end( function(err, doc){
 
       if(!err){
-        // create a new view, passing it our element and a new Hyperbone Model.
+
+        // create a new view, passing it our wrapped element and a new Hyperbone Model.
         new HyperboneView()
-          .create( dom(node), new HyperboneModel( doc ) );
+          .create( root, new HyperboneModel( doc ) );
+
+        // show root
+        root.css({display: 'block'});
 
       }
 
-    })
-
-    return 
-
-    // assume html points to our HTML and model points to the loaded `/some-document`
-    new HyperboneView().create( html, model );
+    });
 
     // and we don't want the original View to continue processing this node
     // and the node's children, so we...
@@ -422,9 +425,9 @@ WHich should, after everything's loaded, result in..
 </div>
 ```
 
-As these two examples should demonstrate, using the custom attribute handler API is fairly powerful, largely unopinionated... and very very easy to abuse
+As these two examples should demonstrate, using the custom attribute handler API is fairly powerful, largely unopinionated... and very very easy to abuse.
 
-## Template rules
+## Logicless Template rules
 
 It looks like moustache templating but it's not. It supports referencing model attributes, calling custom helpers (which are passed the referenced model attribute) and... if you really really must... you can just send in arbitrary javascript so long as it's inside a call to a custom helper.
 
