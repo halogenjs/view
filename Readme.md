@@ -391,9 +391,6 @@ var view = new HyperboneView()
     // wrap our naked element in a dom object.
     var root = dom(node);
 
-    // hide it. We don't want to show the users the template until it's loaded and processed.
-    root.css({display : 'none'});
-
     // load the model...
     request.get(uri).set('Accept', 'application/json+hal').end( function(err, doc){
 
@@ -402,9 +399,6 @@ var view = new HyperboneView()
         // create a new view, passing it our wrapped element and a new Hyperbone Model.
         new HyperboneView()
           .create( root, new HyperboneModel( doc ) );
-
-        // show root
-        root.css({display: 'block'});
 
       }
 
