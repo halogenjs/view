@@ -742,8 +742,6 @@ describe("suite", function(){
 					expect( this.model.get('test') ).to.equal('Hello');
 					expect( node.outerHTML ).to.equal('<div custom-attribute="test"><p>{{test}}</p></div>')
 
-					return true;
-
 				})
 				.on('initialised', function(){
 

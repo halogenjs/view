@@ -289,9 +289,9 @@ HyperboneView exposes a method to add additional helpers for specific attributes
 
 ### .addCustomAttributeHandler( attributeName, fn )
 
-`fn` is called when HyperboneView finds an element with your attribute. When called, it is passed the element and the value of the attribute as arguments. The scope is the instance of HyperboneView itself, meaning you can use this.model and this.el (this may not be true forever)
+`fn` is called when HyperboneView finds an element with your attribute. When called, it is passed the element, the value of the attribute as arguments and a 'cancel' function. The scope is the instance of HyperboneView itself, meaning you can use this.model and this.el (this may not be true forever)
 
-Helpers should return either true or false. Return true to instruct the HyperboneView to continue processing the element -- templates will be compiled etc -- or return false to stop any further processing -- templates will be ignored.
+The cancel function should be called if you do not wish the View to continue processing the node (i.e, recurse into the childNodes etc).
 
 Here's a non-disruptive 'return true' example. We want a link to switch between `.on` and `.off` whenever it's clicked..
 ```html
@@ -304,7 +304,7 @@ var model = new HyperboneModel({
 });
 
 var view = new HyperboneView()
-  .addCustomAttributeHandler('x-switch', function(node, propertyValue){
+  .addCustomAttributeHandler('x-switch', function(node, propertyValue, cancel){
 
     var self = this; // hey, 'this' is the HyperboneView.
 
@@ -331,8 +331,7 @@ var view = new HyperboneView()
 
     })
 
-    // and we want the View to continue processing this node, so we...
-    return true;
+    // we don't call cancel here, so the childNodes will be processed as normal
 
   })
   .create( html, model )
@@ -378,7 +377,7 @@ Our HTML. We want to manually embed `/some-other-document` into our page. We don
 Now we add our custom attribute handler...
 ```js
 var view = new HyperboneView()
-  .addCustomAttributeHandler('x-embed', function(node, propertyValue){
+  .addCustomAttributeHandler('x-embed', function(node, propertyValue, cancel){
 
     // remove the attribute so that when we create a subview
     // we don't end up back inside this handler.
@@ -406,7 +405,7 @@ var view = new HyperboneView()
 
     // and we don't want the original View to continue processing this node
     // and the node's children, so we...
-    return false;
+    cancel();
 
   })
   .create( html, someModel )

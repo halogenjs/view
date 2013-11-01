@@ -154,14 +154,8 @@ HyperboneView.prototype = {
           if(attributeHandlers[attr.name]){
 
             // custom attribute detected. 
-            if(!attributeHandlers[attr.name].call(self, node, node.getAttribute(attr.name))){
+            attributeHandlers[attr.name].call(self, node, node.getAttribute(attr.name), function(){ continueWalking = false; });
 
-              // custom attribute handler has returned false so we don't want to traverse
-              // any further. Note that we can't just 'return false' here because we're not in the walkDOM function scope.
-              continueWalking = false;
-              return;
-
-            }
 
           }
 
@@ -313,7 +307,7 @@ _.extend(attributeHandlers, {
  * @return null
  * @api private
  */
-  "rel" : function( node, prop ){
+  "rel" : function( node, prop){
 
     // CONVENTION: If an anchor tag has a 'rel' attribute, and the model 
     // has a matching .rel(), we automatically add/populate the href attribute.
@@ -330,11 +324,9 @@ _.extend(attributeHandlers, {
 
     }
 
-    return true;
-
   },
 
-  "hb-with" : function( node, prop ){
+  "hb-with" : function( node, prop, cancel ){
 
     var collection, inner, self = this;
 
@@ -379,8 +371,8 @@ _.extend(attributeHandlers, {
 
     }
 
-   // don't want to process this node's childrens so return false;
-    return false;
+   // don't want to process this node's childrens so we cancel
+   cancel();
 
   },
 /**
@@ -390,7 +382,7 @@ _.extend(attributeHandlers, {
  * @return null
  * @api private
  */
-  "hb-bind" : function( node, prop){
+  "hb-bind" : function( node, prop, cancel){
 
     var self = this, el = dom(node), attrValue = this.model.get(prop);
 
@@ -417,7 +409,7 @@ _.extend(attributeHandlers, {
     el.val( attrValue );
 
     // don't want to process this node's childrens so return false;
-    return false;
+    cancel();
 
   }
   
