@@ -293,7 +293,7 @@ HyperboneView exposes a method to add additional helpers for specific attributes
 
 The cancel function should be called if you do not wish the View to continue processing the node (i.e, recurse into the childNodes etc).
 
-Here's a non-disruptive 'return true' example. We want a link to switch between `.on` and `.off` whenever it's clicked..
+Here's a non-disruptive non-cancelled example. We want a link to switch between `.on` and `.off` whenever it's clicked..
 ```html
 <a x-switch="status:off|on" class="{{status}}" href="#"></a>
 ```
