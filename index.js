@@ -144,7 +144,7 @@ HyperboneView.prototype = {
     // Visit every node in the dom to check for templated attributes and innerText
     walkDOM(this.el.els[0], function(node){
 
-      var toks, rel, escape = false;
+      var toks, rel, continueWalking = true;
 
       if (isNode(node)){
 
@@ -154,17 +154,21 @@ HyperboneView.prototype = {
           if(attributeHandlers[attr.name]){
 
             // custom attribute detected. 
-            attributeHandlers[attr.name].call(self, node, node.getAttribute(attr.name));
+            if(!attributeHandlers[attr.name].call(self, node, node.getAttribute(attr.name))){
 
-            // do not traverse further.
-            escape = true;
+              // custom attribute handler has returned false so we don't want to traverse
+              // any further. Note that we can't just 'return false' here because we're not in the walkDOM function scope.
+              continueWalking = false;
+              return;
 
-            return;
+            }
 
           }
 
+          // okay, at this point there's no custom attributes to worry about so..
           var toks = tokenise(attr.nodeValue);
 
+          // and if we detect a template...
           if(toks.length > 1){
 
             self.activeNodes.push({
@@ -179,26 +183,14 @@ HyperboneView.prototype = {
 
         });
 
-        // want to be careful that we only operate on anchor tags with untemplated rels
-        if(node.tagName === "A"){
-
-          rel = node.getAttribute('rel');
-
-          if(rel && tokenise(rel).length === 1){
-
-            node.setAttribute('href', self.model.rel( rel ) );
-
-          }
-
-        }
-
-        return !escape;
+        // this should be 'true' unless a custom attribute has claimed ownership of all children. 
+        return continueWalking;
 
       } else if (isTextNode(node)){
 
-        // check for textnodes that are templates
         toks = tokenise(node.wholeText);
 
+        // detect a template. 
         if (toks.length > 1){
 
           self.activeNodes.push({
@@ -213,7 +205,9 @@ HyperboneView.prototype = {
         return true;
 
       }
-      // in case we get DOM fragments...
+
+      // by default we return 'true' to continue traversing. This 
+      // return is required to support 'weird' nodes like document fragments.
       return true;
 
     });
@@ -319,6 +313,27 @@ _.extend(attributeHandlers, {
  * @return null
  * @api private
  */
+  "rel" : function( node, prop ){
+
+    // CONVENTION: If an anchor tag has a 'rel' attribute, and the model 
+    // has a matching .rel(), we automatically add/populate the href attribute.
+    if(node.tagName === "A"){
+
+      rel = node.getAttribute('rel');
+
+      // just quickly check the rel isn't templated. If it is, we ignore it.
+      if(rel && tokenise(rel).length === 1){
+
+        node.setAttribute('href', this.model.rel( rel ) );
+
+      }
+
+    }
+
+    return true;
+
+  },
+
   "hb-with" : function( node, prop ){
 
     var collection, inner, self = this;
@@ -364,6 +379,9 @@ _.extend(attributeHandlers, {
 
     }
 
+   // don't want to process this node's childrens so return false;
+    return false;
+
   },
 /**
  * "hb-bind" custom attribute handler
@@ -397,6 +415,9 @@ _.extend(attributeHandlers, {
     })
 
     el.val( attrValue );
+
+    // don't want to process this node's childrens so return false;
+    return false;
 
   }
   

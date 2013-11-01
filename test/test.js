@@ -730,7 +730,7 @@ describe("suite", function(){
 
 			var html, test, view;
 
-			html = dom('<div custom-attribute="test"><p>Hello</p></div>');
+			html = dom('<div custom-attribute="test"><p>{{test}}</p></div>');
 			test = new Model({
 				test : "Hello"
 			});
@@ -740,7 +740,14 @@ describe("suite", function(){
 
 					expect( prop ).to.equal('test');
 					expect( this.model.get('test') ).to.equal('Hello');
-					expect( node.outerHTML ).to.equal('<div custom-attribute="test"><p>Hello</p></div>')
+					expect( node.outerHTML ).to.equal('<div custom-attribute="test"><p>{{test}}</p></div>')
+
+					return true;
+
+				})
+				.on('initialised', function(){
+
+					expect( html.find('p').text() ).to.equal('Hello');
 					done();
 
 				})

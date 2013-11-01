@@ -138,6 +138,12 @@ Install with [component(1)](http://component.io):
     $ component install green-mesa/hyperbone-view
 ```
 
+Hyperbone View has a number of dependencies which are installed at the same time. These are:
+
+- Underscore
+- component/dom
+-
+
 Note that unlike Backbone View this does not have a dependency on jQuery. It does use a smaller dom manipulation component called Dom, and this is the recommended tool to use for Hyperbone applications. 
 
 ## API
@@ -227,67 +233,10 @@ view.on('delegate-fired', function(el, model, selector){
 
 Nothing happens until `.create()` is called. Pass it either a CSS selector or a `dom` List object along with the model and this then binds the model to the view.
 
-Generally best to call this 
-
-### .addCustomAttributeHandler( attributeName, fn )
-
-So this is pretty low level, but it's for releasing control of parts of a view back to you, the developer.
-
-It exposes the way HyperboneView is extended internally to support specific Hyperbone attributes such as `hb-bind` and `hb-with`. If you want to seriously play with this method it would be worth examining the source code for those.
-
-When a custom attribute is detected, the node is passed to the appropriate helper, skipping any further processing by HyperboneView. This means any templates on childNodes will not be parsed.
-
-The workaround for this is to create a new HyperboneView - a subview. 
-
-```html
-<p>
-  <div custom-thingy="something"><p>{{test}}</p></div>
-</p>
-```
-```js
-var model = new HyperboneModel({
-  test : "Hello"
-})
-
-var element;
-
-var view = new HyperboneView()
-  .addCustomAttributeHandler('custom-thingy', function(node, propertyValue){
-
-    var self = this; // hey, 'this' is the HyperboneView.
-
-    // node is the element that contains your custom attribute
-    // propertyValue is the value of the attribute
-
-    // all we want to do is keep a reference to this node.
-    element = dom(node);
-
-    // We have a template inside the childNodes of node. We want HyperboneView to look after this.
-    // so, first we delete the custom attribute because we don't want to call this helper again.
-    element.attr('custom-thingy', null);
-
-    // then create another hyperboneview. A subview.
-
-    new HyperboneView()
-
-      // we want to pass on any 'updated' signals to the parent view
-      .on('updated', function( event ){
-
-        self.trigger('updated', 'custom-thingy ' + event )
-
-      })
-
-      // and we pass in our wrapped node and the model.
-      .create( element, this.model );
+Generally best to call this last.
 
 
-  })
-  .create( 'p', model )
-```
-This particular helper does nothing especially useful, but it could be used to inject a different model or do... well... anything you could possibly do a DOM object.
-
-
-## Custom attributes
+## Custom Attributes
 
 Custom attributes are added to the HTML, and allow for additional functionality not provided in the logicless templates.
 
@@ -335,6 +284,145 @@ When used with a model..
 }
 ```
 ...results in the class on the body tag being automatically updated when the user changes the select. Etc.
+
+### Adding your own custom attributes
+
+HyperboneView exposes a method to add additional helpers for specific attributes:
+
+### .addCustomAttributeHandler( attributeName, fn )
+
+`fn` is called when HyperboneView finds an element with your attribute. When called, it is passed the element and the value of the attribute as arguments. The scope is the instance of HyperboneView itself, meaning you can use this.model and this.el (this may not be true forever)
+
+Helpers should return either true or false. Return true to instruct the HyperboneView to continue processing the element -- templates will be compiled etc -- or return false to stop any further processing -- templates will be ignored.
+
+Here's a non-disruptive 'return true' example. We want a link to switch between `.on` and `.off` whenever it's clicked..
+```html
+<a x-switch="status:off|on" class="{{status}}" href="#"></a>
+```
+```js
+
+var model = new HyperboneModel({
+  status : ""
+});
+
+var view = new HyperboneView()
+  .addCustomAttributeHandler('x-switch', function(node, propertyValue){
+
+    var self = this; // hey, 'this' is the HyperboneView.
+
+    // it's a custom attribute so you need to do your own 
+    // parsing. You get 'status:on|off' passed to you.
+    var parts = propertyValue.split(":");
+    var prop = parts[0];
+    var options = parts[1].split("|");
+
+    // we're in the HyperboneView scope so this works... 
+    this.model.set(prop, options[1]);
+
+    // Create a click handler for this element..
+    dom(node).on('click', function(e){
+
+      e.preventDefault();
+
+      // we tweak the model here.. 
+      if (self.model.get(prop) === options[0]){
+        self.model.set(prop, options[1])
+      } else {
+        self.model.set(prop, options[0])
+      }
+
+    })
+
+    // and we want the View to continue processing this node, so we...
+    return true;
+
+  })
+  .create( html, model )
+```
+
+A `return false` example: Creating a new instance of HyperboneView with a different model to process the element and all its children.
+
+This is the parent Hypermedia document. Note that it contains a rel `some-rel` which points to `/some-other-document`.
+```json
+{
+  "_links" : {
+    "self" : {
+      "href" : "/some-document"
+    },
+    "some-rel" : {
+      "href" : "/some-other-document"
+    }
+  },
+  "greeting" : "Welcome to the magic world of Hypermedia"
+}
+```
+And this is the JSON for `/some-other-document`
+```json
+{
+  "_links" : {
+    "self" : {
+      "href" : "/some-other-document"
+    },
+    "other-thing" : {
+      "href" : "/some-document"
+    }
+  },
+  "greeting" : "Woooo!"
+}
+```
+Our HTML. We want to manually embed `/some-other-document` into our page. We don't use the href, only the rel.
+```html
+<div>
+<p>{{greeting}}</p>
+<div x-embed="some-rel"><p>{{greeting}}</p></div>
+</div>
+```
+Now we add our custom attribute handler...
+```js
+var view = new HyperboneView()
+  .addCustomAttributeHandler('x-embed', function(node, propertyValue){
+
+    // remove the attribute so that when we create a subview
+    // we don't end up back inside this handler.
+    node.removeAttribute('x-embed');
+
+    // Hyperbone Models have a special helper method for looking
+    // up the hrefs of rels.
+    var uri = this.model.rel(propertyValue);
+
+    // load the model...
+    request.get(uri).set('Accept', 'application/json+hal').end(function(err, doc){
+
+      if(!err){
+        // create a new view, passing it our element and a new Hyperbone Model.
+        new HyperboneView()
+          .create( dom(node), new HyperboneModel( doc ) );
+
+      }
+
+    })
+
+    return 
+
+    // assume html points to our HTML and model points to the loaded `/some-document`
+    new HyperboneView().create( html, model );
+
+    // and we don't want the original View to continue processing this node
+    // and the node's children, so we...
+    return false;
+
+  })
+  .create( html, someModel )
+```
+WHich should, after everything's loaded, result in..
+```html
+<div>
+<p>Welcome to the magic world of Hypermedia</p>
+<div x-embed="some-rel"><p>Woooo!</p></div>
+</div>
+```
+
+As these two examples should demonstrate, using the custom attribute handler API is fairly powerful, largely unopinionated... and very very easy to abuse
 
 ## Template rules
 
