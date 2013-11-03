@@ -13,30 +13,11 @@ describe("suite", function(){
 			should.exist(Model);
 			should.exist(setValueAndTrigger);
 			should.exist(require('hyperbone-view'));
+			should.exist(require('hyperbone-view').HyperboneView);
+			should.exist(require('hyperbone-view').registerHelper);
+			should.exist(require('hyperbone-view').registerAttributeHandler);
 
 		})
-
-	})
-
-	describe("Registering helpers", function(){
-
-		var HyperboneView = require('hyperbone-view').HyperboneView;
-
-		it("Can set a helper", function( done ){
-
-			var view = new HyperboneView();
-
-			view.addHelper('test',function(val){
-
-				expect(val).to.equal("Hello world");
-				done();
-
-			});
-
-			view.helpers['test']("Hello world");
-
-		})
-
 
 	})
 
@@ -47,14 +28,17 @@ describe("suite", function(){
 
 		it("Can apply a model to template within innertext with property alias", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<p>{{test}}</p>');
 			test = new Model({
 				test : "Hello world"
 			});
 
-			view = new HyperboneView().create( html, test );
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect( html.text() ).to.equal('Hello world');
 
@@ -62,14 +46,17 @@ describe("suite", function(){
 
 		it("Can apply a model to template within innertext with the get helper", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<p>{{get(test)}}</p>');
 			test = new Model({
 				test : "Hello world"
 			});
 
-			view = new HyperboneView().create( html, test )
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect( html.text() ).to.equal('Hello world');
 
@@ -77,16 +64,19 @@ describe("suite", function(){
 
 		it("Can apply a model to template within innertext using a custom helper", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<p>{{uppercase(test)}}</p>');
 			test = new Model({
 				test : "Hello world"
 			});
 
-			view = new HyperboneView()
-				.addHelper('uppercase', function( str ){ return str.toUpperCase(); })
-				.create( html, test )
+			require('hyperbone-view').registerHelper('uppercase', function(str){ return str.toUpperCase(); });
+
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect( html.text() ).to.equal('HELLO WORLD');
 
@@ -94,14 +84,17 @@ describe("suite", function(){
 
 		it("Automatically updates the view when the model changes for alias", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<p>{{test}}</p>');
 			test = new Model({
 				test : "Hello world"
 			});
 
-			view = new HyperboneView().create( html, test );
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect( html.text() ).to.equal('Hello world');
 
@@ -113,14 +106,17 @@ describe("suite", function(){
 
 		it("Automatically updates the view when the model changes for get helper", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<p>{{get(test)}}</p>');
 			test = new Model({
 				test : "Hello world"
 			});
 
-			view = new HyperboneView().create( html, test );
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect( html.text() ).to.equal('Hello world');
 
@@ -132,16 +128,19 @@ describe("suite", function(){
 
 		it("Automatically updates the view when the model changes for custom helper", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<p>{{uppercase(test)}}</p>');
 			test = new Model({
 				test : "Hello world"
 			});
 
-			view = new HyperboneView()
-				.addHelper('uppercase', function( str ){ return str.toUpperCase(); })
-				.create( html, test )
+			require('hyperbone-view').registerHelper('uppercase', function(str){ return str.toUpperCase(); })
+
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect( html.text() ).to.equal('HELLO WORLD');
 
@@ -160,14 +159,17 @@ describe("suite", function(){
 
 		it("Can apply a model to template within an attribute with property alias", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<p class="paragraph {{className}}">Hello world</p>');
 			test = new Model({
 				className : "active"
 			});
 
-			view = new HyperboneView().create( html, test );
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect( html.attr('class') ).to.equal('paragraph active');
 
@@ -175,14 +177,17 @@ describe("suite", function(){
 
 		it("Can apply a model to template within an attribute with the get helper", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<p class="paragraph {{get(className)}}">Hello world</p>');
 			test = new Model({
 				className : "active"
 			});
 
-			view = new HyperboneView().create( html, test );
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect( html.attr('class') ).to.equal('paragraph active');
 
@@ -190,16 +195,19 @@ describe("suite", function(){
 
 		it("Can apply a model to template within an attribute with a custom helper", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<p class="paragraph {{lowercase(className)}}">Hello world</p>');
 			test = new Model({
 				className : "ActIve"
 			});
 
-			view = new HyperboneView()
-				.addHelper('lowercase', function( str ){ return str.toLowerCase(); })
-				.create( html, test );
+			require('hyperbone-view').registerHelper('lowercase', function(str){ return str.toLowerCase() })
+
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect( html.attr('class') ).to.equal('paragraph active');
 
@@ -207,14 +215,17 @@ describe("suite", function(){
 
 		it("Can automatically update the attribute when the model changes", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<p class="paragraph {{active}}">Hello world</p>');
 			test = new Model({
 				active : "active"
 			});
 
-			view = new HyperboneView().create( html, test );
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect( html.attr('class') ).to.equal('paragraph active');
 
@@ -226,14 +237,17 @@ describe("suite", function(){
 
 		it("Can automatically update the attribute with the get helper when the model changes", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<p class="paragraph {{get(active)}}">Hello world</p>');
 			test = new Model({
 				active : "active"
 			});
 
-			view = new HyperboneView().create( html, test );
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect( html.attr('class') ).to.equal('paragraph active');
 
@@ -245,16 +259,19 @@ describe("suite", function(){
 
 		it("Can automatically update the attribute with a custom helper when the model changes", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<p class="paragraph {{lowercase(active)}}">Hello world</p>');
 			test = new Model({
 				active : "ACTIVE"
 			});
 
-			view = new HyperboneView()
-				.addHelper('lowercase', function( str ){ return str.toLowerCase(); })
-				.create( html, test );
+			require('hyperbone-view').registerHelper('lowercase', function(str){ return str.toLowerCase(); })
+
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect( html.attr('class') ).to.equal('paragraph active');
 
@@ -273,7 +290,7 @@ describe("suite", function(){
 
 		it("can do a sum if you like", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<div>{{expression(1 + 2)}}</div>');
 			test = new Model({
@@ -284,13 +301,10 @@ describe("suite", function(){
 				}
 			});
 
-			view = new HyperboneView()
-				.addHelper('expression', function(params){
-
-					return params;
-
-				})
-				.create( html, test );
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect( html.text() ).to.equal('3');
 
@@ -298,7 +312,7 @@ describe("suite", function(){
 
 		it("can manually access attributes", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<div>{{expression( model.url() )}}</div>');
 			test = new Model({
@@ -309,13 +323,10 @@ describe("suite", function(){
 				}
 			});
 
-			view = new HyperboneView()
-				.addHelper('expression', function(params){
-
-					return params;
-
-				})
-				.create( html, test );
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect( html.text() ).to.equal('/hyperlink');
 
@@ -323,7 +334,7 @@ describe("suite", function(){
 
 		it("can generally do evil horrible shit", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<div>{{expression( model.url() + ".xml" + (5 * 9) )}}</div>');
 			test = new Model({
@@ -334,13 +345,10 @@ describe("suite", function(){
 				}
 			});
 
-			view = new HyperboneView()
-				.addHelper('expression', function(params){
-
-					return params;
-
-				})
-				.create( html, test );
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect( html.text() ).to.equal('/hyperlink.xml45');
 
@@ -354,7 +362,7 @@ describe("suite", function(){
 
 		it("Can get the link to self from built in url() helper", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<div><a href={{url()}}>Myself</a></div>');
 			test = new Model({
@@ -365,7 +373,11 @@ describe("suite", function(){
 				}
 			});
 
-			view = new HyperboneView().create( html, test );
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
+
 
 			expect( html.find('a').first().attr('href') ).to.equal('/hyperlink');
 
@@ -373,7 +385,7 @@ describe("suite", function(){
 
 		it("Can get the link to a rel from built in rel() helper", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<div><a href={{rel("some-rel")}}>Some rel</a></div>');
 			test = new Model({
@@ -384,7 +396,10 @@ describe("suite", function(){
 				}
 			});
 
-			view = new HyperboneView().create( html, test );
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect( html.find('a').first().attr('href') ).to.equal('/hyperlink');
 
@@ -392,7 +407,7 @@ describe("suite", function(){
 
 		it("Can add href to anchor tags where the rel is recognised", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<div><a rel="self">Myself</a><a rel="alternate">Alternate</a></div>');
 			test = new Model({
@@ -406,7 +421,10 @@ describe("suite", function(){
 				}
 			});
 
-			view = new HyperboneView().create( html, test );
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect( html.find('a').first().attr('href') ).to.equal('/hyperlink');
 			expect( html.find('a').last().attr('href') ).to.equal('/hyperlink.xml');
@@ -428,7 +446,7 @@ describe("suite", function(){
 
 		it("Allows us to bind a callback to a dom event", function( done ){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<div><a class="{{status}}" rel="self">Myself</a></div>');
 			test = new Model({
@@ -440,21 +458,23 @@ describe("suite", function(){
 				status : 'inactive'
 			});
 
-			view = new HyperboneView();
+			new HyperboneView({
+				model : test,
+				el : html.els[0],
+				delegates : {
+					'click a[rel="self"]' : function(event){
 
-			view.addDelegate({
-				'click a[rel="self"]' : function(event){
+						this.set('status', 'active');
+						// test that we've actually done the work.
+						expect( html.find('a').attr('class') ).to.equal('active');
+						// test we're being passed the element wrapped in a dom object
+						expect( test.get('status') ).to.equal('active');
 
-					this.set('status', 'active');
+						done();
 
-					// test that we've actually done the work.
-					expect( html.find('a').attr('class') ).to.equal('active');
-					// test we're being passed the element wrapped in a dom object
-					expect( test.get('status') ).to.equal('active');
-
-					done();
+					}
 				}
-			}).create( html, test );
+			});
 
 			simulateClick( html.find('a') );
 
@@ -472,7 +492,9 @@ describe("suite", function(){
 		// Because the DOM is preserved and never just resplatted actual delegates aren't necessary. We can 
 		// just use the selector to bind to the actual element. 
 
-		it("issues an 'initialised' event'", function( done ){
+		it("Can register an onInitialised callback", function( done ){
+
+			var html, test;
 
 			html = dom('<div><a class="{{status}}" rel="self">Myself</a></div>');
 			test = new Model({
@@ -484,22 +506,24 @@ describe("suite", function(){
 				status : 'inactive'
 			});
 
-			view = new HyperboneView();
-
-			view
-				.on('initialised', function( el, model ){
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0],
+				initialised : function(el, model){
 
 					expect(model.get('status')).to.equal('inactive');
-
 					done();
 
-				})
-				.create( html, test );
+				}
+			});
+
 
 		});
 
 		it("issues an 'updated' event", function( done ){
 
+			var html, test, view;
+
 			html = dom('<div><a class="{{status}}" rel="self">Myself</a></div>');
 			test = new Model({
 				_links : {
@@ -510,7 +534,10 @@ describe("suite", function(){
 				status : 'inactive'
 			});
 
-			view = new HyperboneView();
+			var view = new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			view
 				.on('updated', function( el, model, event ){
@@ -520,14 +547,15 @@ describe("suite", function(){
 
 					done();
 
-				})
-				.create( html, test );
+				});
 
 			test.set('status', 'active');
 
 		});
 
 		it("issues an 'delegate-fired' event when a delegate is fired", function( done ){
+
+			var html, test, view;
 
 			html = dom('<div><a class="{{status}}" rel="self">Myself</a></div>');
 			test = new Model({
@@ -539,19 +567,19 @@ describe("suite", function(){
 				status : 'inactive'
 			});
 
-			view = new HyperboneView();
+			var view = new HyperboneView({ 
+				model: test, 
+				el : html.els[0],
+				delegates : {
+					'click a[rel="self"]' : function(event){
+						this.set('status', 'active');
+					}
+				}
+			});
 
 			var triggerCount = 0;
 
-			view
-				.addDelegate({
-					'click a[rel="self"]' : function(event){
-
-						this.set('status', 'active');
-
-					}
-				})
-				.on('delegate-fired', function(el, model, selector){
+			view.on('delegate-fired', function(el, model, selector){
 
 					expect(++triggerCount).to.equal(1);
 
@@ -560,8 +588,7 @@ describe("suite", function(){
 
 					done();
 
-				})
-				.create( html, test );
+				});
 
 			simulateClick( html.find('a') );
 
@@ -575,7 +602,7 @@ describe("suite", function(){
 
 		it("Can change scope to a nested model with hb-with attribute", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<div hb-with="embedded"><p>{{title}}</p></div>');
 			test = new Model({
@@ -584,7 +611,10 @@ describe("suite", function(){
 				}
 			});
 
-			var view = new HyperboneView().create( html, test );
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect(html.find('p').text()).to.equal('Hello world');
 
@@ -606,16 +636,18 @@ describe("suite", function(){
 				}
 			});
 
-			var view = new HyperboneView()
-				.on('updated', function(el, model, event){
+			var view = new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
+			view.on('updated', function(el, model, event){
 
-					expect(event).to.equal("subview embedded change:title");
-					expect(model.get('title')).to.equal('Test');
-					done();
+				expect(event).to.equal("subview embedded change:title");
+				expect(model.get('title')).to.equal('Test');
+				done();
 
-				})
-				.create( html, test );
+			});
 
 			expect(html.find('p').text()).to.equal('Hello world');
 
@@ -634,7 +666,7 @@ describe("suite", function(){
 
 		it("Will iterate through a collection", function(){
 
-			var html, test, view;
+			var html, test;
 
 			html = dom('<ul hb-with="collection"><li><p>{{title}}</p></li></ul>');
 			test = new Model({
@@ -651,7 +683,10 @@ describe("suite", function(){
 				]
 			});
 
-			var view = new HyperboneView().create( html, test );
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			expect( html.find('p').at(0).text() ).to.equal('One');
 			expect( html.find('p').at(1).text() ).to.equal('Two');
@@ -679,9 +714,10 @@ describe("suite", function(){
 				test : "Backbone style"
 			});
 
-			var view = new HyperboneView().create( html, test );
-
-			expect( html.find('p').text() ).to.equal('Backbone style');
+			var view = new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			view.on('updated', function(){
 
@@ -690,7 +726,9 @@ describe("suite", function(){
 				expect( html.find('p').text() ).to.equal('Yay REST level 2 friendly!');
 				done();
 
-			})
+			});
+
+			expect( html.find('p').text() ).to.equal('Backbone style');
 
 			setValueAndTrigger( html.find('input'), "Yay REST level 2 friendly!", "change");
 
@@ -705,9 +743,10 @@ describe("suite", function(){
 				test : "backbone"
 			});
 
-			var view = new HyperboneView().create( html, test );
-
-			expect( html.find('select').val() ).to.equal('backbone');
+			var view = new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
 			view.on('updated',function(){
 
@@ -715,6 +754,8 @@ describe("suite", function(){
 				done();
 
 			});
+
+			expect( html.find('select').val() ).to.equal('backbone');
 
 			setValueAndTrigger( html.find('select'), "knockout", "change");
 
@@ -735,22 +776,25 @@ describe("suite", function(){
 				test : "Hello"
 			});
 
-			var view = new HyperboneView()
-				.addCustomAttributeHandler('custom-attribute', function( node, prop ){
+			require('hyperbone-view').registerAttributeHandler('custom-attribute', function(node, prop, cancel){
 
 					expect( prop ).to.equal('test');
+					expect( cancel ).to.be.a('function');
 					expect( this.model.get('test') ).to.equal('Hello');
 					expect( node.outerHTML ).to.equal('<div custom-attribute="test"><p>{{test}}</p></div>')
 
-				})
-				.on('initialised', function(){
+			})
+
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0],
+				initialised : function(){
 
 					expect( html.find('p').text() ).to.equal('Hello');
 					done();
 
-				})
-				.create( html, test );
-			
+				}
+			});
 
 		});
 

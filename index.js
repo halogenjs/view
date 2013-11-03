@@ -7,8 +7,8 @@ var _ = require('underscore'),
     tache : /\{\{|\}\}/
   },
   Events = require('backbone-events').Events,
-  attributeHandlers = {};
-
+  attributeHandlers = {},
+  templateHelpers = {};
 
 
 /**
@@ -19,29 +19,30 @@ var _ = require('underscore'),
  * @api public
  */
 
-var HyperboneView = function(){
+var HyperboneView = function( config ){
 
   var self = this;
 
   this.activeNodes = [];
   this.delegates = [];
 
-  this.helpers = {
-    get : function( prop ){
-      return  prop;
-    },
-    url : function(){
-      return self.model.url();
-    },
-    rel : function(rel){
-      return self.model.rel(rel);
-    },
-    expression : function( result ){
-      return result;
-    }
-  }
-
   _.extend(this, Events);
+
+  if(config){
+
+    if(config.initialised){
+      this.on('initialised', config.initialised);
+    }
+
+    if(config.delegates){
+      this.addDelegate(config.delegates);
+    }
+
+    if(config.model && config.el){
+      this.create(config.el, config.model);
+    }
+
+  }
 
   return this;
 
@@ -60,7 +61,7 @@ HyperboneView.prototype = {
 
   create : function(el, model){
 
-    this.el = _.isString(el) ? dom(el) : el;
+    this.el = dom(el);
 
     this._original = this.el.clone();
 
@@ -75,37 +76,7 @@ HyperboneView.prototype = {
     return this;
 
   },
-
-/**
- * Register a helper function.
- *
- * @param {String} name, {Function}, fn
- * @return {Object} this
- * @api public
- */
-
-  addHelper : function(name, fn){
-
-    this.helpers[name] = fn;
-    return this;
-
-  },
-
-/**
- * Register custom attribute handler - basically a plugin API.
- *
- * @param {String} name, {Function}, fn
- * @return {Object} this
- * @api public
- */
-
-  addCustomAttributeHandler : function(name, fn){
-
-    attributeHandlers[name] = fn;
-    return this;
-
-  },
-
+  
 /**
  * Register an event delegate.
  *
@@ -298,6 +269,67 @@ HyperboneView.prototype = {
 // Export HyperboneView
 module.exports.HyperboneView = HyperboneView;
 
+
+_.extend(templateHelpers, {
+/**
+ * "get" template helper
+ *
+ * @param {String} prop, {Object} HyperboneModel
+ * @return string
+ * @api private
+ */
+    get : function( prop ){
+      return  prop;
+    },
+/**
+ * "url" template helper
+ *
+ * @param {String} unused, {Object} HyperboneModel
+ * @return string
+ * @api private
+ */
+    url : function(blank, model){
+      return model.url();
+    },
+/**
+ * "rel" template helper
+ *
+ * @param {String} rel, {Object} HyperboneModel
+ * @return string
+ * @api private
+ */
+    rel : function(rel, model){
+      return model.rel(rel);
+    },
+/**
+ * "expression" template helper
+ *
+ * @param {String} expression result, {Object} HyperboneModel
+ * @return string
+ * @api private
+ */
+    expression : function( result ){
+      return result;
+    }
+
+});
+
+/**
+ * .registerHelper() - Register a template helper
+ *
+ * @param {String} name, {Function} fn
+ * @return null
+ * @api public
+ */
+module.exports.registerHelper = function(name, fn){
+  
+  if(_.isObject(name)){
+    _.extend(templateHelpers, name);
+  }else{
+    templateHelpers[name] = fn;
+  }
+}
+
 _.extend(attributeHandlers, {
 
 /**
@@ -414,11 +446,22 @@ _.extend(attributeHandlers, {
   }
   
 });
+
 /**
+ * .registerAttributeHandler() - Register an attribute handler. 
  *
- *
- *
+ * @param {String} name, {Function} fn
+ * @return null
+ * @api public
  */
+module.exports.registerAttributeHandler = function(name, fn){
+  
+  if(_.isObject(name)){
+    _.extend(attributeHandlers, name);
+  }else{
+    attributeHandlers[name] = fn;
+  }
+}
 
 
 /**
@@ -431,9 +474,9 @@ _.extend(attributeHandlers, {
 
 function render( node ){
   if (isNode(node.node)){
-    node.node.setAttribute( node.attribute, node.fn( this.model, this.helpers ) );
+    node.node.setAttribute( node.attribute, node.fn( this.model, templateHelpers ) );
   } else {
-    node.node.replaceWholeText( node.fn( this.model, this.helpers ) );
+    node.node.replaceWholeText( node.fn( this.model, templateHelpers ) );
   }
 };
 
@@ -506,11 +549,11 @@ function compile(tokens) {
 
       } else if (expr = tokeniseHelper( token )) {
 
-        js.push(' + helpers["' + expr.fn + '"]( model.get("' + expr.val + '") ) + ')
+        js.push(' + helpers["' + expr.fn + '"]( model.get("' + expr.val + '"), model) + ')
 
       }else if (expr = tokeniseExpression( token )){
 
-        js.push(' + helpers["' + expr.fn + '"](' + (expr.val ? expr.val : "")+ ') + ')   
+        js.push(' + helpers["' + expr.fn + '"](' + (expr.val ? expr.val : '""')+ ', model) + ')   
       
       }
     }
