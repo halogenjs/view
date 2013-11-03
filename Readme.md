@@ -6,113 +6,143 @@
 
 Bind Hyperbone Models to the DOM.
 
-Currently implemented: 
+## Features
 
-- Logicless templates within attributes and innerText of nodes. 
-- Ability to register helper functions to do in-template processing/formatting.
-- Automatic mapping of urls to anchor tags if the rel is recognised inside the hypermedia model
+- Logicless templates for attributes and text 
+- Register custom helpers to do string processing inside templates
+- Hypermedia extensions: Insert href attributes for recognised rels.
 - Create delegates to handle DOM events
 - Subscribe to and trigger Backbone events on the View itself.
-- Iterate through collections - (very early functionality - dealing with add/change/delete still needs a lot of work)
+- Iterate through collections
 - Classic 'Backbone' style two way binding of form inputs directly to models.
-- Register custom attributes to take control of parts of a view yourself
+- Register custom attribute handlers
 
 ## To Do:
 
-- Collection change/add/remove events. Another tricky one this 
+There's a bit of work around Collections that needs doing. Most additional functionality will come in the form of plugins though.
 
 ## Example
 
-In the page..
-
+HTML in your page:
 ```html
 <div id="some-view" class="{{type}}">
   <p>Hello, {{name}}</p>
   <label>Enter your name: <input hb-bind="name"></label>
-  <div class="description">{{parser(description)}}</div>
+  <div class="description">{{strip(description)}}</div>
   <a rel="some-rel"> Some link </a>
   <a rel="self" class="{{clicked}}">A link to myself</a>
   <ul hb-with="noodle-flavours">
-    <li class="flavour {{className}}">{{flavour}}</li>
+    <li class="flavour {{className}}"><a rel="self">{{flavour}}</a></li>
   </ul>
 </div>
 ```
-
-In the code...
+JSON HAL document on the server
+```json
+{
+  "_links" : {
+    "self" : {
+      "href" : "/a-link-to-me"
+    },
+    "some-rel" : {
+      "href" : "/some-link"
+    }
+  },
+  "description" : "This is __very__ exciting",
+  "type" : "testing-thing",
+  "_embedded" : {
+    "noodle-flavours" : [
+      {
+        "_links" : {
+          "self" : {
+            "href" : "/flavours/chicken"
+          }
+        },
+        "flavour" : "Chickenesque",
+        "classification" : "edible"
+      },
+      {
+        "_links" : {
+          "self" : {
+            "href" : "/flavours/beef"
+          }
+        },
+        "flavour" : "Spicy Beef substitute",
+        "classification" : "toxic"
+      },
+      {
+        "_links" : {
+          "self" : {
+            "href" : "/flavours/curry"
+          }
+        },
+        "flavour" : "Curry. Just Curry.",
+        "classification" : "edible"
+      }
+    ]
+  }
+  "name" : ""
+}
+```
+Presume that we've loaded this JSON into a HyperboneModel instance..
 
 ```js
-// create an instance of Hyperbone View
-var view =  new (require('hyperbone-view')).HyperboneView();
 
-// create an instance of Hyperbone Model (you may be able to use standard Backbone models but this is untested)
-var model = new (require('hyperbone-model')).HyperboneModel({
-	_links : {
-		self : {
-			href : "/a-link-to-me"
-		},
-		"some-rel" : {
-			href : "/some-link"
-		}
-	},
-	description : "This is __very__ exciting",
-	type : "testing-thing",
-	clicked : "",
-  "noodle-flavours" : [
-    {
-      flavour : "Chickenesque",
-      className : "edible"
-    },
-    {
-      flavour : "Spicy Beef substitute",
-      className : "toxic"
-    },
-    {
-      flavour : "Curry. Just Curry.",
-      className : "edible"
+var HyperboneView = require('hyperbone-view').HyperboneView;
+
+// we want to register a helper called 'strip'. This will be available to all Views in the system.
+
+require('hyperbone-view').registerHelper('strip', function( str ){
+  return markdownStripper( str )
+})
+
+// now we can create our view instance.
+new HyperboneView({
+
+  // the model...
+  model : myHypermediaDocument,
+
+  // our view root
+  el : '#some-view',
+ 
+  // an event delegate
+  delegates : {
+    'click a[rel="self"]' : function( event ){
+
+      this.set('clicked', 'clicked');
+
     }
-  ],
-  name : ""
+
+  }
 
 });
-
-// with our view instance...
-view
-
-	// add a helper
-	.addHelper('parser', require('marked')) // we want to convert markdown to html
-
-	// add a delegate..
-	.addDelegate('click a[rel="self"]', function( event ){
-		// scope in the callback is the model
-		this.set('clicked', 'clicked');
-
-	})
-
-	// initialse the view..
-	.create( dom('#some-view'), model );
-
 ```
-Back in the page, without you having to do anything else...
+As soon as the initial processing is done, our DOM has been transformed.
+
+Some things to note:
+
+- The collection of flavours has been expanded
+- Each flavour has automatically had its own href added to the link because of the rel='self'
+- Our link to rel='some-rel' has had its href added as well.
+- Our 'strip' helper has removed the markdown from 'description'.
+
 ```html
 <div id="some-view" class="testing-thing">
   <p>Hello, </p>
   <label>Enter your name: <input hb-bind="name"></label>
-  <div class="description">
-  	<p>This is <strong>very</strong> exciting</p>
-  </div>
+  <div class="description">This is very exciting</div>
   <a href="/some-link" rel="some-rel"> Some link </a>
   <a href="/a-link-to-me" rel="self" class="">A link to myself</a>
   <ul>
-    <li class="flavour edible">Chickenesque</li>
-    <li class="flavour toxic">Spicy Beef substitute</li>
-    <li class="flavour edible">Curry. Just Curry.</li>
+    <li class="flavour edible"><a href="/flavour/chicken" rel="self">Chickenesque</a></li>
+    <li class="flavour toxic"><a href="/flavour/beef" rel="self">Spicy Beef substitute</a></li>
+    <li class="flavour edible"><a href="/flavour/curry" rel="self">Curry. Just Curry.</a></li>
     <li>
   </ul>
 </div>
 ```
-Then if you happen to do this in your code....
+If you happen to do this in your code....
 ```js
-model.set('type', 'sure-hope-this-works')
+myHypermediaDocument.set('type', 'sure-hope-this-works')
 ```
 Then the page automatically updates to...
 ```html
@@ -128,6 +158,7 @@ And if you type something into the the 'Enter your name box'
 <p>Hello, something</p>
 ```
 
+
 ## Installation
 
 Install with [component(1)](http://component.io):
@@ -142,52 +173,61 @@ Hyperbone View has a number of dependencies which are installed at the same time
 - component/dom
 - Parts of Backbone
 
-Note that unlike Backbone View this does not have a dependency on jQuery. It does use a smaller dom manipulation component called Dom, and this is the recommended tool to use for Hyperbone applications. 
+Note that unlike Backbone View this does not have a dependency on jQuery. It does use a tiny standalone dom manipulation component called Dom instead.
 
-## API
+## Module API
 
-### .addHelper( name, fn )
+### require('hyperbone-view').registerHelper(name, fn)
 
-Register a helper function for use inside templates. You must do this before you call .create(). 
+Register a helper function for use inside templates. It becomes globally available to all views.
 
-Register your helper...
+Example:
 ```js
-  view.addHelper('shout', function( str ){
+  require('hyperbone-view').registerHelper('shout', function( str ){
 
   	return str.toUpperCase();
 
   });
+  new HyperboneView({ model: new HyperboneModel({ name : "squirrel"}), el : dom('#namebox')});
 ```
 The template calls the helper...
 ```html
-<p>Hello {{shout(name)}}</p>
+<p id="namebox">Hello {{shout(name)}}</p>
 ```
-Which products
+Which produces
 ```html
 <p>Hello SQUIRREL</p>
 ```
 
-### .addDelegate( obj )
+### require('hyperbone-view').registerAttributeHandler(name, fn)
 
-Register a delegate for an event with an object. Callbacks are passed an event and have the model as the scope. This is because the philosophy is that all changes should happen on the model rather than on the DOM. _Get your truth out of the DOM_ etc.
+Register a custom attribute handler for extending the capabilities of View. More on this below.
 
-```js
-view.addDelegate({
-	'click a.thing' : function(event){
-		model.set('something', 'somevalue');
-	}
-})
-```
 
-### .addDelegate( selector, fn )
+### require('hyperbone-view').HyperboneView
 
-As above, except you register a delegate with a selector and a callback
+Your reference to the HyperboneView prototype.
 
 ```js
-view.addDelegate('click a.thing', function(){
-	model.set('something', 'somevalue')
-})
+var HyperboneView = require('hyperbone-view').HyperboneView;
+
+new HyperboneView({
+    model : model,
+    el : el,
+    delegates : delegates,
+    initialised : function(){
+
+      // i get called after it's initialised for the first time.
+
+    }
+});
 ```
+or
+```js
+new HyperboneView().create(el, model);
+```
+
+## HyperboneView Instance API
 
 ### .on( event, callback )
 
@@ -229,9 +269,31 @@ view.on('delegate-fired', function(el, model, selector){
 
 ### .create( dom, hyperboneModel )
 
-Nothing happens until `.create()` is called. Pass it either a CSS selector or a `dom` List object along with the model and this then binds the model to the view.
+If you want to postpone the view initialising, you can manually triggered this by invoking HyperboneView without a model and el and then calling .create(). Pass it either a CSS selector or a `dom` List object along with the model and this then binds the model to the view.
 
-Generally best to call this last.
+### .addDelegate(obj | name, fn)
+
+If you're using the .create() method, you can manually set up delegates using this.
+
+```js
+new HyperboneView({
+  delegates : {
+    'click .icon' : function( event ){
+      // do something here. Scope is the model.
+    }
+  },
+  model : model,
+  el: el
+})
+```
+is equivilant to 
+```js
+new HyperboneView()
+  .addDelegate('click .icon', function(event){
+    // do something here
+  })
+  .create(el, model)
+```
 
 
 ## Custom Attributes
@@ -285,9 +347,9 @@ When used with a model..
 
 ### Adding your own custom attributes
 
-HyperboneView exposes a method to add additional helpers for specific attributes:
+HyperboneView exposes a method to add additional helpers for specific attributes. These are available globally to all Views.
 
-### .addCustomAttributeHandler( attributeName, fn )
+### require('hyperbone-view').registerAttributeHandler( attributeName, fn )
 
 `fn` is called when HyperboneView finds an element with your attribute. When called, it is passed the element, the value of the attribute as arguments and a 'cancel' function. The scope is the instance of HyperboneView itself, meaning you can use this.model and this.el (this may not be true forever)
 
@@ -298,13 +360,12 @@ Here's a non-disruptive non-cancelled example. We want a link to switch between 
 <a x-switch="status:off|on" class="{{status}}" href="#"></a>
 ```
 ```js
-
+// create a model
 var model = new HyperboneModel({
   status : ""
 });
-
-var view = new HyperboneView()
-  .addCustomAttributeHandler('x-switch', function(node, propertyValue, cancel){
+// register an attribute handler
+require('hyperbone-view').registerAttributeHandler('x-switch', function(node, propertyValue, cancel){
 
     var self = this; // hey, 'this' is the HyperboneView.
 
@@ -333,8 +394,9 @@ var view = new HyperboneView()
 
     // we don't call cancel here, so the childNodes will be processed as normal
 
-  })
-  .create( html, model )
+  });
+// create a view
+new HyperboneView({ model: model, el : html});
 ```
 
 A `return false` example: Creating a new instance of HyperboneView with a different model to process the element and all its children.
@@ -376,8 +438,8 @@ Our HTML. We want to manually embed `/some-other-document` into our page. We don
 ```
 Now we add our custom attribute handler...
 ```js
-var view = new HyperboneView()
-  .addCustomAttributeHandler('x-embed', function(node, propertyValue, cancel){
+// add attribute handler
+require('hyperbone-view').registerAttributeHandler('x-embed', function(node, propertyValue, cancel){
 
     // remove the attribute so that when we create a subview
     // we don't end up back inside this handler.
@@ -407,8 +469,11 @@ var view = new HyperboneView()
     // and the node's children, so we...
     cancel();
 
-  })
-  .create( html, someModel )
+  });
+
+// create a view
+new HyperboneView({model : someModel, el : myElement });
+
 ```
 WHich should, after everything's loaded, result in..
 ```html
