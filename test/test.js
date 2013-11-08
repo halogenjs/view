@@ -769,6 +769,34 @@ describe("suite", function(){
 
 	});
 
+	describe("Built In: If", function(){
+
+		var HyperboneView = require('hyperbone-view').HyperboneView;
+
+		it('Shows and hides an element based on truthiness of model attribute', function(){
+
+			var html, test;
+
+			html = dom('<div if="active"></div>');
+			test = new Model({
+				active : true
+			});
+
+			new HyperboneView({
+				model : test,
+				el : html.els[0]
+			});
+
+			expect(html.els[0].style.display).to.not.equal('none');
+
+			test.set('active', false);
+
+			expect(html.els[0].style.display).to.equal('none');
+
+		});
+
+	})
+
 	describe("Custom attribute handlers", function(){
 
 		var HyperboneView = require('hyperbone-view').HyperboneView;
