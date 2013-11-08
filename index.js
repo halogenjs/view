@@ -2,8 +2,8 @@ var _ = require('underscore'),
   dom = require('dom'),
   regex = {
     alias : /^[A-Za-z0-9\_\.]+$/,
-    helper : /^([A-Za-z\_]+)\(([A-Za-z0-9\_\.]+)\)$/,
-    expression : /^([A-Za-z\_]+)\((|(.+))\)$/,
+    helper : /^([A-Za-z\_\.]+)\(([A-Za-z0-9\_\.]+)\)$/,
+    expression : /^([A-Za-z\_\.]+)\((|(.+))\)$/,
     tache : /\{\{|\}\}/
   },
   Events = require('backbone-events').Events,
@@ -72,6 +72,10 @@ HyperboneView.prototype = {
     this.activateDelegates();
 
     this.trigger('initialised', this.el, this.model);
+
+    if(isNode(this.el.els[0])){
+      this.el.css({'display':'block'});
+    }
 
     return this;
 
@@ -252,11 +256,12 @@ HyperboneView.prototype = {
       var event = parts[0];
       var selector = parts[1];
 
-      this.el.find(selector).on(event, function(e){
-        e.preventDefault();
-        delegate.fn.call( self.model, e );
+      this.el.on(event, selector, function(e){
+        //e.preventDefault();
+        delegate.fn.call( self.model, e, self.model, self.el );
         self.trigger('delegate-fired', self.el, self.model, delegate.selector);
-      })
+
+      });
 
     }, this);
 
@@ -321,7 +326,10 @@ _.extend(templateHelpers, {
  * @return null
  * @api public
  */
-module.exports.registerHelper = function(name, fn){
+
+var registerHelper;
+
+module.exports.registerHelper = registerHelper = function(name, fn){
   
   if(_.isObject(name)){
     _.extend(templateHelpers, name);
@@ -333,7 +341,7 @@ module.exports.registerHelper = function(name, fn){
 _.extend(attributeHandlers, {
 
 /**
- * "hb-with" custom attribute handler. Creates subview with a different scope.
+ * "rel" custom attribute handler. Populates an href if the rel is recognised
  *
  * @param {Object} node, {String} hb-width value
  * @return null
@@ -357,7 +365,31 @@ _.extend(attributeHandlers, {
     }
 
   },
+/**
+ * "if" custom attribute handler. Makes an element displayed or not.
+ *
+ * @param {Object} node, {String} hb-width value
+ * @return null
+ * @api private
+ */
+  "if" : function( node, prop, cancel ){
 
+    var self = this, 
+    test = function(){
+      dom(node).css({display: ( self.model.get(prop) ? '': 'none') });  
+    };
+
+    this.model.on('change:' + prop, function(){ test() });
+    // do the initial state.
+    test();
+  },
+/**
+ * "hb-with" custom attribute handler. Creates subview with a different scope.
+ *
+ * @param {Object} node, {String} hb-width value
+ * @return null
+ * @api private
+ */
   "hb-with" : function( node, prop, cancel ){
 
     var collection, inner, self = this;
@@ -380,15 +412,33 @@ _.extend(attributeHandlers, {
       collection.__hyperbone_view = node;
       collection.__hyperbone_subview = inner;
 
-      collection.each(function( model ){
+      var render = function( collection ){
 
-        var html = inner.cloneNode(true);
-          new HyperboneView()
-            .create( dom(html), model);
+        collection.each(function( model ){
 
-        node.appendChild(html);
+          var html = inner.cloneNode(true);
+            new HyperboneView()
+              .on('updated', function(el, model, event){
+
+                self.trigger('updated', el, model, "subview " + prop + " " + event);
+
+              })
+              .create( dom(html), model)
+
+          node.appendChild(html);
+
+        });
+
+      };
+
+      collection.on('add remove', function(){
+
+        node.innerHTML = "";
+        render(self.model.get(prop));
 
       });
+
+      render(collection);
 
     } else {
 
@@ -410,7 +460,7 @@ _.extend(attributeHandlers, {
 /**
  * "hb-bind" custom attribute handler
  *
- * @param {Object} node, {String} hb-width value
+ * @param {Object} node, {String} hb-bind property, {Function} cancel
  * @return null
  * @api private
  */
@@ -443,9 +493,48 @@ _.extend(attributeHandlers, {
     // don't want to process this node's childrens so return false;
     cancel();
 
+  },
+/**
+ * "hb-click-bind" custom attribute handler
+ *
+ * @param {Object} node, {String} hb-click-bind property, {Function} cancel
+ * @return null
+ * @api private
+ */
+  "hb-click-bind" : function( node, prop, cancel){
+
+    var self = this;
+    self.model.set(prop, false);
+
+    dom(node).on('click', function(e){
+
+      self.model.set(prop, true);
+
+    });
+
+  },
+/**
+ * "hb-trigger" trigger a backbone event handler.
+ *
+ * @param {Object} node, {String} event to trigger, {Function} cancel
+ * @return null
+ * @api private
+ */
+  "hb-trigger" : function( node, prop, cancel){
+
+    var self = this;
+    self.model.set(prop, false);
+
+    dom(node).on('click', function(e){
+
+      self.model.trigger(prop, self.model, node, e);
+
+    });
+
   }
-  
+
 });
+
 
 /**
  * .registerAttributeHandler() - Register an attribute handler. 
@@ -454,13 +543,41 @@ _.extend(attributeHandlers, {
  * @return null
  * @api public
  */
-module.exports.registerAttributeHandler = function(name, fn){
+
+var registerAttributeHandler;
+
+module.exports.registerAttributeHandler = registerAttributeHandler = function(name, fn){
   
   if(_.isObject(name)){
     _.extend(attributeHandlers, name);
   }else{
     attributeHandlers[name] = fn;
   }
+}
+
+
+
+/**
+ * .use() - use an extension
+ *
+ * @param {Object} obj
+ * @return null
+ * @api public
+ */
+module.exports.use = function( obj ){
+  
+  if(obj.attributeHandlers){
+    _.each(obj.attributeHandlers, function(handler, id){
+      registerAttributeHandler(id, handler);
+    })
+  }
+
+  if(obj.templateHelpers){
+    _.each(obj.templateHelpers, function(handler, id){
+      registerHelper(id, handler);
+    })
+  }
+
 }
 
 
