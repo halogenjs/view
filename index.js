@@ -74,7 +74,7 @@ HyperboneView.prototype = {
     this.trigger('initialised', this.el, this.model);
 
     if(isNode(this.el.els[0])){
-      this.el.css({'display':'block'});
+      this.el.css({'visibility':'visible'});
     }
 
     return this;
@@ -401,40 +401,55 @@ _.extend(attributeHandlers, {
 
     if(collection.models){
 
-      inner = document.createDocumentFragment();
+      inner = dom( Array.prototype.slice.call(node.children, 0) );
+      inner.style.display = "none";
 
-      _.each(node.children, function(el){
-
-        inner.appendChild(el);
-
-      });
+      inner.remove();
 
       collection.__hyperbone_view = node;
       collection.__hyperbone_subview = inner;
+      collection.__nodes = {};
 
       var render = function( collection ){
 
-        collection.each(function( model ){
+        collection.each(function( model, index, models ){
 
-          var html = inner.cloneNode(true);
-            new HyperboneView()
-              .on('updated', function(el, model, event){
+          if(!collection.__nodes[model.cid]){
 
-                self.trigger('updated', el, model, "subview " + prop + " " + event);
+            var html = inner.clone(true);
+            var view = new HyperboneView()
+                .on('updated', function(el, model, event){
 
-              })
-              .create( dom(html), model)
+                  self.trigger('updated', el, model, "subview " + prop + " " + event);
 
-          node.appendChild(html);
+                })
+                .create( html, model);
+
+            collection.__nodes[model.cid] = view;
+
+            html.appendTo(node);
+
+          }
+
 
         });
 
       };
 
-      collection.on('add remove', function(){
+      collection.on('add', function(model, models, details){
 
-        node.innerHTML = "";
         render(self.model.get(prop));
+
+      });
+
+
+      collection.on('remove', function(model, models, details){
+
+        if(collection.__nodes[model.cid]){
+
+          collection.__nodes[model.cid].el.remove()
+
+        }
 
       });
 

@@ -769,29 +769,42 @@ describe("suite", function(){
 
 	});
 
-	describe("Built In: If", function(){
+	describe("Built In Extensions", function(){
 
 		var HyperboneView = require('hyperbone-view').HyperboneView;
 
-		it('Shows and hides an element based on truthiness of model attribute', function(){
+		describe('if', function(){
 
-			var html, test;
+			it('Shows and hides an element based on truthiness of model attribute', function(){
 
-			html = dom('<div if="active"></div>');
-			test = new Model({
-				active : true
+				var html, test;
+
+				html = dom('<div if="active"></div>');
+				test = new Model({
+					active : true
+				});
+
+				new HyperboneView({
+					model : test,
+					el : html.els[0]
+				});
+
+				expect(html.els[0].style.display).to.not.equal('none');
+
+				test.set('active', false);
+
+				expect(html.els[0].style.display).to.equal('none');
+
 			});
 
-			new HyperboneView({
-				model : test,
-				el : html.els[0]
-			});
+		});
 
-			expect(html.els[0].style.display).to.not.equal('none');
+		describe('hb-trigger', function(){
 
-			test.set('active', false);
+			it('triggers a backbone event and passes the correct model', function(){
 
-			expect(html.els[0].style.display).to.equal('none');
+				
+			})
 
 		});
 

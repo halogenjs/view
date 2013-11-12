@@ -5499,18 +5499,14 @@ window.useFixture = function(id){
 
 window.setValueAndTrigger = function( el , value, event, options){
 
-	options || (options = {});
-
 	el.val(value);
 
-	trigger(el.els[0], event, options);
+	trigger(el.els[0], event, { cancelable : true, bubbles : true });
 
 }
-window.simulateClick = function(el, options){
+window.simulateClick = function(el){
 
-  options || (options = { cancelable : true, bubbles : true});
-
-  trigger(el.els[0], 'click', options);
+  trigger(el.els[0], 'click', { cancelable : true, bubbles : true });
 
 }
 
