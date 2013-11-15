@@ -1,9 +1,9 @@
 var _ = require('underscore'),
   dom = require('dom'),
   regex = {
-    alias : /^[A-Za-z0-9\_\.]+$/,
-    helper : /^([A-Za-z\_\.]+)\(([A-Za-z0-9\_\.]+)\)$/,
-    expression : /^([A-Za-z\_\.]+)\((|(.+))\)$/,
+    alias : /^[A-Za-z0-9\_\-\.]+$/,
+    helper : /^([A-Za-z\_\-\.]+)\(([A-Za-z0-9\_\.]+)\)$/,
+    expression : /^([A-Za-z\_\-\.]+)\((|(.+))\)$/,
     tache : /\{\{|\}\}/
   },
   Events = require('backbone-events').Events,
