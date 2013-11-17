@@ -2,35 +2,33 @@
 
 [![Build Status](https://travis-ci.org/green-mesa/hyperbone-view.png?branch=master)](https://travis-ci.org/green-mesa/hyperbone-view)
 
-## tldr; 
+## tl;dr 
 
-Bind Hyperbone Models to the DOM.
+Push style template system for Hyperbone (and probably Backbone) models, allowing strict model/view separation.
+
+You get 'if', 'hb-trigger', 'hb-with' and 'hb-bind' as the only custom attributes you need to learn [See paper on this subject](http://www.cs.usfca.edu/~parrt/papers/mvc.templates.pdf).
 
 ## Features
 
-- Logicless templates for attributes and text 
-- Register custom helpers to do string processing inside templates
-- Hypermedia extensions: Insert href attributes for recognised rels.
-- Create delegates to handle DOM events
-- Subscribe to and trigger Backbone events on the View itself.
-- Iterate through collections
-- Classic 'Backbone' style two way binding of form inputs directly to models.
-- Register custom attribute handlers
-
-## To Do:
-
-There's a bit of work around Collections that needs doing. Most additional functionality will come in the form of plugins though.
+- Logicless moustache-eseque templates for attributes and innertext. 
+- Define your own custom helpers to do advanced string processing
+- Hypermedia extensions: Automatically insert href attributes for recognised rels.
+- 'hb-trigger' custom attribute to trigger Hyperbone events on a model
+- 'if' custom attribute to conditionally display elements.
+- 'hb-bind' custom attribute to link an input to a model attribute
+- 'hb-with' to change scope of a template and render out collections (partials, in effect)
+- API for adding additional attributes for when you HAVE to touch the DOM.
 
 ## Example
 
 HTML in your page:
 ```html
-<div id="some-view" class="{{type}}">
+<div if="getting-name" id="some-view" class="{{type}}">
   <p>Hello, {{name}}</p>
   <label>Enter your name: <input hb-bind="name"></label>
   <div class="description">{{strip(description)}}</div>
   <a rel="some-rel"> Some link </a>
-  <a rel="self" class="{{clicked}}">A link to myself</a>
+  <a rel="self" class="{{clicked}}" hb-trigger="special-link-clicked">A link to myself</a>
   <ul hb-with="noodle-flavours">
     <li class="flavour {{className}}"><a rel="self">{{flavour}}</a></li>
   </ul>
@@ -102,19 +100,18 @@ new HyperboneView({
   model : myHypermediaDocument,
 
   // our view root
-  el : '#some-view',
- 
-  // an event delegate
-  delegates : {
-    'click a[rel="self"]' : function( event ){
-
-      this.set('clicked', 'clicked');
-
-    }
-
-  }
-
+  el : '#some-view'
 });
+
+// set our editing flag to true so that we can see our html
+myHypermediaDocument.set('editing', true);
+
+// bind to a hyperbone event that'll trigger when the user
+// clicks on the particular link.
+myHypermediaDocument.on('special-link-clicked', function( model ){
+  model.set('clicked', 'clicked');
+})
+
 ```
 As soon as the initial processing is done, our DOM has been transformed.
 
@@ -148,7 +145,7 @@ Then the page automatically updates to...
 ```html
 <div id="some-view" class="sure-hope-this-works">
 ```
-And if you happen to click on `A link to myself`, the delegate fires, updates the model and that results in..
+And if you happen to click on `A link to myself`, the Hyperbone event fires, updates the model and that results in..
 ```html
   <a href="/a-link-to-me" rel="self" class="clicked">A link to myself</a>
 </div>
@@ -157,7 +154,11 @@ And if you type something into the the 'Enter your name box'
 ```html
 <p>Hello, something</p>
 ```
-
+And if you do
+```js
+myHypermediaDocument.set('editing', false);
+```
+Then the element gets hidden. 
 
 ## Installation
 
@@ -214,7 +215,6 @@ var HyperboneView = require('hyperbone-view').HyperboneView;
 new HyperboneView({
     model : model,
     el : el,
-    delegates : delegates,
     initialised : function(){
 
       // i get called after it's initialised for the first time.
@@ -273,7 +273,7 @@ If you want to postpone the view initialising, you can manually triggered this b
 
 ### .addDelegate(obj | name, fn)
 
-If you're using the .create() method, you can manually set up delegates using this.
+If you're using the .create() method, you can manually set up actual DOM event delegates, although this... probably isn't wise.
 
 ```js
 new HyperboneView({
@@ -296,13 +296,23 @@ new HyperboneView()
 ```
 
 
-## Custom Attributes
+## Hyperbone HTML Attributes
 
-Custom attributes are added to the HTML, and allow for additional functionality not provided in the logicless templates.
+Hyperbone attributes can be added to the HTML, and allow for additional functionality not provided in the logicless attribute/innerText templates.
 
-### hb-with
+### if="attribute"
 
-Changes the scope for the innerHTML to the selected model or collection.
+Given the truthiness of the model attribute, it will conditionally display the element.
+
+```html
+<p if="organisation">{{organisation}}</p>
+```
+This is as complex as the logic gets. How do I do an 'else' or an 'or' or an 'and' I hear you cry. Anything more complex than this is a job for code. It's what code is good at. The philosophy is that you do your difficult logic stuff in your code.
+
+
+### hb-with="attribute"
+
+Changes the scope for the innerHTML to the selected model or collection. In effect the nested elements become a partial.
 
 This HTML...
 ```html
@@ -323,6 +333,42 @@ Slightly more useful than this is the ability to iterate through collections wit
 </ul>
 ```
 ... this then automatically clones the li tag for every model inside the collection.
+
+### hb-trigger="hyperbone-event"
+
+On clicking an element with the hb-trigger attribute, a subscribeable hyperbone event is fired. The first parameter is the model that originated the event.
+
+This comes in especially handy when you want to deal with a particular model inside a collection.. 
+
+Our model contains...
+```js
+{
+  filters : [
+    {
+      name : "Filter one",
+      active : true
+    },
+    {
+      name : "Filter two",
+      active : false
+    }
+  ]
+}
+```
+And our view makes a new li for each filter. The scope of each li is the individual model in the collection.
+```html
+<ul hb-with="filters">
+  <li class="if(model.get('active'), 'active')" hb-trigger="filter-changed">{{name}}</li>
+</ul>
+```
+Which means when that li is clicked, the 'filters-changed' event fires on the 'filters' object (in backbone style that's `filters-changed:filters`), and the first parameter is the individual filter.
+```js
+model.on('filters-changed:filters', function( filter ){
+  filter.set('active', true);
+})
+```
+
+Using a custom attribute for this does feel a bit bad but it does mean you can link user interactions to the underlying models, and no code is being run in the View. Everything's on the model, which is as it should be. 
 
 ### hb-bind
 
@@ -347,9 +393,10 @@ When used with a model..
 
 ### Adding your own custom attributes
 
-HyperboneView exposes a method to add additional helpers for specific attributes. These are available globally to all Views.
+Because Hyperbone View enforces a strict separation of model and view, your applications shouldn't be touching the DOM at all. However, sometimes, you do in fact need to touch the DOM. When you do, the idea is that you use your own custom attributes. Luckily Hyperbone View exposes an API for this.
 
 ### require('hyperbone-view').registerAttributeHandler( attributeName, fn )
+### require('hyperbone-view').use( attributeHandlers : { attributeName : fn })
 
 `fn` is called when HyperboneView finds an element with your attribute. When called, it is passed the element, the value of the attribute as arguments and a 'cancel' function. The scope is the instance of HyperboneView itself, meaning you can use this.model and this.el (this may not be true forever)
 
@@ -399,7 +446,7 @@ require('hyperbone-view').registerAttributeHandler('x-switch', function(node, pr
 new HyperboneView({ model: model, el : html});
 ```
 
-A `return false` example: Creating a new instance of HyperboneView with a different model to process the element and all its children.
+A disruptive 'cancelling' example: Creating a new instance of HyperboneView with a different model to process the element and all its children.
 
 This is the parent Hypermedia document. Note that it contains a rel `some-rel` which points to `/some-other-document`.
 ```json
