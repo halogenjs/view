@@ -2,11 +2,11 @@
   "name": "hyperbone-view",
   "repo": "green-mesa/hyperbone-view",
   "description": "Automatic bindings to the DOM for Hyperbone Models",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "keywords": [],
   "dependencies": {
     "components/underscore": "1.4.4",
-    "green-mesa/dom": "0.10.0",
+    "green-mesa/dom": "0.11.0",
     "green-mesa/backbone-events": "*"
   },
   "development": {},
