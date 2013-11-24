@@ -25,6 +25,7 @@ var HyperboneView = function( config ){
 
   this.activeNodes = [];
   this.delegates = [];
+  this.eventRefs = [];
 
   _.extend(this, Events);
 
@@ -399,6 +400,11 @@ _.extend(attributeHandlers, {
 
     collection = this.model.get(prop);
 
+    if(!collection){
+      this.model.set(prop, []);
+      collection = this.model.get(prop);
+    }
+
     if(collection.models){
 
       inner = dom( Array.prototype.slice.call(node.children, 0) );
@@ -447,7 +453,11 @@ _.extend(attributeHandlers, {
 
         if(collection.__nodes[model.cid]){
 
-          collection.__nodes[model.cid].el.remove()
+          // attempt to completely destroy the subview..
+          collection.__nodes[model.cid].el.remove();
+          collection.__nodes[model.cid].model.off();
+          collection.__nodes[model.cid].off();
+          delete collection.__nodes[model.cid];
 
         }
 

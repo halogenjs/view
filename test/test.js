@@ -911,5 +911,47 @@ describe("suite", function(){
 
 	});
 
+	// Tests for bugs that have emerged
+
+	describe("Issues", function(){
+
+		var HyperboneView = require('hyperbone-view').HyperboneView;
+
+		it("doesn't crash when template uses hb-with for non-existent collection", function(){
+
+			var html, test, view;
+
+			html = dom('<ul hb-with="not-in-model"><li>{{Name}}</li></ul>');
+			test = new Model({
+			});
+
+			expect(function(){
+				new HyperboneView({
+					model : test,
+					el : html.els[0]
+				});
+			}).to.not.throw();
+
+		});
+
+		it("defaults to a collection for a non-existent property for hb-with", function(){
+
+			var html, test, view;
+
+			html = dom('<ul hb-with="not-in-model"><li>{{Name}}</li></ul>');
+			test = new Model({
+			});
+
+			new HyperboneView({
+				model : test,
+				el : html.els[0]
+			});
+
+			expect(test.get('not-in-model').models).to.be.ok;
+
+		});
+
+	})
+
 
 });
