@@ -295,7 +295,11 @@ _.extend(templateHelpers, {
  * @api private
  */
     url : function(blank, model){
-      return model.url();
+      try {
+        return model.url();
+      }catch(e){
+        return "";
+      }
     },
 /**
  * "rel" template helper
@@ -511,7 +515,7 @@ _.extend(attributeHandlers, {
         el.val(val);
       }
       
-    })
+    });
 
     el.val( attrValue );
 
