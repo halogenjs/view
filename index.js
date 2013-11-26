@@ -388,6 +388,25 @@ _.extend(attributeHandlers, {
     // do the initial state.
     test();
   },
+
+/**
+ * "if-not" custom attribute handler. Makes an element displayed or not.
+ *
+ * @param {Object} node, {String} hb-width value
+ * @return null
+ * @api private
+ */
+  "if-not" : function( node, prop, cancel ){
+
+    var self = this, 
+    test = function(){
+      dom(node).css({display: ( self.model.get(prop) ? 'none': '') });  
+    };
+
+    this.model.on('change:' + prop, function(){ test() });
+    // do the initial state.
+    test();
+  },
 /**
  * "hb-with" custom attribute handler. Creates subview with a different scope.
  *
@@ -598,16 +617,16 @@ module.exports.use = function( obj ){
   if(obj.attributeHandlers){
     _.each(obj.attributeHandlers, function(handler, id){
       registerAttributeHandler(id, handler);
-    })
+    });
   }
 
   if(obj.templateHelpers){
     _.each(obj.templateHelpers, function(handler, id){
       registerHelper(id, handler);
-    })
+    });
   }
 
-}
+};
 
 
 /**
@@ -622,9 +641,9 @@ function render( node ){
   if (isNode(node.node)){
     node.node.setAttribute( node.attribute, node.fn( this.model, templateHelpers ) );
   } else {
-    node.node.replaceWholeText( node.fn( this.model, templateHelpers ) );
+    node.node.replaceWholeText( node.fn( this.model, templateHelpers ) || " " );
   }
-};
+}
 
 /**
  * Walk Dom `node` and call `func`.
@@ -643,7 +662,7 @@ function walkDOM(node, func){
       node = node.nextSibling;
     }
   }
-};
+}
 
 /**
  * Find expressions within an array of Tokens.
