@@ -206,15 +206,37 @@ HyperboneView.prototype = {
 
       _.each(node.expressions, function( expr ){
 
-        var expr, ev = "change";
+        var ev = "change", subExpr, modelGets, relsOrUrls;
 
         if (isAlias(expr)){
 
           ev = 'change:' + expr;
 
-        } else if (expr = tokeniseHelper(expr)){
+        } else if (subExpr = tokeniseHelper(expr)){
 
-            ev = 'change:' + expr.val;
+            ev = 'change:' + subExpr.val;
+
+        } else if (modelGets = expr.match(/model\.get\((\'|\")([\S]+)(\'|\")\)/g)){
+          // test for use of model.get('something') inside a template...
+          var props = [];
+
+          _.each(modelGets, function(get){
+
+            props.push('change:' + get.match(/model\.get\((\'|\")([\S]+)(\'|\")\)/)[2]);
+
+          });
+
+          if(props.length){
+            ev = props.join(' ');
+          }
+
+        } else if(resOrUrls = expr.match(/url\(\)/)){
+          // test for use of rel() or url() inside a template
+          ev = "change-rel:self";
+
+        } else if(resOrUrls = expr.match(/rel\((\'|\")([\S]+)(\'|\")\)/)){
+
+          ev = "change-rel:" + resOrUrls[2];
 
         }
 
@@ -225,6 +247,7 @@ HyperboneView.prototype = {
           self.trigger('updated', self.el, self.model, ev);
 
         });
+
 
       }, this);
 
@@ -480,7 +503,7 @@ _.extend(attributeHandlers, {
 
       collection.on('remove', function(model, models, details){
 
-        if(collection.__nodes[model.cid]){
+        if(node.__nodes[model.cid]){
 
           // attempt to completely destroy the subview..
           node.__nodes[model.cid].el.remove();

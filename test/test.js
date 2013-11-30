@@ -1072,6 +1072,86 @@ describe("suite", function(){
 			expect( html.find('p').at(0).text() ).to.equal('1: test 1');
 			expect( html.find('p').at(1).text() ).to.equal('2: test 1');
 
+		});
+
+		it('can recognise use of somehelper(model.get("attribute")), subscribes to right event', function(){
+
+			var html, test, view;
+
+			html = dom("<section>{{test(model.get('thing'))}}</section>");
+
+			require('hyperbone-view').use({
+				templateHelpers : {
+					'test' : function(val){
+						return val;
+					}
+				}
+			});
+
+			test = new Model({
+				thing : "some value"
+			});
+
+			new HyperboneView({
+				model : test,
+				el : html.els[0]
+			});
+
+			test.set('thing', 'some other value', {silent : true});
+
+			test.trigger('change:thing');
+
+			expect( html.text() ).to.equal('some other value');
+
+		})
+
+		it('subscribes to rel change events when using url() or rel()', function(){
+
+			var html, test, view;
+
+			html = dom("<section><p>{{url()}}</p><p>{{rel('test')}}</p></section>");
+
+			require('hyperbone-view').use({
+				templateHelpers : {
+					'test' : function(val){
+						return val;
+					}
+				}
+			});
+
+			test = new Model({
+				_links : {
+					self : {
+						href : '/test'
+					},
+					test : {
+						href : '/other'
+					}
+				}
+			});
+
+			new HyperboneView({
+				model : test,
+				el : html.els[0]
+			});
+
+			expect( html.find('p').first().text()).to.equal('/test');
+			expect( html.find('p').last().text()).to.equal('/other');
+
+			test.set({
+				_links : {
+					self : {
+						href : '/moved'
+					},
+					test : {
+						href : "/also-moved"
+					}
+				}
+			})
+
+			expect( html.find('p').first().text()).to.equal('/moved');
+			expect( html.find('p').last().text()).to.equal('/also-moved');
+
 		})
 
 	})
