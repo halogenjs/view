@@ -354,21 +354,31 @@ _.extend(attributeHandlers, {
  */
   "rel" : function( node, prop){
 
+    var rel, self = this;
+
     // CONVENTION: If an anchor tag has a 'rel' attribute, and the model 
     // has a matching .rel(), we automatically add/populate the href attribute.
     if(node.tagName === "A"){
-
       rel = node.getAttribute('rel');
-
+      var setHref = function(){
+        var uri = self.model.rel( rel );
+        if (uri){
+          node.style.display = "";
+          node.setAttribute('href', uri);
+        } else {
+          node.style.display = "none";
+          node.setAttribute('href', '#');
+        }
+      };
       // just quickly check the rel isn't templated. If it is, we ignore it.
       if(rel && tokenise(rel).length === 1){
 
-        node.setAttribute('href', this.model.rel( rel ) );
-
+        this.model.on('add-rel:' + rel + ' remove-rel:' + rel + " change-rel:" + rel, function(){
+          setHref();
+        });
+        setHref();
       }
-
     }
-
   },
 /**
  * "if" custom attribute handler. Makes an element displayed or not.
@@ -435,15 +445,13 @@ _.extend(attributeHandlers, {
 
       inner.remove();
 
-      collection.__hyperbone_view = node;
-      collection.__hyperbone_subview = inner;
-      collection.__nodes = {};
+      node.__nodes = {};
 
       var render = function( collection ){
 
         collection.each(function( model, index, models ){
 
-          if(!collection.__nodes[model.cid]){
+          if(!node.__nodes[model.cid]){
 
             var html = inner.clone(true);
             var view = new HyperboneView()
@@ -454,12 +462,11 @@ _.extend(attributeHandlers, {
                 })
                 .create( html, model);
 
-            collection.__nodes[model.cid] = view;
+            node.__nodes[model.cid] = view;
 
             html.appendTo(node);
 
           }
-
 
         });
 
@@ -471,18 +478,36 @@ _.extend(attributeHandlers, {
 
       });
 
-
       collection.on('remove', function(model, models, details){
 
         if(collection.__nodes[model.cid]){
 
           // attempt to completely destroy the subview..
-          collection.__nodes[model.cid].el.remove();
-          collection.__nodes[model.cid].model.off();
-          collection.__nodes[model.cid].off();
-          delete collection.__nodes[model.cid];
+          node.__nodes[model.cid].el.remove();
+          node.__nodes[model.cid].model.off();
+          node.__nodes[model.cid].off();
+          delete node.__nodes[model.cid];
 
         }
+
+      });
+
+      collection.on('reset', function(){
+
+        var destroyers = [];
+
+        _.each(node.__nodes, function(n, id){
+          n.el.remove();
+          n.model.off();
+          n.off();
+          destroyers.push(function(){
+            delete node.__nodes[id];
+          });
+        });
+
+        _.each(destroyers, function(fn){fn();});
+
+        render(self.model.get(prop));
 
       });
 
@@ -549,14 +574,13 @@ _.extend(attributeHandlers, {
  * @return null
  * @api private
  */
-  "hb-click-bind" : function( node, prop, cancel){
+  "hb-click-toggle" : function( node, prop, cancel){
 
     var self = this;
-    self.model.set(prop, false);
 
     dom(node).on('click', function(e){
 
-      self.model.set(prop, true);
+      self.model.set(prop, !self.model.get(prop));
 
     });
 
@@ -571,7 +595,6 @@ _.extend(attributeHandlers, {
   "hb-trigger" : function( node, prop, cancel){
 
     var self = this;
-    self.model.set(prop, false);
 
     dom(node).on('click', function(e){
 
@@ -638,10 +661,14 @@ module.exports.use = function( obj ){
  */
 
 function render( node ){
+  var res = node.fn( this.model, templateHelpers );
   if (isNode(node.node)){
-    node.node.setAttribute( node.attribute, node.fn( this.model, templateHelpers ) );
+    node.node.setAttribute( node.attribute, res);
   } else {
-    node.node.replaceWholeText( node.fn( this.model, templateHelpers ) || " " );
+    if(res===""){
+      res = "\u200B";
+    }
+    node.node.replaceWholeText( res );
   }
 }
 

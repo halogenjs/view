@@ -429,60 +429,80 @@ describe("suite", function(){
 			expect( html.find('a').first().attr('href') ).to.equal('/hyperlink');
 			expect( html.find('a').last().attr('href') ).to.equal('/hyperlink.xml');
 
-		})
+		});
 
-
-	})	
-
-	describe("Event delegates", function(){
-
-		var HyperboneView = require('hyperbone-view').HyperboneView;
-
-		// could really do with more extensive testing of this but really we're just testing DOM's event 
-		// handler. I found the actual delegate stuff didn't work which is infuriating really.
-
-		// Because the DOM is preserved and never just resplatted actual delegates aren't necessary. We can 
-		// just use the selector to bind to the actual element. 
-
-		it("Allows us to bind a callback to a dom event", function( done ){
-
-			done();
-
-			/*
-
-			// simulate click does not trigger delegates. This has to be
-			// tested manually for now. :(
+		it("Can update the href when the rel changes", function(){
 
 			var html, test;
 
-			html = dom('<div><button value="Click me" class="{{status}}"></button></div>');
+			html = dom('<div><a rel="self">Myself</a><a rel="alternate">Alternate</a></div>');
 			test = new Model({
-				status : 'inactive'
-			});
-
-			new HyperboneView({
-				model : test,
-				el : html.els[0],
-				delegates : {
-					'button click' : function(event){
-
-						this.set('status', 'active');
-						// test that we've actually done the work.
-						expect( html.find('button').attr('class') ).to.equal('active');
-						// test we're being passed the element wrapped in a dom object
-						expect( test.get('status') ).to.equal('active');
-
-						done();
-
+				_links : {
+					self : {
+						href : "/hyperlink"
+					},
+					alternate : {
+						href : "/hyperlink.xml"
 					}
 				}
 			});
 
-			simulateClick( html.find('button') );
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
 
-			*/
+			test.set({
+				_links : {
+					self : {
+						href : "/changed-hyperlink"
+					},
+					alternate : {
+						href : "/changed-hyperlink.xml"
+					}
+				}
+			})
+
+			expect( html.find('a').first().attr('href') ).to.equal('/changed-hyperlink');
+			expect( html.find('a').last().attr('href') ).to.equal('/changed-hyperlink.xml');
 
 		});
+
+		it("Rels added after initialisation still work, initially hidden", function(){
+
+
+			var html, test;
+
+			html = dom('<div><a rel="self">Myself</a><a rel="alternate">Alternate</a></div>');
+			test = new Model({});
+
+			new HyperboneView({ 
+				model: test, 
+				el : html.els[0]
+			});
+
+			expect( html.find('a').first().attr('href')).to.equal('#');
+			expect( html.find('a').first().els[0].style.display).to.equal('none');
+
+			test.set({
+				_links : {
+					self : {
+						href : "/hyperlink"
+					},
+					alternate : {
+						href : "/hyperlink.xml"
+					}
+				}
+			})
+
+			expect( html.find('a').first().attr('href') ).to.equal('/hyperlink');
+			expect( html.find('a').last().attr('href') ).to.equal('/hyperlink.xml');
+
+			expect( html.find('a').first().els[0].style.display ).to.not.equal('none');
+
+
+		});
+
 
 	});
 
@@ -554,49 +574,6 @@ describe("suite", function(){
 				});
 
 			test.set('status', 'active');
-
-		});
-
-		it("issues an 'delegate-fired' event when a delegate is fired", function( done ){
-
-			done();
-			/*
-
-			// simulate click does not trigger delegate subscriptions. This has to be
-			// tested manually for now. :(
-
-			var html, test, view;
-
-			html = dom('<div><button value="Click me" class="{{status}}"></button></div>');
-			test = new Model({
-				status : 'inactive'
-			});
-
-			var view = new HyperboneView({ 
-				model: test, 
-				el : html.els[0],
-				delegates : {
-					'button click' : function(event){
-						this.set('status', 'active');
-					}
-				}
-			});
-
-			var triggerCount = 0;
-
-			view.on('delegate-fired', function(el, model, selector){
-
-					expect(++triggerCount).to.equal(1);
-
-					expect(model.get('status')).to.equal('active');
-					expect(selector).to.equal('click a[rel="self"]')
-
-					done();
-
-				});
-
-			simulateClick( html.find('button') );
-			*/
 
 		});
 
@@ -799,12 +776,93 @@ describe("suite", function(){
 
 		});
 
+		describe('if-not', function(){
+
+			it('Shows and hides an element based on truthiness of model attribute', function(){
+
+				var html, test;
+
+				html = dom('<div if-not="active"></div>');
+				test = new Model({
+					active : true
+				});
+
+				new HyperboneView({
+					model : test,
+					el : html.els[0]
+				});
+
+				expect(html.els[0].style.display).to.equal('none');
+
+				test.set('active', false);
+
+				expect(html.els[0].style.display).to.not.equal('none');
+
+			});
+
+		});
+
 		describe('hb-trigger', function(){
+			
+			it('triggers a hyperbone event on click and passes the correct model', function( done ){
 
-			it('triggers a backbone event and passes the correct model', function(){
+				var test, html, view;
 
+				html = dom('<div><button hb-trigger="test-hb-trigger">Click me</button></div>');
 				
-			})
+				test = new Model({
+					val : "hello"
+				});
+
+				new HyperboneView({ 
+					model: test, 
+					el : html.els[0]
+				});
+	
+				test.on('test-hb-trigger', function(){
+
+					expect(this.get('val')).to.equal('hello');
+					done();
+
+				});
+
+				simulateClick(html.find('button'));
+
+			});
+			
+			it('triggers a hyperbone event and passes the correct model for nested models', function( done ){
+
+				var test, html, view;
+
+				html = dom('<div><ul hb-with="collection"><li hb-trigger="some-event">{{name}}</li></ul></div>');
+				
+				test = new Model({
+					val : "hello",
+					collection : [
+						{
+							name : "One"
+						},
+						{
+							name : "Two"
+						}
+					]
+				});
+
+				new HyperboneView({ 
+					model: test, 
+					el : html.els[0]
+				});
+	
+				test.on('some-event:collection', function( model ){
+
+					expect(model.get('name')).to.equal('Two');
+					done();
+
+				});
+
+				simulateClick(html.find('li').last());
+
+			});
 
 		});
 
@@ -934,6 +992,27 @@ describe("suite", function(){
 
 		});
 
+		it("does, however, pick up the collection/model once its added", function(){
+
+			var html, test, view;
+
+			html = dom('<ul hb-with="not-in-model"><li>{{Name}}</li></ul>');
+			test = new Model({
+			});
+
+			expect(function(){
+				new HyperboneView({
+					model : test,
+					el : html.els[0]
+				});
+			}).to.not.throw();
+
+			test.set('not-in-model', [{ Name : 'well done'}]);
+
+			expect( html.find('li').text() ).to.equal('well done');
+
+		});
+
 		it("defaults to a collection for a non-existent property for hb-with", function(){
 
 			var html, test, view;
@@ -950,6 +1029,50 @@ describe("suite", function(){
 			expect(test.get('not-in-model').models).to.be.ok;
 
 		});
+
+		it('doesnt destroy text nodes if the result of a template is a totally empty string (issue #3)', function(){
+
+			var html, test, view;
+
+			html = dom('<p>{{empty}}</p>');
+			test = new Model({
+				empty : ''
+			});
+
+			new HyperboneView({
+				model : test,
+				el : html.els[0]
+			});
+
+			expect( html.text() ).to.equal('\u200b');
+
+			test.set('empty', 'not empty');
+
+			expect( html.text() ).to.equal('not empty');			
+
+		});
+
+		it('doesnt ignore the second use of hb-with in the same scope when added later (issue #1)', function(){
+
+			var html, test, view;
+
+			html = dom('<section><p hb-with="spans"><span>1: {{name}}</span></p><p hb-with="spans"><span>2: {{name}}</span></p></section>');
+			test = new Model({
+				spans : [
+				]
+			});
+
+			new HyperboneView({
+				model : test,
+				el : html.els[0]
+			});
+
+			test.get('spans').add({ name : "test 1"});
+
+			expect( html.find('p').at(0).text() ).to.equal('1: test 1');
+			expect( html.find('p').at(1).text() ).to.equal('2: test 1');
+
+		})
 
 	})
 
