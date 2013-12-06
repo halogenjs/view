@@ -6,7 +6,7 @@
 
 Push style template system for Hyperbone (and probably Backbone) models, allowing strict model/view separation.
 
-You get 'if', 'hb-trigger', 'hb-with' and 'hb-bind' as the only custom attributes you need to learn [See paper on this subject](http://www.cs.usfca.edu/~parrt/papers/mvc.templates.pdf).
+You get 'if', 'if-not', 'hb-trigger', 'hb-click-toggle', 'hb-with' and 'hb-bind' as the only custom attributes you need to learn [See paper on this subject](http://www.cs.usfca.edu/~parrt/papers/mvc.templates.pdf).
 
 ## Features
 
@@ -336,9 +336,11 @@ Slightly more useful than this is the ability to iterate through collections wit
 
 ### hb-trigger="hyperbone-event"
 
-On clicking an element with the hb-trigger attribute, a subscribeable hyperbone event is fired. The first parameter is the model that originated the event.
+On clicking an element with the hb-trigger attribute, a subscribeable hyperbone event is fired. The handler is passed three parameters - the originating model, the name of the signal and a function to cancel any default DOM events.
 
-This comes in especially handy when you want to deal with a particular model inside a collection.. 
+This solves a particular problem of being able to access individual models within collections without doing horrible things to the DOM.
+
+A futher example:
 
 Our model contains...
 ```js
@@ -363,16 +365,42 @@ And our view makes a new li for each filter. The scope of each li is the individ
 ```
 Which means when that li is clicked, the 'filters-changed' event fires on the 'filters' object (in backbone style that's `filters-changed:filters`), and the first parameter is the individual filter.
 ```js
-model.on('filters-changed:filters', function( filter ){
+model.on('filters-changed:filters', function( filter, signal, cancelDefault ){
+
+  // call cancelDefault() to prevent the default DOM event from firing.
+
   filter.set('active', true);
 })
 ```
 
-Using a custom attribute for this does feel a bit bad but it does mean you can link user interactions to the underlying models, and no code is being run in the View. Everything's on the model, which is as it should be. 
+### hb-click-toggle="model-attribute"
+
+The most common use case for `hb-trigger` is actually just toggling a flag on or off, so this custom attribute automates this for you.
+
+```html
+<section>
+  <section if-not="editing">
+    <button hb-click-toggle="editing">Edit</button>
+    <p>Hello {{Name}}</p>
+  </section>
+  <section if="editing">
+    <button hb-click-toggle="editing">View</button>
+    <p>Enter your name:<input hb-bind="Name"></p>
+  </section>
+</section>
+```
+
+That's really all there is to it. You can, of course, bind to the change event and do somethign else... 
+
+```js
+app.on('change:editing', function(){
+  // editing has changed!
+})
+```
 
 ### hb-bind
 
-This attribute allows two-way binding to form inputs to allow an easy way to let your users interact with your model.
+This attribute allows two-way binding to form inputs to allow an easy way to let your users interact with your model. 
 
 ```html
 <body class="{{theme}}">

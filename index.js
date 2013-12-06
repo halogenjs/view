@@ -621,7 +621,7 @@ _.extend(attributeHandlers, {
 
     dom(node).on('click', function(e){
 
-      self.model.trigger(prop, self.model, node, e);
+      self.model.trigger(prop, self.model, prop, function(){e.preventDefault();});
 
     });
 

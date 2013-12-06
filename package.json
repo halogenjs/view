@@ -1,6 +1,6 @@
 {
   "name": "hyperbone-view",
-  "version": "0.2.6",
+  "version": "0.2.8",
   "description": "Automatic bindings to the DOM for Hyperbone Models",
   "main": "index.js",
   "scripts": {
