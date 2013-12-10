@@ -2,7 +2,7 @@
   "name": "hyperbone-view",
   "repo": "green-mesa/hyperbone-view",
   "description": "Automatic bindings to the DOM for Hyperbone Models",
-  "version": "0.2.8",
+  "version": "0.2.10",
   "keywords": [],
   "dependencies": {
     "components/underscore": "1.4.4",

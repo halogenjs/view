@@ -343,6 +343,28 @@ _.extend(templateHelpers, {
  */
     expression : function( result ){
       return result;
+    },
+/**
+ * "if" template helper, returns string if expression is truthy
+ *
+ * @param {Expression} val, {String} str
+ * @return string
+ * @api private
+ */
+    if : function (val, str){
+      // this helper returns str if val is truthy. 
+      return (val ? str : '');
+    },
+/**
+ * "if-eq" template helper, returns str if the value equals the comparator
+ *
+ * @param {Expression} val, {Expression} com {String} str
+ * @return string
+ * @api private
+ */
+    'if-eq' : function(val, com, str){
+      // this helper returns str if val is sequel to the comparator.
+      return ( val === com ? str : '');
     }
 
 });
