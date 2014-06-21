@@ -1,10 +1,15 @@
 {
   "name": "hyperbone-view",
-  "version": "0.2.10",
+  "version": "0.2.12",
   "description": "Automatic bindings to the DOM for Hyperbone Models",
   "main": "index.js",
   "scripts": {
     "test": "grunt install-build-test"
+  },
+  "dependencies" : {
+    "underscore" : "1.4.4",
+    "green-mesa-dom" : "0.12.2",
+    "green-mesa-backbone-events" : "1.0.2"
   },
   "repository": {
     "type": "git",
@@ -26,5 +31,9 @@
   },
   "author": "template",
   "license": "MIT",
-  "readmeFilename": "Readme.md"
+  "readmeFilename": "Readme.md",
+  "browser" : {
+    "dom" : "green-mesa-dom",
+    "backbone-events" : "green-mesa-backbone-events"
+  }
 }
