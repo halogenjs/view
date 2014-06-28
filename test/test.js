@@ -1,30 +1,35 @@
+var hyperboneView = require('../index.js');
+var dom = require('green-mesa-dom');
+var Model = require('hyperbone-model').Model;
+var utils = require('./test-utils.js');
+
+var chai = require('chai');
+var expect = chai.expect;
+var should = chai.should();
+
 
 describe("suite", function(){
-
-
 
 	describe("Environment", function(){
 
 		it("Environment", function(){
 
 			should.exist(dom);
-			should.exist(useFixture);
-			should.exist(fixtures);
+			should.exist(utils.useFixture);
 			should.exist(Model);
-			should.exist(setValueAndTrigger);
-			should.exist(require('hyperbone-view'));
-			should.exist(require('hyperbone-view').HyperboneView);
-			should.exist(require('hyperbone-view').registerHelper);
-			should.exist(require('hyperbone-view').registerAttributeHandler);
+			should.exist(utils.setValueAndTrigger);
+			should.exist(hyperboneView);
+			should.exist(hyperboneView.HyperboneView);
+			should.exist(hyperboneView.registerHelper);
+			should.exist(hyperboneView.registerAttributeHandler);
 
 		})
 
-	})
-
+	});
 
 	describe("Templates within Innertext", function(){
 
-		var HyperboneView = require('hyperbone-view').HyperboneView;
+		var HyperboneView = hyperboneView.HyperboneView;
 
 		it("Can apply a model to template within innertext with property alias", function(){
 
@@ -71,7 +76,7 @@ describe("suite", function(){
 				test : "Hello world"
 			});
 
-			require('hyperbone-view').registerHelper('uppercase', function(str){ return str.toUpperCase(); });
+			hyperboneView.registerHelper('uppercase', function(str){ return str.toUpperCase(); });
 
 			new HyperboneView({ 
 				model: test, 
@@ -135,7 +140,7 @@ describe("suite", function(){
 				test : "Hello world"
 			});
 
-			require('hyperbone-view').registerHelper('uppercase', function(str){ return str.toUpperCase(); })
+			hyperboneView.registerHelper('uppercase', function(str){ return str.toUpperCase(); })
 
 			new HyperboneView({ 
 				model: test, 
@@ -155,7 +160,7 @@ describe("suite", function(){
 
 	describe("Templates within attributes", function(){
 
-		var HyperboneView = require('hyperbone-view').HyperboneView;
+		var HyperboneView = hyperboneView.HyperboneView;
 
 		it("Can apply a model to template within an attribute with property alias", function(){
 
@@ -202,7 +207,7 @@ describe("suite", function(){
 				className : "ActIve"
 			});
 
-			require('hyperbone-view').registerHelper('lowercase', function(str){ return str.toLowerCase() })
+			hyperboneView.registerHelper('lowercase', function(str){ return str.toLowerCase() })
 
 			new HyperboneView({ 
 				model: test, 
@@ -266,7 +271,7 @@ describe("suite", function(){
 				active : "ACTIVE"
 			});
 
-			require('hyperbone-view').registerHelper('lowercase', function(str){ return str.toLowerCase(); })
+			hyperboneView.registerHelper('lowercase', function(str){ return str.toLowerCase(); })
 
 			new HyperboneView({ 
 				model: test, 
@@ -286,7 +291,7 @@ describe("suite", function(){
 
 	describe("Arbitrary expressions", function(){
 
-		var HyperboneView = require('hyperbone-view').HyperboneView;
+		var HyperboneView = hyperboneView.HyperboneView;
 
 		it("can do a sum if you like", function(){
 
@@ -358,7 +363,7 @@ describe("suite", function(){
 
 	describe("Hypermedia extensions", function(){
 
-		var HyperboneView = require('hyperbone-view').HyperboneView;
+		var HyperboneView = hyperboneView.HyperboneView;
 
 		it("Can get the link to self from built in url() helper", function(){
 
@@ -508,7 +513,7 @@ describe("suite", function(){
 
 	describe("Issues its own events", function(){
 
-		var HyperboneView = require('hyperbone-view').HyperboneView;
+		var HyperboneView = hyperboneView.HyperboneView;
 
 		// could really do with more extensive testing of this but really we're just testing DOM's event 
 		// handler. I found the actual delegate stuff didn't work which is infuriating really.
@@ -581,7 +586,7 @@ describe("suite", function(){
 
 	describe("Nested model handling", function(){
 
-		var HyperboneView = require('hyperbone-view').HyperboneView;
+		var HyperboneView = hyperboneView.HyperboneView;
 
 		it("Can change scope to a nested model with hb-with attribute", function(){
 
@@ -645,7 +650,7 @@ describe("suite", function(){
 
 	describe("Collection handling", function(){
 
-		var HyperboneView = require('hyperbone-view').HyperboneView;
+		var HyperboneView = hyperboneView.HyperboneView;
 
 		it("Will iterate through a collection", function(){
 
@@ -686,7 +691,7 @@ describe("suite", function(){
 
 	describe("Input binding", function(){
 
-		var HyperboneView = require('hyperbone-view').HyperboneView;
+		var HyperboneView = hyperboneView.HyperboneView;
 
 		it("will bind an input", function( done ){
 
@@ -713,7 +718,7 @@ describe("suite", function(){
 
 			expect( html.find('p').text() ).to.equal('Backbone style');
 
-			setValueAndTrigger( html.find('input'), "Yay REST level 2 friendly!", "change");
+			utils.setValueAndTrigger( html.find('input'), "Yay REST level 2 friendly!", "change");
 
 		});
 
@@ -740,7 +745,7 @@ describe("suite", function(){
 
 			expect( html.find('select').val() ).to.equal('backbone');
 
-			setValueAndTrigger( html.find('select'), "knockout", "change");
+			utils.setValueAndTrigger( html.find('select'), "knockout", "change");
 
 		});
 
@@ -748,7 +753,7 @@ describe("suite", function(){
 
 	describe("Built In Extensions", function(){
 
-		var HyperboneView = require('hyperbone-view').HyperboneView;
+		var HyperboneView = hyperboneView.HyperboneView;
 
 		describe('if', function(){
 
@@ -826,7 +831,7 @@ describe("suite", function(){
 
 				});
 
-				simulateClick(html.find('button'));
+				utils.simulateClick(html.find('button'));
 
 			});
 			
@@ -860,7 +865,7 @@ describe("suite", function(){
 
 				});
 
-				simulateClick(html.find('li').last());
+				utils.simulateClick(html.find('li').last());
 
 			});
 
@@ -870,7 +875,7 @@ describe("suite", function(){
 
 	describe("Custom attribute handlers", function(){
 
-		var HyperboneView = require('hyperbone-view').HyperboneView;
+		var HyperboneView = hyperboneView.HyperboneView;
 
 		it("will pass a node and all its contents to the custom attribute handler", function( done ){
 
@@ -881,7 +886,7 @@ describe("suite", function(){
 				test : "Hello"
 			});
 
-			require('hyperbone-view').registerAttributeHandler('custom-attribute', function(node, prop, cancel){
+			hyperboneView.registerAttributeHandler('custom-attribute', function(node, prop, cancel){
 
 					expect( prop ).to.equal('test');
 					expect( cancel ).to.be.a('function');
@@ -906,8 +911,6 @@ describe("suite", function(){
 	});
 
 	describe("Extensions API", function(){
-
-		var hyperboneView = require('hyperbone-view');
 
 		it("has a use method", function(){
 
@@ -969,11 +972,490 @@ describe("suite", function(){
 
 	});
 
+describe("hb-with-command", function(){
+
+		var HyperboneView = hyperboneView.HyperboneView;
+
+		it("successfully binds properties to a form", function(){
+
+			var html, m;
+
+			html = dom('<div><form hb-with-command="do-something"><input name="username"><input name="password"><input type="submit" value="Submit"></form></div>');
+
+			m = new Model( utils.useFixture('simple') );
+
+			new HyperboneView({
+				model : m,
+				el : html.els[0]
+			});
+
+			expect( m.command('do-something').get('properties.username') ).to.equal('');
+			expect( m.command('do-something').get('properties.password') ).to.equal('');
+			
+			m.command('do-something').set('properties.username', "Hello");
+			m.command('do-something').set('properties.password', "World");
+
+			expect( html.find('input[name="username"]').val() ).to.equal("Hello");
+			expect( html.find('input[name="password"]').val() ).to.equal("World");
+
+		});
+
+		it("issues a submit:cmds:do-something when user clicks submit", function( done ){
+
+			var html, m;
+
+			html = dom('<div><form hb-with-command="do-something"><input name="username"><input name="password"><input type="submit" id="submit" value="Submit"></form></div>');
+
+			m = new Model( utils.useFixture('simple') );
+
+			new HyperboneView({
+				model : m,
+				el : html.els[0]
+			});
+
+			m.command('do-something').set('properties.username', 'Hello world');
+
+			m.on('submit:do-something', function(cmd){
+				// verify we're getting the command model back
+				expect(cmd.get('properties').get('username')).to.equal('Hello world');
+				done();
+
+			});
+
+			utils.simulateClick(html.find('#submit'));
+
+		});
+
+		it("issues a change:do-something event when the user changes an input value", function( done ){
+
+			var html, m;
+
+			html = dom('<div><form hb-with-command="do-something"><input name="username"><input name="password"><input type="submit" value="Submit"></form></div>');
+
+			m = new Model( utils.useFixture('simple') );
+
+			new HyperboneView({
+				model : m,
+				el : html.els[0]
+			});
+
+			m.on('change:do-something', function(cmd){
+
+				expect(cmd.isHyperbone).to.equal(true);
+				done();
+
+			});
+
+			utils.setValueAndTrigger(html.find('[name="username"]'), 'Hello world', 'change');
+
+		});
+
+		it("successfully binds inputs in a form to properties", function( done ){
+
+			var html, m;
+
+			html = dom('<div><form hb-with-command="do-something"><input name="username"><input name="password"><input type="submit" value="Submit"></form></div>');
+
+			m = new Model( utils.useFixture('simple') );
+
+			new HyperboneView({
+				model : m,
+				el : html.els[0]
+			});
+
+			m.on('change:do-something', function( cmd ){
+
+				expect( m.command('do-something').get('properties.username') ).to.equal("Hello");
+				done();
+			});
+
+			utils.setValueAndTrigger(html.find('[name="username"]'), "Hello", 'change');
+
+		});
+
+		it('can populate the options of a select with an appropriate schema', function(){
+
+			var html, m;
+
+			html = dom('<div><form hb-with-command="with-select"><select name="select-input"></select></form></div>');
+
+			m = new Model({
+				_commands : {
+					'with-select' : {
+						href : "/",
+						method : "POST",
+						properties : {
+							'select-input' : '1'
+						},
+						schema : {
+							'select-input' : {
+								options : [
+									{
+										name : 'One',
+										value : '1'
+									},
+									{
+										name : 'Two',
+										value : '2'
+									},
+									{
+										name : 'Three',
+										value : '3'
+									}
+								]
+							}
+						}
+
+					}
+				}
+			});
+
+			new HyperboneView({
+				model : m,
+				el : html.els[0]
+			});
+
+			expect( html.find('option').length() ).to.equal(3);
+			expect( html.find('option').first().els[0].selected ).to.equal(true);
+			expect( html.find('option').first().attr('value')).to.equal('1');
+			expect( html.find('option').first().text() ).to.equal('One');
+
+			expect( html.find('option').at(1).els[0].selected ).to.equal(false);
+			expect( html.find('option').at(1).attr('value')).to.equal('2');
+			expect( html.find('option').at(1).text() ).to.equal('Two');
+
+			expect( html.find('option').at(2).els[0].selected ).to.equal(false);
+			expect( html.find('option').at(2).attr('value')).to.equal('3');
+			expect( html.find('option').at(2).text() ).to.equal('Three');	
+
+		});
+
+		it('can automatically set an input to required with the appropriate schema', function(){
+
+			var html, m;
+
+			html = dom('<div><form hb-with-command="with-required"><label for="required-input">Required Input</label><input name="required-input"></form></div>');
+
+			m = new Model({
+				_commands : {
+					'with-required' : {
+						href : "/",
+						method : "POST",
+						properties : {
+							'required-input' : 'Hello'
+						},
+						schema : {
+							'required-input' : {
+								required : "required"
+							}
+						}
+
+					}
+				}
+			});
+
+			new HyperboneView({
+				model : m,
+				el : html.els[0]
+			});
+
+			expect( html.find('input').attr('required') ).to.equal('required');
+			expect( html.find('label').hasClass('required')).to.equal(true);
+
+		});
+
+		it('gets the "checked" value of checkbox input from the schema', function(){
+
+			var html, m;
+
+			html = dom('<div><form hb-with-command="with-required"><label for="checkbox-input">Checkbox Input</label><input type="checkbox" name="checkbox-input"></form></div>');
+
+			m = new Model({
+				_commands : {
+					'with-required' : {
+						href : "/",
+						method : "POST",
+						properties : {
+							'checkbox-input' : true
+						},
+						schema : {
+							'checkbox-input' : {
+								type : 'html-checkbox',
+								value : "true" // the default is 'on'. 
+							}
+						}
+
+					}
+				}
+			});
+
+			new HyperboneView({
+				model : m,
+				el : html.els[0]
+			});
+
+			expect( html.find('input').attr('value') ).to.equal("true");
+			expect( html.find('input').els[0].checked ).to.equal(true);
+			expect( html.find('input').val() ).to.equal("true");
+			
+			m.setCommandProperty('with-required.checkbox-input', false);
+
+			expect( html.find('input').els[0].checked ).to.equal(false);
+			expect( html.find('input').val() ).to.equal(false);
+
+
+		});
+
+		describe('hb-sync-with', function(){
+
+			it('can synchronise a command property with an attribute on the parent model', function( done ){
+
+				var html, m;
+
+				html = dom('<div><form hb-with-command="do-something"><input name="username" hb-sync-with="username"><input name="password"><input type="submit" value="Submit"></form></div>');
+
+				m = new Model( utils.useFixture('simple') );
+
+				new HyperboneView({
+					model : m,
+					el : html.els[0]
+				});
+
+				m.on('change:username', function( cmd ){
+
+					expect( m.get('username') ).to.equal('Transformed');
+					done();
+				});
+
+				utils.setValueAndTrigger(html.find('[name="username"]'), "Transformed", 'change');
+
+
+			});
+
+		});
+
+		describe('if-property', function(){
+
+			it('can show/hide form fields depending on whether the property exists', function(){
+
+				var html, m;
+
+				html = dom('<div><form hb-with-command="do-something"><input name="username" hb-sync-with="username"><input name="password"><span id="to-be-turned-invisible" if-property="invisible"><input name="invisible"></span><input type="submit" value="Submit"></form></div>');
+
+				m = new Model( utils.useFixture('simple') );
+
+				new HyperboneView({
+					model : m,
+					el : html.els[0]
+				});
+
+				expect( html.find('#to-be-turned-invisible').els[0].style.display ).to.equal('none');
+
+			});
+
+			it('toggles dynamically depending', function(){
+
+				var html, m;
+
+				html = dom('<div><form hb-with-command="do-something"><input name="username" hb-sync-with="username"><input name="password"><span id="to-be-turned-invisible" if-property="invisible"><input name="invisible"></span><input type="submit" value="Submit"></form></div>');
+
+				m = new Model( utils.useFixture('simple') );
+
+				new HyperboneView({
+					model : m,
+					el : html.els[0]
+				});
+
+				expect( html.find('#to-be-turned-invisible').els[0].style.display ).to.equal('none');
+
+				m.reinit( utils.useFixture('simple-extended') );
+
+				expect( html.find('#to-be-turned-invisible').els[0].style.display ).to.not.equal('none');
+
+				m.reinit( utils.useFixture('simple') );
+				
+				expect( html.find('#to-be-turned-invisible').els[0].style.display ).to.equal('none');
+
+			});
+
+		});
+	});
+
+	describe('Async hb-with-command', function(){
+
+		var HyperboneView = hyperboneView.HyperboneView;
+
+		it('can bind to a command that appears after view initialised', function(){
+
+			var html, m;
+
+			html = dom('<div><form hb-with-command="do-something"><input name="username"><input name="password"><input type="submit" value="Submit"></form></div>');
+
+			// no command yet...
+			m = new Model({});
+
+			new HyperboneView({
+				model : m,
+				el : html.els[0]
+			});
+
+			// first, the form should be hidden
+			expect( html.find('form').els[0].style.display ).to.equal('none');
+			expect( html.find('form').is('.bound-to-command')).to.equal(false);
+
+			// now we add the command to teh model with a reinit
+			m.reinit( utils.useFixture('simple') );
+
+			expect( html.find('form').els[0].style.display ).to.not.equal('none');
+			expect( html.find('form').is('.bound-to-command') ).to.equal(true);
+
+		});
+
+		it('can unbind a form if the command disappears', function(){
+
+			var html, m;
+
+			html = dom('<div><form hb-with-command="do-something"><input name="username"><input name="password"><input type="submit" value="Submit"></form></div>');
+
+			// no command yet...
+			m = new Model( utils.useFixture('simple') );
+
+			new HyperboneView({
+				model : m,
+				el : html.els[0]
+			});
+
+			expect( html.find('form').els[0].style.display ).to.not.equal('none');
+			expect( html.find('form').is('.bound-to-command') ).to.equal(true);
+
+			// first, the form should be hidde
+
+			// now we add the command to teh model with a reinit
+			m.reinit({
+				_commands : {}
+			});
+
+			expect( html.find('form').els[0].style.display ).to.equal('none');
+			expect( html.find('form').is('.bound-to-command')).to.equal(false);
+
+
+		});
+
+
+		it('can bind, unbind, rebind...', function( done ){
+
+			var html, m;
+
+			html = dom('<div><form hb-with-command="do-something"><input name="username"><input name="password"><input type="submit" value="Submit"></form></div>');
+
+			// no command yet...
+			m = new Model( utils.useFixture('simple') );
+
+			new HyperboneView({
+				model : m,
+				el : html.els[0]
+			});
+
+			expect( html.find('form').els[0].style.display ).to.not.equal('none');
+			expect( html.find('form').is('.bound-to-command') ).to.equal(true);
+
+			// first, the form should be hidde
+
+			// now we add the command to teh model with a reinit
+			m.reinit({
+				_commands : {}
+			});
+
+			expect( html.find('form').els[0].style.display ).to.equal('none');
+			expect( html.find('form').is('.bound-to-command')).to.equal(false);
+
+			m.reinit(utils.useFixture('simple'));
+
+			expect( html.find('form').els[0].style.display ).to.not.equal('none');
+			expect( html.find('form').is('.bound-to-command') ).to.equal(true);	
+				
+			m.on('change:do-something', function(cmd){
+
+				expect(cmd.isHyperbone).to.equal(true);
+				done();
+
+			});
+
+			utils.setValueAndTrigger(html.find('[name="username"]'), 'Hello world', 'change');
+
+		});
+
+	});
+
+	describe("if-command and if-not-command", function(){
+
+		var HyperboneView = hyperboneView.HyperboneView;
+
+		it('Hides and shows an element correctly if a command exists or not', function(){
+
+
+			var html, m;
+
+			html = dom('<div><p if-command="do-something">Do something command exists!</div>');
+
+			// no command yet...
+			m = new Model( utils.useFixture('simple') );
+
+			new HyperboneView({
+				model : m,
+				el : html.els[0]
+			});
+
+			expect( html.find('p').els[0].style.display ).to.not.equal('none');
+
+			m.reinit({
+				_commands : {}
+			});
+
+			expect( html.find('p').els[0].style.display ).to.equal('none');
+
+			m.reinit( utils.useFixture('simple'));
+
+			expect( html.find('p').els[0].style.display ).to.not.equal('none');
+
+		});
+
+		it('Hides and shows an element correctly if a command exists or not', function(){
+
+
+			var html, m;
+
+			html = dom('<div><p if-not-command="do-something">Do Something command doesn\'t exist!</div>');
+
+			// no command yet...
+			m = new Model( utils.useFixture('simple') );
+
+			new HyperboneView({
+				model : m,
+				el : html.els[0]
+			});
+
+			expect( html.find('p').els[0].style.display ).to.equal('none');
+
+			m.reinit({
+				_commands : {}
+			});
+
+			expect( html.find('p').els[0].style.display ).to.not.equal('none');
+
+			m.reinit( utils.useFixture('simple'));
+
+			expect( html.find('p').els[0].style.display ).to.equal('none');
+
+		});
+
+	});
+
 	// Tests for bugs that have emerged
 
 	describe("Issues", function(){
 
-		var HyperboneView = require('hyperbone-view').HyperboneView;
+		var HyperboneView = hyperboneView.HyperboneView;
 
 		it("doesn't crash when template uses hb-with for non-existent collection", function(){
 
@@ -1080,7 +1562,7 @@ describe("suite", function(){
 
 			html = dom("<section>{{test(model.get('thing'))}}</section>");
 
-			require('hyperbone-view').use({
+			hyperboneView.use({
 				templateHelpers : {
 					'test' : function(val){
 						return val;
@@ -1111,7 +1593,7 @@ describe("suite", function(){
 
 			html = dom("<section><p>{{url()}}</p><p>{{rel('test')}}</p></section>");
 
-			require('hyperbone-view').use({
+			hyperboneView.use({
 				templateHelpers : {
 					'test' : function(val){
 						return val;

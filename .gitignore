@@ -1,7 +1,5 @@
 # npm stuff
 node_modules
-# component stuff
-components
-build
+test/browserified_tests.js
 # Mac crap
 .DS_Store

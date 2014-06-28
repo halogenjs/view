@@ -2,6 +2,31 @@
 
 [![Build Status](https://travis-ci.org/green-mesa/hyperbone-view.png?branch=master)](https://travis-ci.org/green-mesa/hyperbone-view)
 
+## Please note that this module is no longer being maintained. 
+
+It has been replaced with [HalogenJS View](https://github.com/halogenjs/view).
+
+## Installing
+
+```sh
+$ npm install --save hyperbone-view
+```
+
+## Running tests
+
+Once:
+```sh
+$ npm install -g grunt-cli browserify
+```
+Once after cloning repo
+```sh
+$ npm install
+```
+Running tests
+```sh
+$ npm test
+```
+
 ## tl;dr 
 
 Push style template system for Hyperbone (and probably Backbone) models, allowing strict model/view separation.
@@ -580,19 +605,6 @@ Won't work:
 
 - `{{1 + 2}}` 
 
-## Testing
-
-Install testing tools. You probably need PhantomJS on your path.
-
-```back
-  $ npm install && npm install -g grunt-cli
-```
-
-Run the tests:
-
-```bash
-  $ grunt test
-```
 
 ## License
 

@@ -21,7 +21,7 @@ var _ = require('underscore'),
 
 var HyperboneView = function( config ){
 
-  var self = this;
+  var _this = this;
 
   this.activeNodes = [];
   this.delegates = [];
@@ -29,17 +29,17 @@ var HyperboneView = function( config ){
 
   _.extend(this, Events);
 
-  if(config){
+  if (config){
 
-    if(config.initialised){
+    if (config.initialised){
       this.on('initialised', config.initialised);
     }
 
-    if(config.delegates){
+    if (config.delegates){
       this.addDelegate(config.delegates);
     }
 
-    if(config.model && config.el){
+    if (config.model && config.el){
       this.create(config.el, config.model);
     }
 
@@ -74,7 +74,7 @@ HyperboneView.prototype = {
 
     this.trigger('initialised', this.el, this.model);
 
-    if(isNode(this.el.els[0])){
+    if (isNode(this.el.els[0])){
       this.el.css({'visibility':'visible'});
     }
 
@@ -92,7 +92,7 @@ HyperboneView.prototype = {
 
   addDelegate: function(selector, fn){
 
-    if(_.isObject(selector)){
+    if (_.isObject(selector)){
       _.each(selector, function(fn, sel){
         this.addDelegate(sel, fn);
       }, this);
@@ -115,7 +115,7 @@ HyperboneView.prototype = {
 
   evaluate : function(){
 
-    var self = this;
+    var _this = this;
 
     // Visit every node in the dom to check for templated attributes and innerText
     walkDOM(this.el.els[0], function(node){
@@ -127,10 +127,10 @@ HyperboneView.prototype = {
         // check for templated attributes
         _.each(node.attributes, function(attr){
 
-          if(attributeHandlers[attr.name]){
+          if (attributeHandlers[attr.name]){
 
             // custom attribute detected. 
-            attributeHandlers[attr.name].call(self, node, node.getAttribute(attr.name), function(){ continueWalking = false; });
+            attributeHandlers[attr.name].call(_this, node, node.getAttribute(attr.name), function(){ continueWalking = false; });
 
 
           }
@@ -139,9 +139,9 @@ HyperboneView.prototype = {
           var toks = tokenise(attr.nodeValue);
 
           // and if we detect a template...
-          if(toks.length > 1){
+          if (toks.length > 1){
 
-            self.activeNodes.push({
+            _this.activeNodes.push({
               node : node,
               attribute : attr.name,
               original : attr.nodeValue,
@@ -163,7 +163,7 @@ HyperboneView.prototype = {
         // detect a template. 
         if (toks.length > 1){
 
-          self.activeNodes.push({
+          _this.activeNodes.push({
             node : node,
             expressions : getExpressions(toks),
             original : node.wholeText,
@@ -196,7 +196,7 @@ HyperboneView.prototype = {
 
   bindToModel : function(){
 
-    var self = this;
+    var _this = this;
 
     // having established our list of templates, iterate through
     // bind to model events and execute the template immediately.
@@ -206,7 +206,10 @@ HyperboneView.prototype = {
 
       _.each(node.expressions, function( expr ){
 
-        var ev = "change", subExpr, modelGets, relsOrUrls;
+        var ev = 'change',
+          subExpr,
+          modelGets,
+          resOrUrls;
 
         if (isAlias(expr)){
 
@@ -214,7 +217,7 @@ HyperboneView.prototype = {
 
         } else if (subExpr = tokeniseHelper(expr)){
 
-            ev = 'change:' + subExpr.val;
+          ev = 'change:' + subExpr.val;
 
         } else if (modelGets = expr.match(/model\.get\((\'|\")([\S]+)(\'|\")\)/g)){
           // test for use of model.get('something') inside a template...
@@ -226,32 +229,32 @@ HyperboneView.prototype = {
 
           });
 
-          if(props.length){
+          if (props.length){
             ev = props.join(' ');
           }
 
-        } else if(resOrUrls = expr.match(/url\(\)/)){
+        } else if (resOrUrls = expr.match(/url\(\)/)){
           // test for use of rel() or url() inside a template
-          ev = "change-rel:self";
+          ev = 'change-rel:self';
 
-        } else if(resOrUrls = expr.match(/rel\((\'|\")([\S]+)(\'|\")\)/)){
+        } else if (resOrUrls = expr.match(/rel\((\'|\")([\S]+)(\'|\")\)/)){
 
-          ev = "change-rel:" + resOrUrls[2];
+          ev = 'change-rel:' + resOrUrls[2];
 
         }
 
         this.model.on(ev, function(val){
 
-          render.call(self, node);
+          render.call(_this, node);
 
-          self.trigger('updated', self.el, self.model, ev);
+          _this.trigger('updated', _this.el, _this.model, ev);
 
         });
 
 
       }, this);
 
-      render.call(self, node);
+      render.call(_this, node);
 
 
     }, this);
@@ -270,7 +273,7 @@ HyperboneView.prototype = {
 
   activateDelegates : function(){
 
-    var self = this;
+    var _this = this;
 
     // having established our list of templates, iterate through
     // bind to model events and execute the template immediately.
@@ -282,8 +285,8 @@ HyperboneView.prototype = {
 
       this.el.on(event, selector, function(e){
         //e.preventDefault();
-        delegate.fn.call( self.model, e, self.model, self.el );
-        self.trigger('delegate-fired', self.el, self.model, delegate.selector);
+        delegate.fn.call( _this.model, e, _this.model, _this.el );
+        _this.trigger('delegate-fired', _this.el, _this.model, delegate.selector);
 
       });
 
@@ -307,9 +310,9 @@ _.extend(templateHelpers, {
  * @return string
  * @api private
  */
-    get : function( prop ){
-      return  prop;
-    },
+  get : function( prop ){
+    return  prop;
+  },
 /**
  * "url" template helper
  *
@@ -317,13 +320,13 @@ _.extend(templateHelpers, {
  * @return string
  * @api private
  */
-    url : function(blank, model){
-      try {
-        return model.url();
-      }catch(e){
-        return "";
-      }
-    },
+  url : function(blank, model){
+    try {
+      return model.url();
+    }catch(e){
+      return '';
+    }
+  },
 /**
  * "rel" template helper
  *
@@ -331,9 +334,9 @@ _.extend(templateHelpers, {
  * @return string
  * @api private
  */
-    rel : function(rel, model){
-      return model.rel(rel);
-    },
+  rel : function(rel, model){
+    return model.rel(rel);
+  },
 /**
  * "expression" template helper
  *
@@ -341,9 +344,9 @@ _.extend(templateHelpers, {
  * @return string
  * @api private
  */
-    expression : function( result ){
-      return result;
-    },
+  expression : function( result ){
+    return result;
+  },
 /**
  * "if" template helper, returns string if expression is truthy
  *
@@ -351,10 +354,10 @@ _.extend(templateHelpers, {
  * @return string
  * @api private
  */
-    if : function (val, str){
-      // this helper returns str if val is truthy. 
-      return (val ? str : '');
-    },
+  if : function (val, str){
+    // this helper returns str if val is truthy. 
+    return (val ? str : '');
+  },
 /**
  * "if-eq" template helper, returns str if the value equals the comparator
  *
@@ -362,10 +365,10 @@ _.extend(templateHelpers, {
  * @return string
  * @api private
  */
-    'if-eq' : function(val, com, str){
-      // this helper returns str if val is sequel to the comparator.
-      return ( val === com ? str : '');
-    }
+  'if-eq' : function(val, com, str){
+    // this helper returns str if val is sequel to the comparator.
+    return ( val === com ? str : '');
+  }
 
 });
 
@@ -381,12 +384,12 @@ var registerHelper;
 
 module.exports.registerHelper = registerHelper = function(name, fn){
   
-  if(_.isObject(name)){
+  if (_.isObject(name)){
     _.extend(templateHelpers, name);
-  }else{
+  } else {
     templateHelpers[name] = fn;
   }
-}
+};
 
 _.extend(attributeHandlers, {
 
@@ -397,28 +400,28 @@ _.extend(attributeHandlers, {
  * @return null
  * @api private
  */
-  "rel" : function( node, prop){
+  'rel' : function( node, prop){
 
-    var rel, self = this;
+    var rel, _this = this;
 
     // CONVENTION: If an anchor tag has a 'rel' attribute, and the model 
     // has a matching .rel(), we automatically add/populate the href attribute.
-    if(node.tagName === "A"){
+    if (node.tagName === 'A'){
       rel = node.getAttribute('rel');
       var setHref = function(){
-        var uri = self.model.rel( rel );
+        var uri = _this.model.rel( rel );
         if (uri){
-          node.style.display = "";
+          node.style.display = '';
           node.setAttribute('href', uri);
         } else {
-          node.style.display = "none";
+          node.style.display = 'none';
           node.setAttribute('href', '#');
         }
       };
       // just quickly check the rel isn't templated. If it is, we ignore it.
-      if(rel && tokenise(rel).length === 1){
+      if (rel && tokenise(rel).length === 1){
 
-        this.model.on('add-rel:' + rel + ' remove-rel:' + rel + " change-rel:" + rel, function(){
+        this.model.on('add-rel:' + rel + ' remove-rel:' + rel + ' change-rel:' + rel, function(){
           setHref();
         });
         setHref();
@@ -432,14 +435,14 @@ _.extend(attributeHandlers, {
  * @return null
  * @api private
  */
-  "if" : function( node, prop, cancel ){
+  'if' : function( node, prop, cancel ){
 
-    var self = this, 
+    var _this = this,
     test = function(){
-      dom(node).css({display: ( self.model.get(prop) ? '': 'none') });  
+      dom(node).css({display: ( _this.model.get(prop) ? '': 'none') });
     };
 
-    this.model.on('change:' + prop, function(){ test() });
+    this.model.on('change:' + prop, function(){ test(); });
     // do the initial state.
     test();
   },
@@ -451,14 +454,14 @@ _.extend(attributeHandlers, {
  * @return null
  * @api private
  */
-  "if-not" : function( node, prop, cancel ){
+  'if-not' : function( node, prop, cancel ){
 
-    var self = this, 
+    var _this = this,
     test = function(){
-      dom(node).css({display: ( self.model.get(prop) ? 'none': '') });  
+      dom(node).css({display: ( _this.model.get(prop) ? 'none': '') });
     };
 
-    this.model.on('change:' + prop, function(){ test() });
+    this.model.on('change:' + prop, function(){ test(); });
     // do the initial state.
     test();
   },
@@ -469,24 +472,24 @@ _.extend(attributeHandlers, {
  * @return null
  * @api private
  */
-  "hb-with" : function( node, prop, cancel ){
+  'hb-with' : function( node, prop, cancel ){
 
-    var collection, inner, self = this;
+    var collection, inner, _this = this;
 
     // remove this attribute so it's not found when the subview walks the dom
     node.removeAttribute('hb-with');
 
     collection = this.model.get(prop);
 
-    if(!collection){
+    if (!collection){
       this.model.set(prop, []);
       collection = this.model.get(prop);
     }
 
-    if(collection.models){
+    if (collection.models){
 
       inner = dom( Array.prototype.slice.call(node.children, 0) );
-      inner.style.display = "none";
+      inner.style.display = 'none';
 
       inner.remove();
 
@@ -496,13 +499,13 @@ _.extend(attributeHandlers, {
 
         collection.each(function( model, index, models ){
 
-          if(!node.__nodes[model.cid]){
+          if (!node.__nodes[model.cid]){
 
             var html = inner.clone(true);
             var view = new HyperboneView()
                 .on('updated', function(el, model, event){
 
-                  self.trigger('updated', el, model, "subview " + prop + " " + event);
+                  _this.trigger('updated', el, model, 'subview ' + prop + ' ' + event);
 
                 })
                 .create( html, model);
@@ -519,13 +522,13 @@ _.extend(attributeHandlers, {
 
       collection.on('add', function(model, models, details){
 
-        render(self.model.get(prop));
+        render(_this.model.get(prop));
 
       });
 
       collection.on('remove', function(model, models, details){
 
-        if(node.__nodes[model.cid]){
+        if (node.__nodes[model.cid]){
 
           // attempt to completely destroy the subview..
           node.__nodes[model.cid].el.remove();
@@ -552,7 +555,7 @@ _.extend(attributeHandlers, {
 
         _.each(destroyers, function(fn){fn();});
 
-        render(self.model.get(prop));
+        render(_this.model.get(prop));
 
       });
 
@@ -564,15 +567,15 @@ _.extend(attributeHandlers, {
       new HyperboneView()
         .on('updated', function( el, model, event){
 
-          self.trigger('updated', el, model, "subview " + prop + " " + event);
+          _this.trigger('updated', el, model, 'subview ' + prop + ' ' + event);
 
         })
-        .create( dom(node), self.model.get(prop));
+        .create( dom(node), _this.model.get(prop));
 
     }
 
-   // don't want to process this node's childrens so we cancel
-   cancel();
+    // don't want to process this node's childrens so we cancel
+    cancel();
 
   },
 /**
@@ -582,17 +585,17 @@ _.extend(attributeHandlers, {
  * @return null
  * @api private
  */
-  "hb-bind" : function( node, prop, cancel){
+  'hb-bind' : function( node, prop, cancel){
 
-    var self = this, el = dom(node), attrValue = this.model.get(prop);
+    var _this = this, el = dom(node), attrValue = this.model.get(prop);
 
     el.on('change', function(){
 
-      var oldVal = self.model.get(prop);
+      var oldVal = _this.model.get(prop);
       var val = el.val();
 
       if (oldVal !== val){
-        self.model.set(prop, val);
+        _this.model.set(prop, val);
       }
 
     });
@@ -619,13 +622,13 @@ _.extend(attributeHandlers, {
  * @return null
  * @api private
  */
-  "hb-click-toggle" : function( node, prop, cancel){
+  'hb-click-toggle' : function( node, prop, cancel){
 
-    var self = this;
+    var _this = this;
 
     dom(node).on('click', function(e){
 
-      self.model.set(prop, !self.model.get(prop));
+      _this.model.set(prop, !_this.model.get(prop));
 
     });
 
@@ -637,17 +640,92 @@ _.extend(attributeHandlers, {
  * @return null
  * @api private
  */
-  "hb-trigger" : function( node, prop, cancel){
+  'hb-trigger' : function( node, prop, cancel){
 
-    var self = this;
+    var _this = this;
 
     dom(node).on('click', function(e){
 
-      self.model.trigger(prop, self.model, prop, function(){e.preventDefault();});
+      _this.model.trigger(prop, _this.model, prop, function(){e.preventDefault();});
 
     });
 
+  },
+  /**
+   * "hb-with-command" used on forms to bind them to a particular command.
+   *
+   * @param {Object} node, {String} event to trigger, {Function} cancel
+   * @return null
+   * @api private
+   */
+  'hb-with-command' : function(node, value, cancel){
+
+    var _this = this;
+    var root = dom(node);
+    var showHide = true;
+
+    if (node.getAttribute('if') || node.getAttribute('if-not')) showHide = false;
+
+
+    var checkCommand = function(){
+      var cmd = _this.model.command(value);
+      if (cmd && !root.__isBound){
+        // bind or rebind the form to the command
+        // this has to happen every time 'add-command' is called
+        // because the command will be a completely different model
+        // in the parent model and thus all the old events bound
+        // won't work
+        bindCommand(cmd, root, _this.model, value);
+      } else if (!cmd && root.__isBound) {
+        // unbind if the command has been removed. We only
+        // care about clearing down the DOM events here though
+        unBindCommand(cmd, root, _this.model, value);
+      }
+      // hide forms bound to non-existent commands
+      if (showHide) dom(node).css({display: ( cmd ? '': 'none') });
+    };
+    // bind to add and remove command events to make this turn on and offable and deal
+    // with commands loaded from a server after teh view initialised.
+    this.model.on('add-command:' + value + ' remove-command:' + value, checkCommand);
+    
+    checkCommand();
+
+  },
+  /**
+   * "if-command" toggles the block on or off if the command exists or not.
+   *
+   * @param {Object} node, {String} event to trigger, {Function} cancel
+   * @return null
+   * @api private
+   */
+  'if-command' : function(node, prop, cancel){
+    var _this = this,
+      test = function(){
+        dom(node).css({display: ( _this.model.command(prop) ? '': 'none') });
+      };
+
+    this.model.on('add-command:' + prop + ' remove-command:' + prop, test);
+    // do the initial state.
+    test();
+  },
+  /**
+   * "if-not-command" toggles a block off or on if the command exists or not.
+   *
+   * @param {Object} node, {String} event to trigger, {Function} cancel
+   * @return null
+   * @api private
+   */
+  'if-not-command' : function(node, prop, cancel){
+    var _this = this,
+      test = function(){
+        dom(node).css({display: ( _this.model.command(prop) ? 'none': '') });
+      };
+
+    this.model.on('add-command:' + prop + ' remove-command:' + prop, test);
+    // do the initial state.
+    test();
   }
+
 
 });
 
@@ -664,14 +742,12 @@ var registerAttributeHandler;
 
 module.exports.registerAttributeHandler = registerAttributeHandler = function(name, fn){
   
-  if(_.isObject(name)){
+  if (_.isObject(name)){
     _.extend(attributeHandlers, name);
-  }else{
+  } else {
     attributeHandlers[name] = fn;
   }
-}
-
-
+};
 
 /**
  * .use() - use an extension
@@ -682,13 +758,13 @@ module.exports.registerAttributeHandler = registerAttributeHandler = function(na
  */
 module.exports.use = function( obj ){
   
-  if(obj.attributeHandlers){
+  if (obj.attributeHandlers){
     _.each(obj.attributeHandlers, function(handler, id){
       registerAttributeHandler(id, handler);
     });
   }
 
-  if(obj.templateHelpers){
+  if (obj.templateHelpers){
     _.each(obj.templateHelpers, function(handler, id){
       registerHelper(id, handler);
     });
@@ -710,8 +786,8 @@ function render( node ){
   if (isNode(node.node)){
     node.node.setAttribute( node.attribute, res);
   } else {
-    if(res===""){
-      res = "\u200B";
+    if (res===''){
+      res = '\u200B';
     }
     node.node.replaceWholeText( res );
   }
@@ -727,7 +803,7 @@ function render( node ){
 
 function walkDOM(node, func){
   var go = func(node);
-  if(go){
+  if (go){
     node = node.firstChild;
     while (node){
       walkDOM(node, func);
@@ -747,11 +823,11 @@ function walkDOM(node, func){
 function getExpressions(toks){
   var expr = [];
   _.each(toks, function(t, i){
-    if(i % 2 === 1){
+    if (i % 2 === 1){
       expr.push(t.trim());
     }
 
-  })
+  });
   return expr;
 }
 
@@ -765,16 +841,15 @@ function getExpressions(toks){
 
 function compile(tokens) {
   var js = [],
-      tokens,
-      token,
-      expr,
-      subTokens;
+    token,
+    expr,
+    subTokens;
 
   for (var i = 0; i < tokens.length; ++i) {
 
     token = tokens[i];
 
-    if (i % 2 == 0) {
+    if (i % 2 === 0) {
 
       js.push('"' + token.replace(/"/g, '\\"') + '"');
 
@@ -786,11 +861,11 @@ function compile(tokens) {
 
       } else if (expr = tokeniseHelper( token )) {
 
-        js.push(' + helpers["' + expr.fn + '"]( model.get("' + expr.val + '"), model) + ')
+        js.push(' + helpers["' + expr.fn + '"]( model.get("' + expr.val + '"), model) + ');
 
       }else if (expr = tokeniseExpression( token )){
 
-        js.push(' + helpers["' + expr.fn + '"](' + (expr.val ? expr.val : '""')+ ', model) + ')   
+        js.push(' + helpers["' + expr.fn + '"](' + (expr.val ? expr.val : '""')+ ', model) + ');
       
       }
     }
@@ -887,4 +962,149 @@ function tokeniseExpression(str) {
 
 function indent(str) {
   return str.replace(/^/gm, '  ');
+}
+
+/**
+ * bind a command to a form.
+ *
+ * @param {Command} cmd, {Element} root, {Model} model, {String} commandName
+ * @return {null}
+ * @api private
+ */
+function bindCommand(cmd, root, model, commandName){
+
+  var properties = cmd.get('properties');
+  var _this = this;
+
+  root.find('[if-property]').each(function(el){
+
+    var property = el.attr('if-property');
+
+    var test = function(){
+      el.css({display: ( properties.attributes.hasOwnProperty(property) ? '': 'none') });
+    };
+
+    properties.on('change:' + property, test);
+
+    test();
+
+  });
+
+  root.find('[name]').each(function(el){
+
+    var property = el.attr('name'), sync, schema;
+
+    if (schema = cmd.get('schema')){
+
+      if (el.is('select') && schema.get(property + '.options')){
+        // clear any existing child options. Scheme overrides all the things.
+        el.empty();
+        cmd.get('schema.' + property + '.options').each(function(option){
+          el.els[0].appendChild(dom('<option value="' + option.get('value')+ '">' + option.get('name') + '</option>').els[0]);
+        });
+      }
+
+      if (schema.get(property + '.required')){
+        el.attr('required', 'required');
+        var label = root.find('label[for="' + property + '"]');
+        if (label.length()){
+          label.addClass('required');
+        }
+      }
+
+      if (schema.get(property + '.disabled')){
+        el.attr('disabled', 'disabled');
+      } else {
+        el.removeAttr('disabled');
+      }
+
+      if (schema.get(property + '.type') === 'html-checkbox'){
+        var valueAttribute = cmd.get('schema.' + property + '.value');
+
+        if (valueAttribute){
+          el.attr('value', valueAttribute);
+        }
+      }
+
+    }
+
+    var val = properties.get(property);
+    el.val(val);
+
+
+    if (el.attr('type') === 'file'){
+
+      if (!cmd._files){
+        cmd._files = {};
+      }
+
+      el.on('change', function(e){
+        var file = el.els[0].files[0];
+        cmd._files[property] = file;
+
+        properties.set(property, el.val());
+        
+        model.trigger('change:' + commandName, file, cmd);
+
+      });
+
+    } else {
+
+      properties.on('change:' + property, function(val){
+        var oldVal = el.val();
+        var newVal = properties.get(property);
+        if (oldVal !== newVal){
+          el.val(newVal);
+        }
+      });
+
+      el.on('change', function(e){
+        var oldVal = properties.get(property);
+        var newVal = el.val();
+
+        if (oldVal !== newVal){
+          properties.set(property, newVal);
+        }
+
+        model.trigger('change:' + commandName, cmd);
+
+      });
+
+    }
+    // bind a particular input to an attribute on the parent model
+    if (sync = el.attr('hb-sync-with')){ // assignment on purpose. do not fix.
+      properties.on('change:' + property, function(properties, val){
+        model.set(sync, val);
+      });
+    }
+
+  });
+
+  root.on('submit', function(e){
+    e.preventDefault();
+    model.trigger('submit:' + commandName, cmd, function(callback){model.execute(commandName, callback); });
+  });
+
+  root.addClass('bound-to-command');
+  root.__isBound = true;
+
+}
+/**
+ * unbinds commands to forms form.
+ *
+ * @param {Command} cmd, {Element} root, {Model} model, {String} commandName
+ * @return {null}
+ * @api private
+ */
+function unBindCommand(cmd, root){
+
+  root.find('[name]').each(function(el){
+
+    el.off('change');
+
+  });
+
+  root.off('submit');
+  root.removeClass('bound-to-command');
+  root.__isBound = false;
 }
