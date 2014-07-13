@@ -1,6 +1,6 @@
-var hyperboneView = require('../index.js');
+var halogenView = require('../index.js');
 var dom = require('green-mesa-dom');
-var Model = require('hyperbone-model').Model;
+var Model = require('halogen-model').Model;
 var utils = require('./test-utils.js');
 
 var chai = require('chai');
@@ -18,10 +18,10 @@ describe("suite", function(){
 			should.exist(utils.useFixture);
 			should.exist(Model);
 			should.exist(utils.setValueAndTrigger);
-			should.exist(hyperboneView);
-			should.exist(hyperboneView.HyperboneView);
-			should.exist(hyperboneView.registerHelper);
-			should.exist(hyperboneView.registerAttributeHandler);
+			should.exist(halogenView);
+			should.exist(halogenView.HalogenView);
+			should.exist(halogenView.registerHelper);
+			should.exist(halogenView.registerAttributeHandler);
 
 		})
 
@@ -29,7 +29,7 @@ describe("suite", function(){
 
 	describe("Templates within Innertext", function(){
 
-		var HyperboneView = hyperboneView.HyperboneView;
+		var HalogenView = halogenView.HalogenView;
 
 		it("Can apply a model to template within innertext with property alias", function(){
 
@@ -40,7 +40,7 @@ describe("suite", function(){
 				test : "Hello world"
 			});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -58,7 +58,7 @@ describe("suite", function(){
 				test : "Hello world"
 			});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -76,9 +76,9 @@ describe("suite", function(){
 				test : "Hello world"
 			});
 
-			hyperboneView.registerHelper('uppercase', function(str){ return str.toUpperCase(); });
+			halogenView.registerHelper('uppercase', function(str){ return str.toUpperCase(); });
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -96,7 +96,7 @@ describe("suite", function(){
 				test : "Hello world"
 			});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -118,7 +118,7 @@ describe("suite", function(){
 				test : "Hello world"
 			});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -140,9 +140,9 @@ describe("suite", function(){
 				test : "Hello world"
 			});
 
-			hyperboneView.registerHelper('uppercase', function(str){ return str.toUpperCase(); })
+			halogenView.registerHelper('uppercase', function(str){ return str.toUpperCase(); })
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -160,7 +160,7 @@ describe("suite", function(){
 
 	describe("Templates within attributes", function(){
 
-		var HyperboneView = hyperboneView.HyperboneView;
+		var HalogenView = halogenView.HalogenView;
 
 		it("Can apply a model to template within an attribute with property alias", function(){
 
@@ -171,7 +171,7 @@ describe("suite", function(){
 				className : "active"
 			});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -189,7 +189,7 @@ describe("suite", function(){
 				className : "active"
 			});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -207,9 +207,9 @@ describe("suite", function(){
 				className : "ActIve"
 			});
 
-			hyperboneView.registerHelper('lowercase', function(str){ return str.toLowerCase() })
+			halogenView.registerHelper('lowercase', function(str){ return str.toLowerCase() })
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -227,7 +227,7 @@ describe("suite", function(){
 				active : "active"
 			});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -249,7 +249,7 @@ describe("suite", function(){
 				active : "active"
 			});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -271,9 +271,9 @@ describe("suite", function(){
 				active : "ACTIVE"
 			});
 
-			hyperboneView.registerHelper('lowercase', function(str){ return str.toLowerCase(); })
+			halogenView.registerHelper('lowercase', function(str){ return str.toLowerCase(); })
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -291,7 +291,7 @@ describe("suite", function(){
 
 	describe("Arbitrary expressions", function(){
 
-		var HyperboneView = hyperboneView.HyperboneView;
+		var HalogenView = halogenView.HalogenView;
 
 		it("can do a sum if you like", function(){
 
@@ -306,7 +306,7 @@ describe("suite", function(){
 				}
 			});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -328,7 +328,7 @@ describe("suite", function(){
 				}
 			});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -350,7 +350,7 @@ describe("suite", function(){
 				}
 			});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -363,7 +363,7 @@ describe("suite", function(){
 
 	describe("Hypermedia extensions", function(){
 
-		var HyperboneView = hyperboneView.HyperboneView;
+		var HalogenView = halogenView.HalogenView;
 
 		it("Can get the link to self from built in url() helper", function(){
 
@@ -378,7 +378,7 @@ describe("suite", function(){
 				}
 			});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -401,7 +401,7 @@ describe("suite", function(){
 				}
 			});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -426,7 +426,7 @@ describe("suite", function(){
 				}
 			});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -452,7 +452,7 @@ describe("suite", function(){
 				}
 			});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -481,7 +481,7 @@ describe("suite", function(){
 			html = dom('<div><a rel="self">Myself</a><a rel="alternate">Alternate</a></div>');
 			test = new Model({});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -513,7 +513,7 @@ describe("suite", function(){
 
 	describe("Issues its own events", function(){
 
-		var HyperboneView = hyperboneView.HyperboneView;
+		var HalogenView = halogenView.HalogenView;
 
 		// could really do with more extensive testing of this but really we're just testing DOM's event 
 		// handler. I found the actual delegate stuff didn't work which is infuriating really.
@@ -535,7 +535,7 @@ describe("suite", function(){
 				status : 'inactive'
 			});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0],
 				initialised : function(el, model){
@@ -563,7 +563,7 @@ describe("suite", function(){
 				status : 'inactive'
 			});
 
-			var view = new HyperboneView({ 
+			var view = new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -586,20 +586,20 @@ describe("suite", function(){
 
 	describe("Nested model handling", function(){
 
-		var HyperboneView = hyperboneView.HyperboneView;
+		var HalogenView = halogenView.HalogenView;
 
-		it("Can change scope to a nested model with hb-with attribute", function(){
+		it("Can change scope to a nested model with hal-with attribute", function(){
 
 			var html, test;
 
-			html = dom('<div hb-with="embedded"><p>{{title}}</p></div>');
+			html = dom('<div hal-with="embedded"><p>{{title}}</p></div>');
 			test = new Model({
 				embedded : {
 					title : "Hello world"
 				}
 			});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -617,14 +617,14 @@ describe("suite", function(){
 
 			var html, test, view;
 
-			html = dom('<div hb-with="embedded"><p>{{title}}</p></div>');
+			html = dom('<div hal-with="embedded"><p>{{title}}</p></div>');
 			test = new Model({
 				embedded : {
 					title : "Hello world"
 				}
 			});
 
-			var view = new HyperboneView({ 
+			var view = new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -650,13 +650,13 @@ describe("suite", function(){
 
 	describe("Collection handling", function(){
 
-		var HyperboneView = hyperboneView.HyperboneView;
+		var HalogenView = halogenView.HalogenView;
 
 		it("Will iterate through a collection", function(){
 
 			var html, test;
 
-			html = dom('<ul hb-with="collection"><li><p>{{title}}</p></li></ul>');
+			html = dom('<ul hal-with="collection"><li><p>{{title}}</p></li></ul>');
 			test = new Model({
 				collection : [
 					{
@@ -671,7 +671,7 @@ describe("suite", function(){
 				]
 			});
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -691,18 +691,18 @@ describe("suite", function(){
 
 	describe("Input binding", function(){
 
-		var HyperboneView = hyperboneView.HyperboneView;
+		var HalogenView = halogenView.HalogenView;
 
 		it("will bind an input", function( done ){
 
 			var html, test, view;
 
-			html = dom('<p>{{test}}</p><input hb-bind="test">');
+			html = dom('<p>{{test}}</p><input hal-bind="test">');
 			test = new Model({
 				test : "Backbone style"
 			});
 
-			var view = new HyperboneView({ 
+			var view = new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -726,12 +726,12 @@ describe("suite", function(){
 
 			var html, test, view;
 
-			html = dom('<p class="{{test}}""><select hb-bind="test"><option value="backbone">Backbone</option><option value="knockout">Knockout</option><option value="angular">Angular</option></select></p>');
+			html = dom('<p class="{{test}}""><select hal-bind="test"><option value="backbone">Backbone</option><option value="knockout">Knockout</option><option value="angular">Angular</option></select></p>');
 			test = new Model({
 				test : "backbone"
 			});
 
-			var view = new HyperboneView({ 
+			var view = new HalogenView({ 
 				model: test, 
 				el : html.els[0]
 			});
@@ -753,7 +753,7 @@ describe("suite", function(){
 
 	describe("Built In Extensions", function(){
 
-		var HyperboneView = hyperboneView.HyperboneView;
+		var HalogenView = halogenView.HalogenView;
 
 		describe('if', function(){
 
@@ -766,7 +766,7 @@ describe("suite", function(){
 					active : true
 				});
 
-				new HyperboneView({
+				new HalogenView({
 					model : test,
 					el : html.els[0]
 				});
@@ -792,7 +792,7 @@ describe("suite", function(){
 					active : true
 				});
 
-				new HyperboneView({
+				new HalogenView({
 					model : test,
 					el : html.els[0]
 				});
@@ -807,24 +807,24 @@ describe("suite", function(){
 
 		});
 
-		describe('hb-trigger', function(){
+		describe('hal-trigger', function(){
 			
-			it('triggers a hyperbone event on click and passes the correct model', function( done ){
+			it('triggers a halogen event on click and passes the correct model', function( done ){
 
 				var test, html, view;
 
-				html = dom('<div><button hb-trigger="test-hb-trigger">Click me</button></div>');
+				html = dom('<div><button hal-trigger="test-hal-trigger">Click me</button></div>');
 				
 				test = new Model({
 					val : "hello"
 				});
 
-				new HyperboneView({ 
+				new HalogenView({ 
 					model: test, 
 					el : html.els[0]
 				});
 	
-				test.on('test-hb-trigger', function(){
+				test.on('test-hal-trigger', function(){
 
 					expect(this.get('val')).to.equal('hello');
 					done();
@@ -835,11 +835,11 @@ describe("suite", function(){
 
 			});
 			
-			it('triggers a hyperbone event and passes the correct model for nested models', function( done ){
+			it('triggers a halogen event and passes the correct model for nested models', function( done ){
 
 				var test, html, view;
 
-				html = dom('<div><ul hb-with="collection"><li hb-trigger="some-event">{{name}}</li></ul></div>');
+				html = dom('<div><ul hal-with="collection"><li hal-trigger="some-event">{{name}}</li></ul></div>');
 				
 				test = new Model({
 					val : "hello",
@@ -853,7 +853,7 @@ describe("suite", function(){
 					]
 				});
 
-				new HyperboneView({ 
+				new HalogenView({ 
 					model: test, 
 					el : html.els[0]
 				});
@@ -875,7 +875,7 @@ describe("suite", function(){
 
 	describe("Custom attribute handlers", function(){
 
-		var HyperboneView = hyperboneView.HyperboneView;
+		var HalogenView = halogenView.HalogenView;
 
 		it("will pass a node and all its contents to the custom attribute handler", function( done ){
 
@@ -886,7 +886,7 @@ describe("suite", function(){
 				test : "Hello"
 			});
 
-			hyperboneView.registerAttributeHandler('custom-attribute', function(node, prop, cancel){
+			halogenView.registerAttributeHandler('custom-attribute', function(node, prop, cancel){
 
 					expect( prop ).to.equal('test');
 					expect( cancel ).to.be.a('function');
@@ -895,7 +895,7 @@ describe("suite", function(){
 
 			})
 
-			new HyperboneView({ 
+			new HalogenView({ 
 				model: test, 
 				el : html.els[0],
 				initialised : function(){
@@ -914,7 +914,7 @@ describe("suite", function(){
 
 		it("has a use method", function(){
 
-			expect(hyperboneView.use).to.be.a('function');
+			expect(halogenView.use).to.be.a('function');
 
 		});
 
@@ -934,9 +934,9 @@ describe("suite", function(){
 				}
 			};
 
-			hyperboneView.use(extension);
+			halogenView.use(extension);
 
-			new hyperboneView.HyperboneView({
+			new halogenView.HalogenView({
 				model : test,
 				el : html.els[0]
 			});
@@ -961,9 +961,9 @@ describe("suite", function(){
 				}
 			};
 
-			hyperboneView.use(extension);
+			halogenView.use(extension);
 
-			new hyperboneView.HyperboneView({
+			new halogenView.HalogenView({
 				model : test,
 				el : html.els[0]
 			});
@@ -972,19 +972,19 @@ describe("suite", function(){
 
 	});
 
-describe("hb-with-command", function(){
+describe("hal-with-command", function(){
 
-		var HyperboneView = hyperboneView.HyperboneView;
+		var HalogenView = halogenView.HalogenView;
 
 		it("successfully binds properties to a form", function(){
 
 			var html, m;
 
-			html = dom('<div><form hb-with-command="do-something"><input name="username"><input name="password"><input type="submit" value="Submit"></form></div>');
+			html = dom('<div><form hal-with-command="do-something"><input name="username"><input name="password"><input type="submit" value="Submit"></form></div>');
 
 			m = new Model( utils.useFixture('simple') );
 
-			new HyperboneView({
+			new HalogenView({
 				model : m,
 				el : html.els[0]
 			});
@@ -1004,11 +1004,11 @@ describe("hb-with-command", function(){
 
 			var html, m;
 
-			html = dom('<div><form hb-with-command="do-something"><input name="username"><input name="password"><input type="submit" id="submit" value="Submit"></form></div>');
+			html = dom('<div><form hal-with-command="do-something"><input name="username"><input name="password"><input type="submit" id="submit" value="Submit"></form></div>');
 
 			m = new Model( utils.useFixture('simple') );
 
-			new HyperboneView({
+			new HalogenView({
 				model : m,
 				el : html.els[0]
 			});
@@ -1030,18 +1030,18 @@ describe("hb-with-command", function(){
 
 			var html, m;
 
-			html = dom('<div><form hb-with-command="do-something"><input name="username"><input name="password"><input type="submit" value="Submit"></form></div>');
+			html = dom('<div><form hal-with-command="do-something"><input name="username"><input name="password"><input type="submit" value="Submit"></form></div>');
 
 			m = new Model( utils.useFixture('simple') );
 
-			new HyperboneView({
+			new HalogenView({
 				model : m,
 				el : html.els[0]
 			});
 
 			m.on('change:do-something', function(cmd){
 
-				expect(cmd.isHyperbone).to.equal(true);
+				expect(cmd.isHalogen).to.equal(true);
 				done();
 
 			});
@@ -1054,11 +1054,11 @@ describe("hb-with-command", function(){
 
 			var html, m;
 
-			html = dom('<div><form hb-with-command="do-something"><input name="username"><input name="password"><input type="submit" value="Submit"></form></div>');
+			html = dom('<div><form hal-with-command="do-something"><input name="username"><input name="password"><input type="submit" value="Submit"></form></div>');
 
 			m = new Model( utils.useFixture('simple') );
 
-			new HyperboneView({
+			new HalogenView({
 				model : m,
 				el : html.els[0]
 			});
@@ -1077,7 +1077,7 @@ describe("hb-with-command", function(){
 
 			var html, m;
 
-			html = dom('<div><form hb-with-command="with-select"><select name="select-input"></select></form></div>');
+			html = dom('<div><form hal-with-command="with-select"><select name="select-input"></select></form></div>');
 
 			m = new Model({
 				_commands : {
@@ -1110,7 +1110,7 @@ describe("hb-with-command", function(){
 				}
 			});
 
-			new HyperboneView({
+			new HalogenView({
 				model : m,
 				el : html.els[0]
 			});
@@ -1134,7 +1134,7 @@ describe("hb-with-command", function(){
 
 			var html, m;
 
-			html = dom('<div><form hb-with-command="with-required"><label for="required-input">Required Input</label><input name="required-input"></form></div>');
+			html = dom('<div><form hal-with-command="with-required"><label for="required-input">Required Input</label><input name="required-input"></form></div>');
 
 			m = new Model({
 				_commands : {
@@ -1154,7 +1154,7 @@ describe("hb-with-command", function(){
 				}
 			});
 
-			new HyperboneView({
+			new HalogenView({
 				model : m,
 				el : html.els[0]
 			});
@@ -1168,7 +1168,7 @@ describe("hb-with-command", function(){
 
 			var html, m;
 
-			html = dom('<div><form hb-with-command="with-required"><label for="checkbox-input">Checkbox Input</label><input type="checkbox" name="checkbox-input"></form></div>');
+			html = dom('<div><form hal-with-command="with-required"><label for="checkbox-input">Checkbox Input</label><input type="checkbox" name="checkbox-input"></form></div>');
 
 			m = new Model({
 				_commands : {
@@ -1189,7 +1189,7 @@ describe("hb-with-command", function(){
 				}
 			});
 
-			new HyperboneView({
+			new HalogenView({
 				model : m,
 				el : html.els[0]
 			});
@@ -1206,17 +1206,17 @@ describe("hb-with-command", function(){
 
 		});
 
-		describe('hb-sync-with', function(){
+		describe('hal-sync-with', function(){
 
 			it('can synchronise a command property with an attribute on the parent model', function( done ){
 
 				var html, m;
 
-				html = dom('<div><form hb-with-command="do-something"><input name="username" hb-sync-with="username"><input name="password"><input type="submit" value="Submit"></form></div>');
+				html = dom('<div><form hal-with-command="do-something"><input name="username" hal-sync-with="username"><input name="password"><input type="submit" value="Submit"></form></div>');
 
 				m = new Model( utils.useFixture('simple') );
 
-				new HyperboneView({
+				new HalogenView({
 					model : m,
 					el : html.els[0]
 				});
@@ -1240,11 +1240,11 @@ describe("hb-with-command", function(){
 
 				var html, m;
 
-				html = dom('<div><form hb-with-command="do-something"><input name="username" hb-sync-with="username"><input name="password"><span id="to-be-turned-invisible" if-property="invisible"><input name="invisible"></span><input type="submit" value="Submit"></form></div>');
+				html = dom('<div><form hal-with-command="do-something"><input name="username" hal-sync-with="username"><input name="password"><span id="to-be-turned-invisible" if-property="invisible"><input name="invisible"></span><input type="submit" value="Submit"></form></div>');
 
 				m = new Model( utils.useFixture('simple') );
 
-				new HyperboneView({
+				new HalogenView({
 					model : m,
 					el : html.els[0]
 				});
@@ -1257,11 +1257,11 @@ describe("hb-with-command", function(){
 
 				var html, m;
 
-				html = dom('<div><form hb-with-command="do-something"><input name="username" hb-sync-with="username"><input name="password"><span id="to-be-turned-invisible" if-property="invisible"><input name="invisible"></span><input type="submit" value="Submit"></form></div>');
+				html = dom('<div><form hal-with-command="do-something"><input name="username" hal-sync-with="username"><input name="password"><span id="to-be-turned-invisible" if-property="invisible"><input name="invisible"></span><input type="submit" value="Submit"></form></div>');
 
 				m = new Model( utils.useFixture('simple') );
 
-				new HyperboneView({
+				new HalogenView({
 					model : m,
 					el : html.els[0]
 				});
@@ -1281,20 +1281,20 @@ describe("hb-with-command", function(){
 		});
 	});
 
-	describe('Async hb-with-command', function(){
+	describe('Async hal-with-command', function(){
 
-		var HyperboneView = hyperboneView.HyperboneView;
+		var HalogenView = halogenView.HalogenView;
 
 		it('can bind to a command that appears after view initialised', function(){
 
 			var html, m;
 
-			html = dom('<div><form hb-with-command="do-something"><input name="username"><input name="password"><input type="submit" value="Submit"></form></div>');
+			html = dom('<div><form hal-with-command="do-something"><input name="username"><input name="password"><input type="submit" value="Submit"></form></div>');
 
 			// no command yet...
 			m = new Model({});
 
-			new HyperboneView({
+			new HalogenView({
 				model : m,
 				el : html.els[0]
 			});
@@ -1315,12 +1315,12 @@ describe("hb-with-command", function(){
 
 			var html, m;
 
-			html = dom('<div><form hb-with-command="do-something"><input name="username"><input name="password"><input type="submit" value="Submit"></form></div>');
+			html = dom('<div><form hal-with-command="do-something"><input name="username"><input name="password"><input type="submit" value="Submit"></form></div>');
 
 			// no command yet...
 			m = new Model( utils.useFixture('simple') );
 
-			new HyperboneView({
+			new HalogenView({
 				model : m,
 				el : html.els[0]
 			});
@@ -1346,12 +1346,12 @@ describe("hb-with-command", function(){
 
 			var html, m;
 
-			html = dom('<div><form hb-with-command="do-something"><input name="username"><input name="password"><input type="submit" value="Submit"></form></div>');
+			html = dom('<div><form hal-with-command="do-something"><input name="username"><input name="password"><input type="submit" value="Submit"></form></div>');
 
 			// no command yet...
 			m = new Model( utils.useFixture('simple') );
 
-			new HyperboneView({
+			new HalogenView({
 				model : m,
 				el : html.els[0]
 			});
@@ -1376,7 +1376,7 @@ describe("hb-with-command", function(){
 				
 			m.on('change:do-something', function(cmd){
 
-				expect(cmd.isHyperbone).to.equal(true);
+				expect(cmd.isHalogen).to.equal(true);
 				done();
 
 			});
@@ -1389,7 +1389,7 @@ describe("hb-with-command", function(){
 
 	describe("if-command and if-not-command", function(){
 
-		var HyperboneView = hyperboneView.HyperboneView;
+		var HalogenView = halogenView.HalogenView;
 
 		it('Hides and shows an element correctly if a command exists or not', function(){
 
@@ -1401,7 +1401,7 @@ describe("hb-with-command", function(){
 			// no command yet...
 			m = new Model( utils.useFixture('simple') );
 
-			new HyperboneView({
+			new HalogenView({
 				model : m,
 				el : html.els[0]
 			});
@@ -1430,7 +1430,7 @@ describe("hb-with-command", function(){
 			// no command yet...
 			m = new Model( utils.useFixture('simple') );
 
-			new HyperboneView({
+			new HalogenView({
 				model : m,
 				el : html.els[0]
 			});
@@ -1455,18 +1455,18 @@ describe("hb-with-command", function(){
 
 	describe("Issues", function(){
 
-		var HyperboneView = hyperboneView.HyperboneView;
+		var HalogenView = halogenView.HalogenView;
 
-		it("doesn't crash when template uses hb-with for non-existent collection", function(){
+		it("doesn't crash when template uses hal-with for non-existent collection", function(){
 
 			var html, test, view;
 
-			html = dom('<ul hb-with="not-in-model"><li>{{Name}}</li></ul>');
+			html = dom('<ul hal-with="not-in-model"><li>{{Name}}</li></ul>');
 			test = new Model({
 			});
 
 			expect(function(){
-				new HyperboneView({
+				new HalogenView({
 					model : test,
 					el : html.els[0]
 				});
@@ -1478,12 +1478,12 @@ describe("hb-with-command", function(){
 
 			var html, test, view;
 
-			html = dom('<ul hb-with="not-in-model"><li>{{Name}}</li></ul>');
+			html = dom('<ul hal-with="not-in-model"><li>{{Name}}</li></ul>');
 			test = new Model({
 			});
 
 			expect(function(){
-				new HyperboneView({
+				new HalogenView({
 					model : test,
 					el : html.els[0]
 				});
@@ -1495,15 +1495,15 @@ describe("hb-with-command", function(){
 
 		});
 
-		it("defaults to a collection for a non-existent property for hb-with", function(){
+		it("defaults to a collection for a non-existent property for hal-with", function(){
 
 			var html, test, view;
 
-			html = dom('<ul hb-with="not-in-model"><li>{{Name}}</li></ul>');
+			html = dom('<ul hal-with="not-in-model"><li>{{Name}}</li></ul>');
 			test = new Model({
 			});
 
-			new HyperboneView({
+			new HalogenView({
 				model : test,
 				el : html.els[0]
 			});
@@ -1521,7 +1521,7 @@ describe("hb-with-command", function(){
 				empty : ''
 			});
 
-			new HyperboneView({
+			new HalogenView({
 				model : test,
 				el : html.els[0]
 			});
@@ -1534,17 +1534,17 @@ describe("hb-with-command", function(){
 
 		});
 
-		it('doesnt ignore the second use of hb-with in the same scope when added later (issue #1)', function(){
+		it('doesnt ignore the second use of hal-with in the same scope when added later (issue #1)', function(){
 
 			var html, test, view;
 
-			html = dom('<section><p hb-with="spans"><span>1: {{name}}</span></p><p hb-with="spans"><span>2: {{name}}</span></p></section>');
+			html = dom('<section><p hal-with="spans"><span>1: {{name}}</span></p><p hal-with="spans"><span>2: {{name}}</span></p></section>');
 			test = new Model({
 				spans : [
 				]
 			});
 
-			new HyperboneView({
+			new HalogenView({
 				model : test,
 				el : html.els[0]
 			});
@@ -1562,7 +1562,7 @@ describe("hb-with-command", function(){
 
 			html = dom("<section>{{test(model.get('thing'))}}</section>");
 
-			hyperboneView.use({
+			halogenView.use({
 				templateHelpers : {
 					'test' : function(val){
 						return val;
@@ -1574,7 +1574,7 @@ describe("hb-with-command", function(){
 				thing : "some value"
 			});
 
-			new HyperboneView({
+			new HalogenView({
 				model : test,
 				el : html.els[0]
 			});
@@ -1593,7 +1593,7 @@ describe("hb-with-command", function(){
 
 			html = dom("<section><p>{{url()}}</p><p>{{rel('test')}}</p></section>");
 
-			hyperboneView.use({
+			halogenView.use({
 				templateHelpers : {
 					'test' : function(val){
 						return val;
@@ -1612,7 +1612,7 @@ describe("hb-with-command", function(){
 				}
 			});
 
-			new HyperboneView({
+			new HalogenView({
 				model : test,
 				el : html.els[0]
 			});

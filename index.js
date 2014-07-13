@@ -19,7 +19,7 @@ var _ = require('underscore'),
  * @api public
  */
 
-var HyperboneView = function( config ){
+var HalogenView = function( config ){
 
   var _this = this;
 
@@ -50,12 +50,12 @@ var HyperboneView = function( config ){
 };
 
 
-HyperboneView.prototype = {
+HalogenView.prototype = {
 
 /**
- * Initialise this instance of Hyperbone View with an element and model.
+ * Initialise this instance of Halogen View with an element and model.
  *
- * @param {Object} element, {Object} hyperboneModel
+ * @param {Object} element, {Object} halogenModel
  * @return {Object} this
  * @api public
  */
@@ -298,15 +298,15 @@ HyperboneView.prototype = {
 
 };
 
-// Export HyperboneView
-module.exports.HyperboneView = HyperboneView;
+// Export HalogenView
+module.exports.HalogenView = HalogenView;
 
 
 _.extend(templateHelpers, {
 /**
  * "get" template helper
  *
- * @param {String} prop, {Object} HyperboneModel
+ * @param {String} prop, {Object} HalogenModel
  * @return string
  * @api private
  */
@@ -316,7 +316,7 @@ _.extend(templateHelpers, {
 /**
  * "url" template helper
  *
- * @param {String} unused, {Object} HyperboneModel
+ * @param {String} unused, {Object} HalogenModel
  * @return string
  * @api private
  */
@@ -330,7 +330,7 @@ _.extend(templateHelpers, {
 /**
  * "rel" template helper
  *
- * @param {String} rel, {Object} HyperboneModel
+ * @param {String} rel, {Object} HalogenModel
  * @return string
  * @api private
  */
@@ -340,7 +340,7 @@ _.extend(templateHelpers, {
 /**
  * "expression" template helper
  *
- * @param {String} expression result, {Object} HyperboneModel
+ * @param {String} expression result, {Object} HalogenModel
  * @return string
  * @api private
  */
@@ -396,7 +396,7 @@ _.extend(attributeHandlers, {
 /**
  * "rel" custom attribute handler. Populates an href if the rel is recognised
  *
- * @param {Object} node, {String} hb-width value
+ * @param {Object} node, {String} hal-width value
  * @return null
  * @api private
  */
@@ -431,7 +431,7 @@ _.extend(attributeHandlers, {
 /**
  * "if" custom attribute handler. Makes an element displayed or not.
  *
- * @param {Object} node, {String} hb-width value
+ * @param {Object} node, {String} hal-width value
  * @return null
  * @api private
  */
@@ -450,7 +450,7 @@ _.extend(attributeHandlers, {
 /**
  * "if-not" custom attribute handler. Makes an element displayed or not.
  *
- * @param {Object} node, {String} hb-width value
+ * @param {Object} node, {String} hal-width value
  * @return null
  * @api private
  */
@@ -466,18 +466,18 @@ _.extend(attributeHandlers, {
     test();
   },
 /**
- * "hb-with" custom attribute handler. Creates subview with a different scope.
+ * "hal-with" custom attribute handler. Creates subview with a different scope.
  *
- * @param {Object} node, {String} hb-width value
+ * @param {Object} node, {String} hal-width value
  * @return null
  * @api private
  */
-  'hb-with' : function( node, prop, cancel ){
+  'hal-with' : function( node, prop, cancel ){
 
     var collection, inner, _this = this;
 
     // remove this attribute so it's not found when the subview walks the dom
-    node.removeAttribute('hb-with');
+    node.removeAttribute('hal-with');
 
     collection = this.model.get(prop);
 
@@ -502,7 +502,7 @@ _.extend(attributeHandlers, {
           if (!node.__nodes[model.cid]){
 
             var html = inner.clone(true);
-            var view = new HyperboneView()
+            var view = new HalogenView()
                 .on('updated', function(el, model, event){
 
                   _this.trigger('updated', el, model, 'subview ' + prop + ' ' + event);
@@ -564,7 +564,7 @@ _.extend(attributeHandlers, {
     } else {
 
     // create a subview which passes updated events back to the primary view
-      new HyperboneView()
+      new HalogenView()
         .on('updated', function( el, model, event){
 
           _this.trigger('updated', el, model, 'subview ' + prop + ' ' + event);
@@ -579,13 +579,13 @@ _.extend(attributeHandlers, {
 
   },
 /**
- * "hb-bind" custom attribute handler
+ * "hal-bind" custom attribute handler
  *
- * @param {Object} node, {String} hb-bind property, {Function} cancel
+ * @param {Object} node, {String} hal-bind property, {Function} cancel
  * @return null
  * @api private
  */
-  'hb-bind' : function( node, prop, cancel){
+  'hal-bind' : function( node, prop, cancel){
 
     var _this = this, el = dom(node), attrValue = this.model.get(prop);
 
@@ -616,13 +616,13 @@ _.extend(attributeHandlers, {
 
   },
 /**
- * "hb-click-bind" custom attribute handler
+ * "hal-click-bind" custom attribute handler
  *
- * @param {Object} node, {String} hb-click-bind property, {Function} cancel
+ * @param {Object} node, {String} hal-click-bind property, {Function} cancel
  * @return null
  * @api private
  */
-  'hb-click-toggle' : function( node, prop, cancel){
+  'hal-click-toggle' : function( node, prop, cancel){
 
     var _this = this;
 
@@ -634,13 +634,13 @@ _.extend(attributeHandlers, {
 
   },
 /**
- * "hb-trigger" trigger a backbone event handler.
+ * "hal-trigger" trigger a backbone event handler.
  *
  * @param {Object} node, {String} event to trigger, {Function} cancel
  * @return null
  * @api private
  */
-  'hb-trigger' : function( node, prop, cancel){
+  'hal-trigger' : function( node, prop, cancel){
 
     var _this = this;
 
@@ -652,13 +652,13 @@ _.extend(attributeHandlers, {
 
   },
   /**
-   * "hb-with-command" used on forms to bind them to a particular command.
+   * "hal-with-command" used on forms to bind them to a particular command.
    *
    * @param {Object} node, {String} event to trigger, {Function} cancel
    * @return null
    * @api private
    */
-  'hb-with-command' : function(node, value, cancel){
+  'hal-with-command' : function(node, value, cancel){
 
     var _this = this;
     var root = dom(node);
@@ -1072,7 +1072,7 @@ function bindCommand(cmd, root, model, commandName){
 
     }
     // bind a particular input to an attribute on the parent model
-    if (sync = el.attr('hb-sync-with')){ // assignment on purpose. do not fix.
+    if (sync = el.attr('hal-sync-with')){ // assignment on purpose. do not fix.
       properties.on('change:' + property, function(properties, val){
         model.set(sync, val);
       });

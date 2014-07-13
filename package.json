@@ -1,6 +1,6 @@
 {
-  "name": "hyperbone-view",
-  "version": "0.2.14",
+  "name": "halogen-view",
+  "version": "1.0.0",
   "description": "Automatic bindings to the DOM for Hyperbone Models",
   "main": "index.js",
   "scripts": {
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "http://github.com/green-mesa/hyperbone-view"
+    "url": "http://github.com/halogenjs/view"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
@@ -27,7 +27,7 @@
     "mocha": "~1.17.1",
     "green-mesa-dom" : "0.12.2",
     "simulate-event" : "0.0.2",
-    "hyperbone-model" : "0.5.8"
+    "halogen-model" : "1.0.2"
   },
   "testling" : {
     "harness" : "mocha-bdd",

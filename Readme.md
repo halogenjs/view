@@ -1,15 +1,11 @@
-# Hyperbone View
+# Halogen View
 
-[![Build Status](https://travis-ci.org/green-mesa/hyperbone-view.png?branch=master)](https://travis-ci.org/green-mesa/hyperbone-view)
-
-## Please note that this module is no longer being maintained. 
-
-It has been replaced with [HalogenJS View](https://github.com/halogenjs/view).
+[![Build Status](https://travis-ci.org/halogenjs/view.png?branch=master)](https://travis-ci.org/halogenjs/view)
 
 ## Installing
 
 ```sh
-$ npm install --save hyperbone-view
+$ npm install --save halogen-view
 ```
 
 ## Running tests
@@ -29,7 +25,7 @@ $ npm test
 
 ## tl;dr 
 
-Push style template system for Hyperbone (and probably Backbone) models, allowing strict model/view separation.
+Push style template system for Halogen (and probably Backbone) models, allowing strict model/view separation.
 
 You get 'if', 'if-not', 'hb-trigger', 'hb-click-toggle', 'hb-with' and 'hb-bind' as the only custom attributes you need to learn [See paper on this subject](http://www.cs.usfca.edu/~parrt/papers/mvc.templates.pdf).
 
@@ -38,7 +34,7 @@ You get 'if', 'if-not', 'hb-trigger', 'hb-click-toggle', 'hb-with' and 'hb-bind'
 - Logicless moustache-eseque templates for attributes and innertext. 
 - Define your own custom helpers to do advanced string processing
 - Hypermedia extensions: Automatically insert href attributes for recognised rels.
-- 'hb-trigger' custom attribute to trigger Hyperbone events on a model
+- 'hb-trigger' custom attribute to trigger Halogen events on a model
 - 'if' custom attribute to conditionally display elements.
 - 'hb-bind' custom attribute to link an input to a model attribute
 - 'hb-with' to change scope of a template and render out collections (partials, in effect)
@@ -106,20 +102,20 @@ JSON HAL document on the server
   "name" : ""
 }
 ```
-Presume that we've loaded this JSON into a HyperboneModel instance..
+Presume that we've loaded this JSON into a HalogenModel instance..
 
 ```js
 
-var HyperboneView = require('hyperbone-view').HyperboneView;
+var HalogenView = require('halogen-view').HalogenView;
 
 // we want to register a helper called 'strip'. This will be available to all Views in the system.
 
-require('hyperbone-view').registerHelper('strip', function( str ){
+require('halogen-view').registerHelper('strip', function( str ){
   return markdownStripper( str )
 })
 
 // now we can create our view instance.
-new HyperboneView({
+new HalogenView({
 
   // the model...
   model : myHypermediaDocument,
@@ -131,7 +127,7 @@ new HyperboneView({
 // set our editing flag to true so that we can see our html
 myHypermediaDocument.set('editing', true);
 
-// bind to a hyperbone event that'll trigger when the user
+// bind to a Halogen event that'll trigger when the user
 // clicks on the particular link.
 myHypermediaDocument.on('special-link-clicked', function( model ){
   model.set('clicked', 'clicked');
@@ -170,7 +166,7 @@ Then the page automatically updates to...
 ```html
 <div id="some-view" class="sure-hope-this-works">
 ```
-And if you happen to click on `A link to myself`, the Hyperbone event fires, updates the model and that results in..
+And if you happen to click on `A link to myself`, the Halogen event fires, updates the model and that results in..
 ```html
   <a href="/a-link-to-me" rel="self" class="clicked">A link to myself</a>
 </div>
@@ -185,15 +181,8 @@ myHypermediaDocument.set('editing', false);
 ```
 Then the element gets hidden. 
 
-## Installation
 
-Install with [component(1)](http://component.io):
-
-```sh
-    $ component install green-mesa/hyperbone-view
-```
-
-Hyperbone View has a number of dependencies which are installed at the same time. These are:
+Halogen View has a number of dependencies which are installed at the same time. These are:
 
 - Underscore
 - component/dom
@@ -203,18 +192,18 @@ Note that unlike Backbone View this does not have a dependency on jQuery. It doe
 
 ## Module API
 
-### require('hyperbone-view').registerHelper(name, fn)
+### require('halogen-view').registerHelper(name, fn)
 
 Register a helper function for use inside templates. It becomes globally available to all views.
 
 Example:
 ```js
-  require('hyperbone-view').registerHelper('shout', function( str ){
+  require('halogen-view').registerHelper('shout', function( str ){
 
   	return str.toUpperCase();
 
   });
-  new HyperboneView({ model: new HyperboneModel({ name : "squirrel"}), el : dom('#namebox')});
+  new HalogenView({ model: new HalogenModel({ name : "squirrel"}), el : dom('#namebox')});
 ```
 The template calls the helper...
 ```html
@@ -225,19 +214,19 @@ Which produces
 <p>Hello SQUIRREL</p>
 ```
 
-### require('hyperbone-view').registerAttributeHandler(name, fn)
+### require('halogen-view').registerAttributeHandler(name, fn)
 
 Register a custom attribute handler for extending the capabilities of View. More on this below.
 
 
-### require('hyperbone-view').HyperboneView
+### require('halogen-view').HalogenView
 
-Your reference to the HyperboneView prototype.
+Your reference to the HalogenView prototype.
 
 ```js
-var HyperboneView = require('hyperbone-view').HyperboneView;
+var HalogenView = require('halogen-view').HalogenView;
 
-new HyperboneView({
+new HalogenView({
     model : model,
     el : el,
     initialised : function(){
@@ -249,14 +238,14 @@ new HyperboneView({
 ```
 or
 ```js
-new HyperboneView().create(el, model);
+new HalogenView().create(el, model);
 ```
 
-## HyperboneView Instance API
+## HalogenView Instance API
 
 ### .on( event, callback )
 
-HyperboneView instances are Backbone event emitters. There are three events emitted currently: `initialised`, `updated` and `delegate-fired`.
+HalogenView instances are Backbone event emitters. There are three events emitted currently: `initialised`, `updated` and `delegate-fired`.
 
 The callbacks are passed a [dom](http://github.com/component/dom) object, which is the view HTML and the model. For updated and delegate fired, information about what has changed is also added.
 
@@ -292,16 +281,16 @@ view.on('delegate-fired', function(el, model, selector){
 })
 ```
 
-### .create( dom, hyperboneModel )
+### .create( dom, HalogenModel )
 
-If you want to postpone the view initialising, you can manually triggered this by invoking HyperboneView without a model and el and then calling .create(). Pass it either a CSS selector or a `dom` List object along with the model and this then binds the model to the view.
+If you want to postpone the view initialising, you can manually triggered this by invoking HalogenView without a model and el and then calling .create(). Pass it either a CSS selector or a `dom` List object along with the model and this then binds the model to the view.
 
 ### .addDelegate(obj | name, fn)
 
 If you're using the .create() method, you can manually set up actual DOM event delegates, although this... probably isn't wise.
 
 ```js
-new HyperboneView({
+new HalogenView({
   delegates : {
     'click .icon' : function( event ){
       // do something here. Scope is the model.
@@ -313,7 +302,7 @@ new HyperboneView({
 ```
 is equivilant to 
 ```js
-new HyperboneView()
+new HalogenView()
   .addDelegate('click .icon', function(event){
     // do something here
   })
@@ -321,9 +310,9 @@ new HyperboneView()
 ```
 
 
-## Hyperbone HTML Attributes
+## Halogen HTML Attributes
 
-Hyperbone attributes can be added to the HTML, and allow for additional functionality not provided in the logicless attribute/innerText templates.
+Halogen attributes can be added to the HTML, and allow for additional functionality not provided in the logicless attribute/innerText templates.
 
 ### if="attribute"
 
@@ -359,9 +348,9 @@ Slightly more useful than this is the ability to iterate through collections wit
 ```
 ... this then automatically clones the li tag for every model inside the collection.
 
-### hb-trigger="hyperbone-event"
+### hb-trigger="Halogen-event"
 
-On clicking an element with the hb-trigger attribute, a subscribeable hyperbone event is fired. The handler is passed three parameters - the originating model, the name of the signal and a function to cancel any default DOM events.
+On clicking an element with the hb-trigger attribute, a subscribeable Halogen event is fired. The handler is passed three parameters - the originating model, the name of the signal and a function to cancel any default DOM events.
 
 This solves a particular problem of being able to access individual models within collections without doing horrible things to the DOM.
 
@@ -446,12 +435,12 @@ When used with a model..
 
 ### Adding your own custom attributes
 
-Because Hyperbone View enforces a strict separation of model and view, your applications shouldn't be touching the DOM at all. However, sometimes, you do in fact need to touch the DOM. When you do, the idea is that you use your own custom attributes. Luckily Hyperbone View exposes an API for this.
+Because Halogen View enforces a strict separation of model and view, your applications shouldn't be touching the DOM at all. However, sometimes, you do in fact need to touch the DOM. When you do, the idea is that you use your own custom attributes. Luckily Halogen View exposes an API for this.
 
-### require('hyperbone-view').registerAttributeHandler( attributeName, fn )
-### require('hyperbone-view').use( attributeHandlers : { attributeName : fn })
+### require('halogen-view').registerAttributeHandler( attributeName, fn )
+### require('halogen-view').use( attributeHandlers : { attributeName : fn })
 
-`fn` is called when HyperboneView finds an element with your attribute. When called, it is passed the element, the value of the attribute as arguments and a 'cancel' function. The scope is the instance of HyperboneView itself, meaning you can use this.model and this.el (this may not be true forever)
+`fn` is called when HalogenView finds an element with your attribute. When called, it is passed the element, the value of the attribute as arguments and a 'cancel' function. The scope is the instance of HalogenView itself, meaning you can use this.model and this.el (this may not be true forever)
 
 The cancel function should be called if you do not wish the View to continue processing the node (i.e, recurse into the childNodes etc).
 
@@ -461,13 +450,13 @@ Here's a non-disruptive non-cancelled example. We want a link to switch between 
 ```
 ```js
 // create a model
-var model = new HyperboneModel({
+var model = new HalogenModel({
   status : ""
 });
 // register an attribute handler
-require('hyperbone-view').registerAttributeHandler('x-switch', function(node, propertyValue, cancel){
+require('halogen-view').registerAttributeHandler('x-switch', function(node, propertyValue, cancel){
 
-    var self = this; // hey, 'this' is the HyperboneView.
+    var self = this; // hey, 'this' is the HalogenView.
 
     // it's a custom attribute so you need to do your own 
     // parsing. You get 'status:on|off' passed to you.
@@ -475,7 +464,7 @@ require('hyperbone-view').registerAttributeHandler('x-switch', function(node, pr
     var prop = parts[0];
     var options = parts[1].split("|");
 
-    // we're in the HyperboneView scope so this works... 
+    // we're in the HalogenView scope so this works... 
     this.model.set(prop, options[1]);
 
     // Create a click handler for this element..
@@ -496,10 +485,10 @@ require('hyperbone-view').registerAttributeHandler('x-switch', function(node, pr
 
   });
 // create a view
-new HyperboneView({ model: model, el : html});
+new HalogenView({ model: model, el : html});
 ```
 
-A disruptive 'cancelling' example: Creating a new instance of HyperboneView with a different model to process the element and all its children.
+A disruptive 'cancelling' example: Creating a new instance of HalogenView with a different model to process the element and all its children.
 
 This is the parent Hypermedia document. Note that it contains a rel `some-rel` which points to `/some-other-document`.
 ```json
@@ -539,13 +528,13 @@ Our HTML. We want to manually embed `/some-other-document` into our page. We don
 Now we add our custom attribute handler...
 ```js
 // add attribute handler
-require('hyperbone-view').registerAttributeHandler('x-embed', function(node, propertyValue, cancel){
+require('halogen-view').registerAttributeHandler('x-embed', function(node, propertyValue, cancel){
 
     // remove the attribute so that when we create a subview
     // we don't end up back inside this handler.
     node.removeAttribute('x-embed');
 
-    // Hyperbone Models have a special helper method for looking
+    // Halogen Models have a special helper method for looking
     // up the hrefs of rels.
     var uri = this.model.rel(propertyValue);
 
@@ -557,9 +546,9 @@ require('hyperbone-view').registerAttributeHandler('x-embed', function(node, pro
 
       if(!err){
 
-        // create a new view, passing it our wrapped element and a new Hyperbone Model.
-        new HyperboneView()
-          .create( root, new HyperboneModel( doc ) );
+        // create a new view, passing it our wrapped element and a new Halogen Model.
+        new HalogenView()
+          .create( root, new HalogenModel( doc ) );
 
       }
 
@@ -572,7 +561,7 @@ require('hyperbone-view').registerAttributeHandler('x-embed', function(node, pro
   });
 
 // create a view
-new HyperboneView({model : someModel, el : myElement });
+new HalogenView({model : someModel, el : myElement });
 
 ```
 WHich should, after everything's loaded, result in..

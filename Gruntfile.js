@@ -1,8 +1,5 @@
 'use strict';
 
-var serverRootUri = 'http://127.0.0.1:8000';
-var mochaPhantomJsTestRunner = serverRootUri + '/test/testrunner.html';
-
 /* jshint -W106 */
 module.exports = function(grunt) {
 
@@ -16,22 +13,6 @@ module.exports = function(grunt) {
       options: {
         jshintrc: '.jshintrc'
       }
-    },
-
-    // run the mocha tests via Node.js
-    mochaTest: {
-      test: {
-        options: {
-          reporter: 'spec'
-        },
-        src: ['test/**/*.js']
-      }
-    },
-
-    // remove all previous browserified builds
-    clean: {
-      dist: ['./browser/dist/**/*'],
-      tests: ['./browser/test/browserified_tests.js'],
     },
 
     // browserify everything
@@ -48,21 +29,6 @@ module.exports = function(grunt) {
       }
     },
 
-    connect: {
-      // Used for mocha-phantomjs tests
-      server: {},
-
-      // you can use this manually by doing
-      // grunt connect:keepalive
-      // to start a server for the example pages (browser/example/*.html) or to
-      // run the tests manually in a browser
-      keepalive: {
-        options: {
-          keepalive: true
-        }
-      }
-    },
-
     // run the mocha tests in the browser via PhantomJS
     'mocha_phantomjs': {
       all: ['test/testrunner.html']
@@ -70,7 +36,7 @@ module.exports = function(grunt) {
 
     watch: {
       files: ['<%= jshint.files %>'],
-      tasks: ['default']
+      tasks: ['test']
     },
   });
 
