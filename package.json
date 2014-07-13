@@ -1,6 +1,6 @@
 {
   "name": "halogen-view",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Automatic bindings to the DOM for Hyperbone Models",
   "main": "index.js",
   "scripts": {

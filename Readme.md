@@ -27,17 +27,17 @@ $ npm test
 
 Push style template system for Halogen (and probably Backbone) models, allowing strict model/view separation.
 
-You get 'if', 'if-not', 'hb-trigger', 'hb-click-toggle', 'hb-with' and 'hb-bind' as the only custom attributes you need to learn [See paper on this subject](http://www.cs.usfca.edu/~parrt/papers/mvc.templates.pdf).
+You get 'if', 'if-not', 'hal-trigger', 'hal-click-toggle', 'hal-with' and 'hal-bind' as the only custom attributes you need to learn [See paper on this subject](http://www.cs.usfca.edu/~parrt/papers/mvc.templates.pdf).
 
 ## Features
 
 - Logicless moustache-eseque templates for attributes and innertext. 
 - Define your own custom helpers to do advanced string processing
 - Hypermedia extensions: Automatically insert href attributes for recognised rels.
-- 'hb-trigger' custom attribute to trigger Halogen events on a model
+- 'hal-trigger' custom attribute to trigger Halogen events on a model
 - 'if' custom attribute to conditionally display elements.
-- 'hb-bind' custom attribute to link an input to a model attribute
-- 'hb-with' to change scope of a template and render out collections (partials, in effect)
+- 'hal-bind' custom attribute to link an input to a model attribute
+- 'hal-with' to change scope of a template and render out collections (partials, in effect)
 - API for adding additional attributes for when you HAVE to touch the DOM.
 
 ## Example
@@ -46,11 +46,11 @@ HTML in your page:
 ```html
 <div if="getting-name" id="some-view" class="{{type}}">
   <p>Hello, {{name}}</p>
-  <label>Enter your name: <input hb-bind="name"></label>
+  <label>Enter your name: <input hal-bind="name"></label>
   <div class="description">{{strip(description)}}</div>
   <a rel="some-rel"> Some link </a>
-  <a rel="self" class="{{clicked}}" hb-trigger="special-link-clicked">A link to myself</a>
-  <ul hb-with="noodle-flavours">
+  <a rel="self" class="{{clicked}}" hal-trigger="special-link-clicked">A link to myself</a>
+  <ul hal-with="noodle-flavours">
     <li class="flavour {{className}}"><a rel="self">{{flavour}}</a></li>
   </ul>
 </div>
@@ -146,7 +146,7 @@ Some things to note:
 ```html
 <div id="some-view" class="testing-thing">
   <p>Hello, </p>
-  <label>Enter your name: <input hb-bind="name"></label>
+  <label>Enter your name: <input hal-bind="name"></label>
   <div class="description">This is very exciting</div>
   <a href="/some-link" rel="some-rel"> Some link </a>
   <a href="/a-link-to-me" rel="self" class="">A link to myself</a>
@@ -324,13 +324,13 @@ Given the truthiness of the model attribute, it will conditionally display the e
 This is as complex as the logic gets. How do I do an 'else' or an 'or' or an 'and' I hear you cry. Anything more complex than this is a job for code. It's what code is good at. The philosophy is that you do your difficult logic stuff in your code.
 
 
-### hb-with="attribute"
+### hal-with="attribute"
 
 Changes the scope for the innerHTML to the selected model or collection. In effect the nested elements become a partial.
 
 This HTML...
 ```html
-<div hb-with="nested-model">
+<div hal-with="nested-model">
   <p>{{greeting}}</p>
 </div>
 ```
@@ -338,19 +338,19 @@ This HTML...
 ```html
 <div><p>{{nested-model.greeting}}</p></div>
 ```
-... except when you use `hb-with` for a model you create a subview and any change events that fire show only the sub-view and the sub-model.
+... except when you use `hal-with` for a model you create a subview and any change events that fire show only the sub-view and the sub-model.
 
-Slightly more useful than this is the ability to iterate through collections with `hb-with`
+Slightly more useful than this is the ability to iterate through collections with `hal-with`
 ```html
-<ul hb-with="nested-collection">
+<ul hal-with="nested-collection">
   <li>{{name}}</li>
 </ul>
 ```
 ... this then automatically clones the li tag for every model inside the collection.
 
-### hb-trigger="Halogen-event"
+### hal-trigger="Halogen-event"
 
-On clicking an element with the hb-trigger attribute, a subscribeable Halogen event is fired. The handler is passed three parameters - the originating model, the name of the signal and a function to cancel any default DOM events.
+On clicking an element with the hal-trigger attribute, a subscribeable Halogen event is fired. The handler is passed three parameters - the originating model, the name of the signal and a function to cancel any default DOM events.
 
 This solves a particular problem of being able to access individual models within collections without doing horrible things to the DOM.
 
@@ -373,8 +373,8 @@ Our model contains...
 ```
 And our view makes a new li for each filter. The scope of each li is the individual model in the collection.
 ```html
-<ul hb-with="filters">
-  <li class="if(model.get('active'), 'active')" hb-trigger="filter-changed">{{name}}</li>
+<ul hal-with="filters">
+  <li class="if(model.get('active'), 'active')" hal-trigger="filter-changed">{{name}}</li>
 </ul>
 ```
 Which means when that li is clicked, the 'filters-changed' event fires on the 'filters' object (in backbone style that's `filters-changed:filters`), and the first parameter is the individual filter.
@@ -387,19 +387,19 @@ model.on('filters-changed:filters', function( filter, signal, cancelDefault ){
 })
 ```
 
-### hb-click-toggle="model-attribute"
+### hal-click-toggle="model-attribute"
 
-The most common use case for `hb-trigger` is actually just toggling a flag on or off, so this custom attribute automates this for you.
+The most common use case for `hal-trigger` is actually just toggling a flag on or off, so this custom attribute automates this for you.
 
 ```html
 <section>
   <section if-not="editing">
-    <button hb-click-toggle="editing">Edit</button>
+    <button hal-click-toggle="editing">Edit</button>
     <p>Hello {{Name}}</p>
   </section>
   <section if="editing">
-    <button hb-click-toggle="editing">View</button>
-    <p>Enter your name:<input hb-bind="Name"></p>
+    <button hal-click-toggle="editing">View</button>
+    <p>Enter your name:<input hal-bind="Name"></p>
   </section>
 </section>
 ```
@@ -412,13 +412,13 @@ app.on('change:editing', function(){
 })
 ```
 
-### hb-bind
+### hal-bind
 
 This attribute allows two-way binding to form inputs to allow an easy way to let your users interact with your model. 
 
 ```html
 <body class="{{theme}}">
-  <select hb-bind="theme">
+  <select hal-bind="theme">
     <option value="default">Default</option>
     <option value="dark">Dark</option>
     <option value="light">Light</option>
