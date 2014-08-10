@@ -594,6 +594,10 @@ Won't work:
 
 - `{{1 + 2}}` 
 
+## Updates
+
+- 10th August 2014: Removed 'replaceWholeText' in templated renderer, restoring cross-browser compatibility
+
 
 ## License
 

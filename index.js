@@ -125,33 +125,36 @@ HalogenView.prototype = {
       if (isNode(node)){
 
         // check for templated attributes
-        _.each(node.attributes, function(attr){
+        for (var i = 0; i < node.attributes.length; i++){
 
-          if (attributeHandlers[attr.name]){
+          (function (attr){
 
-            // custom attribute detected. 
-            attributeHandlers[attr.name].call(_this, node, node.getAttribute(attr.name), function(){ continueWalking = false; });
+            if (attributeHandlers[attr.name]){
 
+              // custom attribute detected. 
+              attributeHandlers[attr.name].call(_this, node, node.getAttribute(attr.name), function(){ continueWalking = false; });
 
-          }
+            }
 
-          // okay, at this point there's no custom attributes to worry about so..
-          var toks = tokenise(attr.nodeValue);
+            // okay, at this point there's no custom attributes to worry about so..
+            var toks = tokenise(attr.nodeValue);
 
-          // and if we detect a template...
-          if (toks.length > 1){
+            // and if we detect a template...
+            if (toks.length > 1){
 
-            _this.activeNodes.push({
-              node : node,
-              attribute : attr.name,
-              original : attr.nodeValue,
-              expressions : getExpressions(toks),
-              tokens : toks
-            });
+              _this.activeNodes.push({
+                node : node,
+                attribute : attr.name,
+                original : attr.value,
+                expressions : getExpressions(toks),
+                tokens : toks
+              });
 
-          }
+            }
 
-        });
+          }(node.attributes[i]));
+
+        }
 
         // this should be 'true' unless a custom attribute has claimed ownership of all children. 
         return continueWalking;
@@ -789,7 +792,7 @@ function render( node ){
     if (res===''){
       res = '\u200B';
     }
-    node.node.replaceWholeText( res );
+    node.node.textContent = res;
   }
 }
 
